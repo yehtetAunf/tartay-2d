@@ -2,7 +2,6 @@ export default {
   async fetch(request: Request, env: any): Promise<Response> {
     const url = new URL(request.url);
 
-    // Home
     if (url.pathname === "/") {
       return Response.json({
         app: "Tartay 2D",
@@ -11,29 +10,14 @@ export default {
       });
     }
 
-    // Login API
-    if (url.pathname === "/login" && request.method === "POST") {
-      const body = await request.json();
-
-      const username = body.username;
-      const password = body.password;
-
-      const result = await env.DB.prepare(
-        "SELECT * FROM users WHERE username = ?"
-      )
-        .bind(username)
-        .first();
-
-      if (!result) {
-        return Response.json({
-          success: false,
-          message: "User not found"
-        });
-      }
+    if (url.pathname === "/users" && request.method === "GET") {
+      const users = await env.DB.prepare(
+        "SELECT id, username, full_name, role, status, created_at FROM users"
+      ).all();
 
       return Response.json({
         success: true,
-        user: result
+        users: users.results
       });
     }
 
