@@ -2,116 +2,86 @@ interface Env {
   DB: D1Database;
 }
 
-interface LoginBody {
-  username?: string;
-  password?: string;
-}
-
-function json(data: unknown, status = 200): Response {
-  return Response.json(data, {
-    status,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-}
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // Home API
+    // Home
     if (url.pathname === "/" && request.method === "GET") {
-      return json({
+      return Response.json({
         app: "Tartay 2D",
         status: "Online",
-        version: "1.0.0",
+        version: "1.0.0"
+      });
+    }
+
+    // Test API
+    if (url.pathname === "/test" && request.method === "GET") {
+      return Response.json({
+        success: true,
+        message: "Tartay 2D API Working"
+      });
+    }
+
+    // Users API
+    if (url.pathname === "/users" && request.method === "GET") {
+      const users = await env.DB.prepare(
+        `SELECT id, username, full_name, role, status, created_at FROM users`
+      ).all();
+
+      return Response.json({
+        success: true,
+        users: users.results
       });
     }
 
     // Login API
     if (url.pathname === "/login" && request.method === "POST") {
-      let body: LoginBody;
-
-      try {
-        body = await request.json<LoginBody>();
-      } catch {
-        return json(
-          {
-            success: false,
-            message: "Invalid JSON data",
-          },
-          400,
-        );
-      }
-
-      const username = body.username?.trim();
-      const password = body.password;
-
-      if (!username || !password) {
-        return json(
-          {
-            success: false,
-            message: "Username and password are required",
-          },
-          400,
-        );
-      }
+      const body = await request.json() as {
+        username: string;
+        password: string;
+      };
 
       const user = await env.DB.prepare(
-        `SELECT id, username, password_hash, full_name, role, status
-         FROM users
-         WHERE username = ?
-         LIMIT 1`,
+        `SELECT * FROM users WHERE username = ? LIMIT 1`
       )
-        .bind(username)
-        .first<{
-          id: number;
-          username: string;
-          password_hash: string;
-          full_name: string;
-          role: string;
-          status: number;
-        }>();
+        .bind(body.username)
+        .first<any>();
 
-      if (
-        !user ||
-        user.status !== 1 ||
-        user.password_hash !== password
-      ) {
-        return json(
+      if (!user) {
+        return Response.json(
           {
             success: false,
-            message: "Invalid username or password",
+            message: "User not found"
           },
-          401,
+          { status: 404 }
         );
       }
 
-      return json({
+      if (user.password_hash !== body.password) {
+        return Response.json(
+          {
+            success: false,
+            message: "Wrong password"
+          },
+          { status: 401 }
+        );
+      }
+
+      return Response.json({
         success: true,
         message: "Login successful",
         user: {
           id: user.id,
           username: user.username,
           full_name: user.full_name,
-          role: user.role,
-        },
+          role: user.role
+        }
       });
     }
 
-    return json(
-      {
-        success: false,
-        message: "Not Found",
-      },
-      404,
-    );
-  },
+    return new Response("Not Found", {
+      status: 404
+    });
+  }
 };
-if (url.pathname === "/test") {
-  return Response.json({
-    success: true,
-    message: "Tartay 2D API Working"
-  });
-          }
