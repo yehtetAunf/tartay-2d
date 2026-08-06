@@ -2,5 +2,7 @@
   "name": "tartay-2d",
   "version": "1.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "scripts": {"deploy":"wrangler deploy","dev":"wrangler dev"},
+  "devDependencies":{"typescript":"^5.6.3","wrangler":"^4.0.0"}
 }
