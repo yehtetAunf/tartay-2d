@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Tartay 2D Login</title>
+<style>
+body{
+font-family:Arial;
+background:#111;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:#222;
+padding:25px;
+border-radius:10px;
+width:300px;
+}
+
+input{
+width:100%;
+padding:10px;
+margin-top:10px;
+}
+
+button{
+width:100%;
+padding:10px;
+margin-top:15px;
+background:#00aaff;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+pre{
+margin-top:15px;
+background:#000;
+padding:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>Tartay 2D Admin</h2>
+
+<input id="username" placeholder="Username">
+
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<pre id="result"></pre>
+
+</div>
+
+<script>
+
+async function login(){
+
+const res=await fetch("/login",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+username:document.getElementById("username").value,
+
+password:document.getElementById("password").value
+
+})
+
+});
+
+const data=await res.json();
+
+document.getElementById("result").textContent=
+JSON.stringify(data,null,2);
+
+}
+
+</script>
+
+</body>
+</html>
