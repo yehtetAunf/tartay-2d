@@ -2,294 +2,240 @@ interface Env {
   DB: D1Database;
 }
 
-interface LoginBody {
-  username?: string;
-  password?: string;
-}
-
-function json(data: unknown, status = 200): Response {
-  return Response.json(data, {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-    },
-  });
-}
-
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // Login page
+    // ================= HOME =================
     if (url.pathname === "/" && request.method === "GET") {
       const html = `
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-  <title>Tartay 2D Login</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      background: #111827;
-      color: white;
-    }
-
-    .login-box {
-      width: 100%;
-      max-width: 360px;
-      padding: 28px;
-      border-radius: 16px;
-      background: #1f2937;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
-    }
-
-    h2 {
-      margin-top: 0;
-      text-align: center;
-    }
-
-    input {
-      width: 100%;
-      padding: 13px;
-      margin-top: 12px;
-      border: 1px solid #4b5563;
-      border-radius: 8px;
-      background: #111827;
-      color: white;
-      font-size: 16px;
-    }
-
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 16px;
-      border: none;
-      border-radius: 8px;
-      background: #2563eb;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    #result {
-      min-height: 24px;
-      margin-top: 16px;
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-      color: #d1d5db;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Tartay 2D Login</title>
+<style>
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+color:white;
+}
+.box{
+background:#1e293b;
+padding:30px;
+border-radius:12px;
+width:320px;
+}
+input{
+width:100%;
+padding:12px;
+margin:8px 0;
+border-radius:6px;
+border:none;
+}
+button{
+width:100%;
+padding:12px;
+background:#2563eb;
+color:white;
+border:none;
+border-radius:6px;
+font-size:18px;
+}
+#msg{
+margin-top:15px;
+}
+</style>
 </head>
-
 <body>
-  <div class="login-box">
-    <h2>Tartay 2D Admin Login</h2>
 
-    <input
-      id="username"
-      type="text"
-      placeholder="Username"
-      autocomplete="username"
-    >
+<div class="box">
+<h2>Tartay 2D Admin Login</h2>
 
-    <input
-      id="password"
-      type="password"
-      placeholder="Password"
-      autocomplete="current-password"
-    >
+<input id="username" placeholder="Username">
 
-    <button id="loginButton" type="button" onclick="login()">
-      Login
-    </button>
+<input id="password" type="password" placeholder="Password">
 
-    <div id="result"></div>
-  </div>
+<button onclick="login()">Login</button>
 
-  <script>
-    async function login() {
-      const username = document.getElementById("username").value.trim();
-      const password = document.getElementById("password").value;
-      const result = document.getElementById("result");
-      const button = document.getElementById("loginButton");
+<p id="msg"></p>
+</div>
 
-      if (!username || !password) {
-        result.textContent = "Username and password are required.";
-        return;
-      }
+<script>
+async function login(){
 
-      button.disabled = true;
-      button.textContent = "Logging in...";
-      result.textContent = "";
+const res=await fetch("/login",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+username:document.getElementById("username").value,
+password:document.getElementById("password").value
+})
+});
 
-      try {
-        const response = await fetch("/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            username,
-            password
-          })
-        });
+const data=await res.json();
 
-        const data = await response.json();
+if(data.success){
+location.href="/dashboard";
+}else{
+document.getElementById("msg").innerHTML=data.message;
+}
 
-        if (!response.ok) {
-          result.textContent = data.message || "Login failed.";
-          return;
-        }
+}
+</script>
 
-        result.textContent =
-          "Login successful\\n" +
-          "Name: " + data.user.full_name + "\\n" +
-          "Role: " + data.user.role;
-      } catch {
-        result.textContent = "Network error. Please try again.";
-      } finally {
-        button.disabled = false;
-        button.textContent = "Login";
-      }
-    }
-  </script>
 </body>
 </html>
 `;
 
       return new Response(html, {
-        status: 200,
         headers: {
-          "Content-Type": "text/html; charset=UTF-8",
-        },
+          "Content-Type": "text/html"
+        }
       });
     }
 
-    // Test API
-    if (url.pathname === "/test" && request.method === "GET") {
-      return json({
-        success: true,
-        message: "Tartay 2D API Working",
+    // ================= DASHBOARD =================
+
+    if (url.pathname === "/dashboard") {
+
+      const html=`
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:#0f172a;
+color:white;
+}
+
+header{
+background:#2563eb;
+padding:20px;
+font-size:22px;
+text-align:center;
+}
+
+.card{
+margin:20px;
+padding:20px;
+background:#1e293b;
+border-radius:10px;
+}
+
+button{
+padding:10px 20px;
+background:red;
+color:white;
+border:none;
+border-radius:6px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+Tartay 2D Dashboard
+</header>
+
+<div class="card">
+<h2>Welcome Owner</h2>
+
+<p>System Online</p>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<script>
+
+function logout(){
+
+location.href="/";
+
+}
+
+</script>
+
+</body>
+
+</html>
+`;
+
+      return new Response(html,{
+        headers:{
+          "Content-Type":"text/html"
+        }
       });
+
     }
 
-    // Temporary users API
-    if (url.pathname === "/users" && request.method === "GET") {
-      const users = await env.DB.prepare(
-        `SELECT id, username, full_name, role, status, created_at
-         FROM users`,
+    // ================= USERS =================
+
+    if (url.pathname === "/users") {
+
+      const users=await env.DB.prepare(
+      "SELECT id,username,full_name,role,status,created_at FROM users"
       ).all();
 
-      return json({
-        success: true,
-        users: users.results,
-      });
+      return Response.json(users.results);
+
     }
 
-    // Login API
-    if (url.pathname === "/login" && request.method === "POST") {
-      let body: LoginBody;
+    // ================= LOGIN =================
 
-      try {
-        body = await request.json<LoginBody>();
-      } catch {
-        return json(
-          {
-            success: false,
-            message: "Invalid JSON data",
-          },
-          400,
-        );
-      }
+    if(url.pathname==="/login" && request.method==="POST"){
 
-      const username = body.username?.trim();
-      const password = body.password;
+      const body=await request.json() as any;
 
-      if (!username || !password) {
-        return json(
-          {
-            success: false,
-            message: "Username and password are required",
-          },
-          400,
-        );
-      }
-
-      const user = await env.DB.prepare(
-        `SELECT
-           id,
-           username,
-           password_hash,
-           full_name,
-           role,
-           status
-         FROM users
-         WHERE username = ?
-         LIMIT 1`,
+      const user=await env.DB.prepare(
+      "SELECT * FROM users WHERE username=? LIMIT 1"
       )
-        .bind(username)
-        .first<{
-          id: number;
-          username: string;
-          password_hash: string;
-          full_name: string;
-          role: string;
-          status: number;
-        }>();
+      .bind(body.username)
+      .first<any>();
 
-      if (
-        !user ||
-        user.status !== 1 ||
-        user.password_hash !== password
-      ) {
-        return json(
-          {
-            success: false,
-            message: "Invalid username or password",
-          },
-          401,
-        );
+      if(!user){
+
+        return Response.json({
+          success:false,
+          message:"User not found"
+        });
+
       }
 
-      return json({
-        success: true,
-        message: "Login successful",
-        user: {
-          id: user.id,
-          username: user.username,
-          full_name: user.full_name,
-          role: user.role,
-        },
+      if(user.password_hash!==body.password){
+
+        return Response.json({
+          success:false,
+          message:"Wrong password"
+        });
+
+      }
+
+      return Response.json({
+        success:true,
+        message:"Login successful"
       });
+
     }
 
-    return json(
-      {
-        success: false,
-        message: "Not Found",
-      },
-      404,
-    );
-  },
+    return new Response("Not Found",{status:404});
+
+  }
 };
