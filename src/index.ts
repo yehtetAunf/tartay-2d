@@ -109,3 +109,9 @@ export default {
     );
   },
 };
+if (url.pathname === "/test") {
+  return Response.json({
+    success: true,
+    message: "Tartay 2D API Working"
+  });
+          }
