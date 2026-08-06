@@ -1,0 +1,13 @@
+{
+  "name": "tartay-2d",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-07",
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tartay-2d",
+      "database_id": "YOUR_DATABASE_ID"
+    }
+  ]
+}
