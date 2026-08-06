@@ -1,61 +1,561 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tartay 2D Dashboard</title>
+  <meta charset="UTF-8">
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#0f172a;
-color:white;
-}
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
 
-header{
-background:#2563eb;
-padding:18px;
-text-align:center;
-font-size:24px;
-font-weight:bold;
-}
+  <title>Tartay 2D Dashboard</title>
 
-.card{
-margin:20px;
-padding:20px;
-background:#1e293b;
-border-radius:10px;
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-button{
-padding:12px 20px;
-background:#dc2626;
-color:white;
-border:none;
-border-radius:6px;
-font-size:16px;
-}
-</style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #ffffff;
+    }
 
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .logout-button {
+      padding: 9px 15px;
+      border: none;
+      border-radius: 8px;
+      background: #dc2626;
+      color: #ffffff;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .summary-card {
+      padding: 18px;
+      border-radius: 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    .summary-label {
+      margin-bottom: 8px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .summary-value {
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 360px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 20px;
+      border-radius: 14px;
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+
+    .panel-title {
+      margin-top: 0;
+      margin-bottom: 18px;
+      font-size: 20px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #475569;
+      border-radius: 8px;
+      outline: none;
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 16px;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #3b82f6;
+    }
+
+    .save-button {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: #ffffff;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .save-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      min-height: 24px;
+      margin-top: 13px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .message.success {
+      color: #4ade80;
+    }
+
+    .message.error {
+      color: #f87171;
+    }
+
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 700px;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #334155;
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      color: #93c5fd;
+      font-size: 14px;
+    }
+
+    td {
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+
+    .empty-row {
+      padding: 30px;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .refresh-button {
+      margin-bottom: 14px;
+      padding: 9px 14px;
+      border: none;
+      border-radius: 8px;
+      background: #475569;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    @media (max-width: 850px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <header class="topbar">
+    <div class="brand">တာတေ 2D Admin</div>
 
-<header>
-Tartay 2D Dashboard
-</header>
+    <button
+      class="logout-button"
+      type="button"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+  </header>
 
-<div class="card">
-<h2>Welcome Admin</h2>
+  <main class="page">
+    <section class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-label">Total Bets</div>
+        <div class="summary-value" id="totalBets">0</div>
+      </div>
 
-<p>System Online</p>
+      <div class="summary-card">
+        <div class="summary-label">Total Amount</div>
+        <div class="summary-value" id="totalAmount">0</div>
+      </div>
 
-<button onclick="location.href='/'">
-Logout
-</button>
+      <div class="summary-card">
+        <div class="summary-label">Customers</div>
+        <div class="summary-value" id="totalCustomers">0</div>
+      </div>
+    </section>
 
-</div>
+    <section class="content-grid">
+      <div class="panel">
+        <h2 class="panel-title">💰 Bet Entry</h2>
 
+        <form id="betForm">
+          <div class="field">
+            <label for="customerName">Customer Name</label>
+
+            <input
+              id="customerName"
+              type="text"
+              placeholder="Customer name"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="phone">Phone</label>
+
+            <input
+              id="phone"
+              type="text"
+              placeholder="Phone number"
+            >
+          </div>
+
+          <div class="field">
+            <label for="number">2D Number</label>
+
+            <input
+              id="number"
+              type="text"
+              inputmode="numeric"
+              maxlength="2"
+              placeholder="00 - 99"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="amount">Amount</label>
+
+            <input
+              id="amount"
+              type="number"
+              min="1"
+              step="1"
+              placeholder="Bet amount"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="betType">Result Time</label>
+
+            <select id="betType" required>
+              <option value="">Select time</option>
+              <option value="5:00 PM">5:00 PM</option>
+              <option value="6:00 PM">6:00 PM</option>
+              <option value="7:00 PM">7:00 PM</option>
+              <option value="8:00 PM">8:00 PM</option>
+              <option value="9:00 PM">9:00 PM</option>
+              <option value="10:00 PM">10:00 PM</option>
+              <option value="11:00 PM">11:00 PM</option>
+              <option value="12:00 AM">12:00 AM</option>
+            </select>
+          </div>
+
+          <button
+            id="saveButton"
+            class="save-button"
+            type="submit"
+          >
+            Save Bet
+          </button>
+
+          <div id="message" class="message"></div>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2 class="panel-title">📋 Bet List</h2>
+
+        <button
+          class="refresh-button"
+          type="button"
+          onclick="loadBets()"
+        >
+          Refresh
+        </button>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Number</th>
+                <th>Amount</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Created</th>
+              </tr>
+            </thead>
+
+            <tbody id="betTableBody">
+              <tr>
+                <td colspan="8" class="empty-row">
+                  Loading...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const betForm = document.getElementById("betForm");
+    const saveButton = document.getElementById("saveButton");
+    const message = document.getElementById("message");
+
+    betForm.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const customerName =
+        document.getElementById("customerName").value.trim();
+
+      const phone =
+        document.getElementById("phone").value.trim();
+
+      const number =
+        document.getElementById("number").value.trim();
+
+      const amount =
+        Number(document.getElementById("amount").value);
+
+      const betType =
+        document.getElementById("betType").value;
+
+      if (!/^\\d{2}$/.test(number)) {
+        showMessage(
+          "2D Number must contain exactly 2 digits.",
+          false
+        );
+
+        return;
+      }
+
+      saveButton.disabled = true;
+      saveButton.textContent = "Saving...";
+      message.textContent = "";
+
+      try {
+        const response = await fetch("/api/bets", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            customer_name: customerName,
+            phone: phone,
+            number: number,
+            amount: amount,
+            bet_type: betType
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          showMessage(
+            data.message || "Bet could not be saved.",
+            false
+          );
+
+          return;
+        }
+
+        showMessage(
+          "Bet saved successfully. ID: " + data.bet_id,
+          true
+        );
+
+        betForm.reset();
+        await loadBets();
+      } catch (error) {
+        showMessage(
+          "Network error. Please try again.",
+          false
+        );
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Save Bet";
+      }
+    });
+
+    function showMessage(text, success) {
+      message.textContent = text;
+      message.className =
+        "message " + (success ? "success" : "error");
+    }
+
+    async function loadBets() {
+      const tableBody =
+        document.getElementById("betTableBody");
+
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="8" class="empty-row">
+            Loading...
+          </td>
+        </tr>
+      `;
+
+      try {
+        const response = await fetch("/api/bets");
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error("Unable to load bets");
+        }
+
+        const bets = Array.isArray(data.bets)
+          ? data.bets
+          : [];
+
+        updateSummary(bets);
+
+        if (bets.length === 0) {
+          tableBody.innerHTML = `
+            <tr>
+              <td colspan="8" class="empty-row">
+                No bets found.
+              </td>
+            </tr>
+          `;
+
+          return;
+        }
+
+        tableBody.innerHTML = bets.map(function (bet) {
+          return `
+            <tr>
+              <td>${escapeHtml(bet.id)}</td>
+              <td>${escapeHtml(bet.customer_name)}</td>
+              <td>${escapeHtml(bet.phone || "-")}</td>
+              <td>${escapeHtml(bet.number)}</td>
+              <td>${formatAmount(bet.amount)}</td>
+              <td>${escapeHtml(bet.bet_type)}</td>
+              <td>${escapeHtml(bet.status)}</td>
+              <td>${escapeHtml(bet.created_at)}</td>
+            </tr>
+          `;
+        }).join("");
+      } catch (error) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-row">
+              Bet list could not be loaded.
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    function updateSummary(bets) {
+      const totalAmount = bets.reduce(function (sum, bet) {
+        return sum + Number(bet.amount || 0);
+      }, 0);
+
+      const customers = new Set(
+        bets.map(function (bet) {
+          return String(bet.customer_name || "").trim();
+        }).filter(Boolean)
+      );
+
+      document.getElementById("totalBets").textContent =
+        bets.length.toLocaleString();
+
+      document.getElementById("totalAmount").textContent =
+        formatAmount(totalAmount);
+
+      document.getElementById("totalCustomers").textContent =
+        customers.size.toLocaleString();
+    }
+
+    function formatAmount(value) {
+      return Number(value || 0).toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function logout() {
+      window.location.href = "/";
+    }
+
+    loadBets();
+  </script>
 </body>
 </html>
