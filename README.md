@@ -1,23 +1,17 @@
-# Tartay 2D v1.1
+# Tartay 2D v2.0
 
-Cloudflare Workers + D1 + Static Assets.
-
-## Included
-
+Included:
 - Admin login
 - Bet entry and bet list
-- Result management for 5:00 PM through 12:00 AM
-- Public User App at `/user.html`
-- Public live results API: `GET /api/results`
-- Admin result update API: `POST /api/results`
+- Admin result publishing with SET, VALUE and 2D
+- User result app styled as a full mobile result screen
+- Result history by date
+- Times: 5:00 PM through 12:00 AM
+- Automatic D1 creation of `result_records`; no extra SQL is required for this new table
 
-## Existing test login
+Links after deployment:
+- Admin: `/`
+- User App: `/user.html`
+- History: `/history.html`
 
-- Username: `admin`
-- Password: `123456`
-
-Change the test password before real use. The current authentication is an early development version.
-
-## Deployment
-
-Replace the matching files in the GitHub `tartay-2d` repository. Cloudflare Git integration will deploy automatically.
+Test admin: admin / 123456. Change before real use.
