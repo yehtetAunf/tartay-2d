@@ -1,0 +1,18 @@
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  role TEXT NOT NULL,
+  status INTEGER DEFAULT 1,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE results (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  result_date TEXT NOT NULL,
+  result_time TEXT NOT NULL,
+  number TEXT NOT NULL,
+  is_published INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT CURRENT_TIMESTAMP
+);
