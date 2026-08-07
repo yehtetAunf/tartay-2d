@@ -1,6 +1,6 @@
 import { DurableObject } from "cloudflare:workers";
 
-const DATA_KEY = "tartay_2d_state_v1";
+const DATA_KEY = "tartay_8_times_2d_state_v1";
 
 const TIMES = [
   "05:00 PM",
@@ -22,7 +22,7 @@ const YANGON_UTC_OFFSET_MINUTES = 6 * 60 + 30;
 const OVERRIDE_MS = 2 * 60 * 1000;
 
 const BACKUP_VERSION = 1;
-const BACKUP_APP_ID = "tartay-2d";
+const BACKUP_APP_ID = "new-zealand-2d";
 const MAX_JSON_BYTES = 2 * 1024 * 1024;
 
 const HISTORY_PREFIX = "history:";
@@ -374,7 +374,7 @@ function normaliseState(rawState) {
       : fresh.live;
 
   const rounds =
-    Array.isArray(state.rounds) && state.rounds.length === TIMES.length
+    Array.isArray(state.rounds) && state.rounds.length === 8
       ? state.rounds
       : fresh.rounds;
 
@@ -388,7 +388,7 @@ function normaliseState(rawState) {
       frozen: normaliseSnapshot(live.frozen, false),
       override: normaliseSnapshot(live.override, true)
     },
-    rounds: rounds.slice(0, TIMES.length).map((round, index) => ({
+    rounds: rounds.slice(0, 8).map((round, index) => ({
       round: index + 1,
       time: timeToMinutes(round?.time) === null ? TIMES[index] : String(round.time),
       scheduleDate: isRealDate(round?.scheduleDate)
@@ -446,7 +446,7 @@ async function getHistory(env, selectedDate) {
 
 async function putHistory(env, selectedDate, items) {
   const sorted = items
-    .slice(0, TIMES.length)
+    .slice(0, 8)
     .sort((a, b) => Number(a.round) - Number(b.round));
 
   if (sorted.length === 0) {
@@ -676,7 +676,7 @@ async function buildFullBackup(env) {
   return {
     backupVersion: BACKUP_VERSION,
     appId: BACKUP_APP_ID,
-    appName: "Tartay 2D",
+    appName: "New Zealand 2D",
     dataKey: DATA_KEY,
     createdAt: new Date().toISOString(),
     createdAtYangon: yangonNowText(),
@@ -765,7 +765,7 @@ function validateBackupStateForRestore(state) {
     restoreValidationError("Paused Live အတွက် Frozen Data မရှိပါ");
   }
 
-  if (!Array.isArray(state.rounds) || state.rounds.length !== TIMES.length) {
+  if (!Array.isArray(state.rounds) || state.rounds.length !== 8) {
     restoreValidationError("Round ၈ ခု မပြည့်ပါ");
   }
 
@@ -841,7 +841,7 @@ function validateBackupHistoryForRestore(history) {
         historyDate + " History Records ပုံစံမှားနေပါတယ်"
       );
     }
-    if (items.length > TIMES.length) {
+    if (items.length > 8) {
       restoreValidationError(
         historyDate + " History Round ၈ ခုထက်ကျော်နေပါတယ်"
       );
@@ -864,7 +864,7 @@ function validateBackupHistoryForRestore(history) {
       if (
         !Number.isInteger(roundNumber) ||
         roundNumber < 1 ||
-        roundNumber > TIMES.length
+        roundNumber > 8
       ) {
         restoreValidationError(label + " Round Number မှားနေပါတယ်");
       }
@@ -1819,7 +1819,7 @@ function appPage() {
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <link rel="icon" href="/favicon.ico">
-<title>Tartay 2D</title>
+<title>NewZealand 2D</title>
 <style>
 :root{
   --page:#02030b;
@@ -1857,29 +1857,17 @@ body.screen-fitted{overflow-y:hidden}
 body::before{
   content:"";
   position:fixed;
-  inset:-4%;
+  inset:0;
   z-index:-2;
   pointer-events:none;
   opacity:.72;
-  background:
-    radial-gradient(circle at 18% 25%,rgba(255,116,31,.22),transparent 25%),
-    radial-gradient(circle at 78% 18%,rgba(255,45,104,.14),transparent 30%),
-    radial-gradient(circle at 55% 75%,rgba(40,66,170,.18),transparent 42%),
-    linear-gradient(155deg,#16080b 0%,#070819 42%,#02030b 100%);
-  background-size:115% 115%;
-  animation:tartayLivingBackground 14s ease-in-out infinite alternate;
-  transform:scale(1.04);
+  background-image:
+    radial-gradient(circle,#9fdcff 0 1px,transparent 1.5px),
+    radial-gradient(circle,#f2a7ff 0 1px,transparent 1.5px),
+    radial-gradient(circle,#fff 0 .8px,transparent 1.2px);
+  background-size:137px 137px,193px 193px,83px 83px;
+  background-position:11px 17px,59px 91px,29px 43px;
 }
-body::after{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(180deg,rgba(1,2,10,.18),rgba(1,2,10,.60));
-}
-@keyframes tartayLivingBackground{
-  0%{transform:scale(1.04) translate3d(-1%,0,0);filter:saturate(.95) brightness(.92)}
-  50%{transform:scale(1.08) translate3d(1%,-1%,0);filter:saturate(1.08) brightness(1.02)}
-  100%{transform:scale(1.05) translate3d(0,1%,0);filter:saturate(1) brightness(.96)}
-}
-@media(prefers-reduced-motion:reduce){body::before{animation:none}}
 button,a{font:inherit}
 .app-viewport{width:100%;overflow:hidden;display:flex;justify-content:center;align-items:flex-start}
 .app-shell{width:min(100%,820px);min-height:100vh;flex:0 0 auto;margin:0;padding-bottom:calc(24px + env(safe-area-inset-bottom));transform-origin:top center;will-change:transform}
@@ -2325,7 +2313,7 @@ button,a{font:inherit}
 .menu-title{margin:23px 8px 28px;color:#f4f8ff;font-size:28px;font-weight:900}
 .menu-links{display:grid;gap:12px}
 .menu-links a{display:flex;align-items:center;min-height:54px;padding:14px 16px;border:1px solid rgba(92,144,255,.28);border-radius:15px;color:#eaf4ff;background:rgba(10,17,42,.78);text-decoration:none;font-weight:800}
-.telegram-modal{display:none!important;position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,7,.78);backdrop-filter:blur(7px)}
+.telegram-modal{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,7,.78);backdrop-filter:blur(7px)}
 .telegram-modal[hidden]{display:none}
 .telegram-dialog{width:min(100%,560px);max-height:calc(100vh - 36px);overflow:auto;padding:24px 19px;border:1px solid #5576ff;border-radius:25px;color:#eef4ff;background:linear-gradient(155deg,#091029,#030511);box-shadow:0 0 22px rgba(75,83,255,.55),0 22px 70px rgba(0,0,0,.72)}
 .telegram-title{margin:0;color:#e9efff;text-align:center;font-size:24px;font-weight:900;text-shadow:0 0 9px #6c65ff}
@@ -2337,7 +2325,7 @@ button,a{font:inherit}
 .telegram-join:focus-visible,.telegram-close:focus-visible,.menu-button:focus-visible,.menu-close:focus-visible{outline:3px solid #f4c542;outline-offset:3px}
 @media(max-width:600px){
   .app-shell{min-height:0;padding-bottom:2px}
-  .top{grid-template-columns:38px 1fr auto;min-height:92px;padding:max(4px,env(safe-area-inset-top)) 9px 3px;gap:5px}
+  .top{grid-template-columns:38px 1fr auto;min-height:58px;padding:max(4px,env(safe-area-inset-top)) 9px 3px;gap:5px}
   .menu-button{width:35px;height:35px;border-radius:10px;gap:4px}.menu-button span{width:25px;height:2.5px}
   .brand{font-size:clamp(21px,6.5vw,27px);letter-spacing:-.8px}
   .status{min-width:70px;padding:7px 8px;gap:4px;font-size:10px;border-width:1px}.status-wave{font-size:12px}.status-dot{width:7px;height:7px}
@@ -2374,7 +2362,7 @@ button,a{font:inherit}
   <button id="menuButton" class="menu-button" type="button" aria-label="Open menu" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
-  <div class="brand">Tartay <strong>2D</strong></div>
+  <div class="brand">NewZealand <strong>2D</strong></div>
   <div id="statusBadge" class="status active">
     <span id="statusText">LOADING</span><span class="status-wave">⌁</span><span class="status-dot"></span>
   </div>
@@ -2423,6 +2411,7 @@ button,a{font:inherit}
     <div class="menu-links">
       <a href="/app">⌂ &nbsp; Home</a>
       <a href="/history">◷ &nbsp; Result History</a>
+      <a href="https://t.me/New_2d" target="_blank" rel="noopener noreferrer">➤ &nbsp; Telegram Channel</a>
     </div>
   </nav>
 </div>
@@ -2430,10 +2419,10 @@ button,a{font:inherit}
   <section class="telegram-dialog">
     <h2 id="telegramTitle" class="telegram-title">📢 အသိပေးကြေညာချက်</h2>
     <div class="telegram-copy">
-      <p><strong>Tartay 2D App မှ ကြိုဆိုပါတယ်။</strong></p>
+      <p><strong>NewZealand 2D App မှ ကြိုဆိုပါတယ်။</strong></p>
       <p>🔔 အကောင့်အသုံးပြုမှု၊ ငွေသွင်း/ငွေထုတ်ခြင်းနှင့် အခြားအခက်အခဲများရှိပါက Telegram Channel မှတစ်ဆင့် ဆက်သွယ်မေးမြန်းနိုင်ပါသည်။</p>
       <p>ဝန်ဆောင်မှုအသုံးပြုသူများပြားနေချိန်တွင် အကြောင်းပြန်ရန် အချိန်အနည်းငယ်ကြာနိုင်သဖြင့် စိတ်ရှည်စွာ စောင့်ဆိုင်းပေးပါရန် မေတ္တာရပ်ခံအပ်ပါသည်။</p>
-      <p>🎯 Tartay 2D သတင်းများ၊ နေ့စဉ်အချက်အလက်များနှင့် အစီအစဉ်များကို သိရှိရန် Telegram Channel သို့ ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။</p>
+      <p>🎯 NewZealand 2D သတင်းများ၊ နေ့စဉ်အချက်အလက်များနှင့် အစီအစဉ်များကို သိရှိရန် Telegram Channel သို့ ဝင်ရောက်ကြည့်ရှုနိုင်ပါသည်။</p>
       <p>🔗 Telegram Channel<br><span class="telegram-link-text">https://t.me/New_2d</span></p>
     </div>
     <div class="telegram-actions">
@@ -3136,8 +3125,8 @@ body{
 }
 .result-grid{
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:12px 10px;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:5px;
 }
 .slot{
   min-width:0;
@@ -3155,16 +3144,16 @@ body{
 .slot-result{
   display:grid;
   place-items:center;
-  min-height:92px;
+  min-height:58px;
   margin-top:8px;
   color:var(--white);
-  background:linear-gradient(155deg,#0877e8,#0a2d7e 58%,#071c55);
-  border:1.5px solid #19c8ff;
-  border-radius:18px;
+  background:linear-gradient(180deg,#0a1625,#06101b);
+  border:1px solid var(--result-border);
+  border-radius:11px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.035),
     0 4px 10px rgba(0,0,0,.20);
-  font-size:38px;
+  font-size:29px;
   line-height:1;
   font-weight:900;
   font-variant-numeric:tabular-nums;
@@ -3196,9 +3185,6 @@ body{
   font-size:12px;
   text-align:center;
 }
-.history-card{border-color:#386dff;background:linear-gradient(160deg,rgba(4,24,64,.98),rgba(2,10,30,.99));box-shadow:0 0 20px rgba(31,118,255,.25),inset 0 0 28px rgba(0,129,255,.08)}
-.card-date-row{margin:-5px -1px 16px;padding:15px 18px;border-radius:17px;background:linear-gradient(100deg,#0879e8,#0755c9 55%,#0640aa);color:#eef8ff;box-shadow:0 0 18px rgba(0,132,255,.25)}
-.card-divider{display:none}.slot-time{min-height:42px;color:#f5f8ff;font-size:15px;line-height:1.15;white-space:normal}.slot-result.waiting{color:#f4f7ff}.history-note{margin:22px 4px;padding:14px;border-radius:18px;background:rgba(7,54,118,.45);color:#dbeaff}
 @media(min-width:560px){
   .history-list{gap:23px}
   .history-card{padding:20px 17px 22px}
@@ -3216,8 +3202,8 @@ body{
   .card-date-row svg{width:26px;height:26px}
   .card-date{font-size:20px}
   .result-grid{gap:3px}
-  .slot-time{font-size:11px;letter-spacing:0;min-height:34px}
-  .slot-result{min-height:68px;font-size:28px;border-radius:14px}
+  .slot-time{font-size:8px;letter-spacing:-.45px}
+  .slot-result{min-height:49px;font-size:23px;border-radius:9px}
 }
 </style>
 </head>
@@ -3397,7 +3383,7 @@ function historyDaysFromStart(endDate){
 async function loadHistory(){
   var input=document.getElementById("historyDate");
   var date=input.value||todayYangon();
-  var days=1;
+  var days=historyDaysFromStart(date);
   var message=document.getElementById("historyMessage");
   var list=document.getElementById("historyList");
 
@@ -3457,12 +3443,12 @@ function adminPage(siteKey) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#075ca8">
 <link rel="icon" href="/favicon.ico">
-<title>Tartay 2D Admin</title>
+<title>New Zealand 2D Admin</title>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:16px;background:linear-gradient(160deg,#071126 0%,#0b1730 45%,#101b36 100%);font-family:Arial,sans-serif;color:#eaf2ff;min-height:100vh}
-.wrap{max-width:820px;margin:auto}.card{margin-bottom:14px;padding:16px;background:linear-gradient(145deg,#ffffff,#f5f8ff);color:#101828;border-radius:20px;box-shadow:0 12px 32px #0004;border:1px solid #ffffff22}
+body{margin:0;padding:16px;background:#f4f7fb;font-family:Arial,sans-serif}
+.wrap{max-width:820px;margin:auto}.card{margin-bottom:14px;padding:16px;background:#fff;border-radius:17px;box-shadow:0 4px 14px #0001}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 input,select,button,textarea{width:100%;padding:13px;margin-top:7px;border:1px solid #ddd;border-radius:10px;font-size:16px}
 button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
@@ -3481,7 +3467,7 @@ button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}but
 </head>
 <body>
 <main class="wrap">
-<h1 style="margin:12px 0 20px;font-size:32px">⚡ Tartay <span style="color:#f7b500">2D</span> Admin</h1><div style="margin:-10px 0 18px;color:#a9b9d6">8 Rounds · 05:00 PM — 12:00 AM</div>
+<h1>New Zealand 2D Admin</h1>
 <section class="card">
   <label>Admin Password</label>
   <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Admin password" onkeydown="if(event.key==='Enter'){loadAdmin()}">
@@ -3697,11 +3683,11 @@ function renderHistoryRoundOptions(){
     return '<option value="'+(index+1)+'">Round '+(index+1)+' — '+esc(time)+'</option>';
   }).join("");
 }
-function clearOldInputs(){for(var index=0;index<ADMIN_TIMES.length;index++){el("oldResult"+index).value=""}}
+function clearOldInputs(){for(var index=0;index<6;index++){el("oldResult"+index).value=""}}
 async function saveOldHistoryFromAdmin(){
   var date=el("oldHistoryDate").value;if(!date){message("History Date ရွေးပါ");return}
   var results=[];
-  for(var index=0;index<ADMIN_TIMES.length;index++){
+  for(var index=0;index<6;index++){
     var value=el("oldResult"+index).value.replace(/\D/g,"").slice(0,2);
     if(!/^\d{2}$/.test(value)){message(ADMIN_TIMES[index]+" အတွက် 2D ဂဏန်း ၂ လုံးထည့်ပါ");return}
     results.push(value);
@@ -3971,8 +3957,8 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Array.isArray(body.results) || body.results.length !== TIMES.length) {
-      throw new HttpError(400, "2D ဂဏန်း ၆ ခုလုံးထည့်ပါ");
+    if (!Array.isArray(body.results) || body.results.length !== 8) {
+      throw new HttpError(400, "2D ဂဏန်း ၈ ခုလုံးထည့်ပါ");
     }
 
     const items = body.results.map((value, index) => ({
@@ -3991,7 +3977,7 @@ async function handleAdminRoute(request, env, url) {
 
     return jsonResponse({
       success: true,
-      message: date + " အတွက် 2D ဂဏန်း ၆ ခု သိမ်းပြီးပါပြီ",
+      message: date + " အတွက် 2D ဂဏန်း ၈ ခု သိမ်းပြီးပါပြီ",
       items
     });
   }
@@ -4003,7 +3989,7 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > TIMES.length) {
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 8) {
       throw new HttpError(400, "History Round မှားနေပါတယ်");
     }
 
@@ -4072,7 +4058,7 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > TIMES.length) {
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 8) {
       throw new HttpError(400, "History Round မှားနေပါတယ်");
     }
 
@@ -4090,7 +4076,7 @@ async function handleAdminRoute(request, env, url) {
   }
 
   const unpublishMatch = url.pathname.match(
-    /^\/api\/admin\/round\/([1-8])\/unpublish$/
+    /^\/api\/admin\/round\/([1-6])\/unpublish$/
   );
 
   if (unpublishMatch) {
@@ -4145,7 +4131,7 @@ async function handleAdminRoute(request, env, url) {
     }
   }
 
-  const roundMatch = url.pathname.match(/^\/api\/admin\/round\/([1-8])$/);
+  const roundMatch = url.pathname.match(/^\/api\/admin\/round\/([1-6])$/);
 
   if (roundMatch) {
     const roundNumber = Number(roundMatch[1]);
@@ -4261,9 +4247,7 @@ async function handleRequest(request, env) {
 
   try {
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/app")) {
-      const assetUrl = new URL(request.url);
-      assetUrl.pathname = "/user.html";
-      return env.ASSETS.fetch(new Request(assetUrl.toString(), request));
+      return htmlResponse(appPage());
     }
 
     if (request.method === "GET" && url.pathname === "/admin") {
