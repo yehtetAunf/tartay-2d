@@ -8,36 +8,28 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  background: #020410;
-  color: #f5f7ff;
+  background: #02030d;
+  color: #f6f7ff;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 90% 35%, rgba(82, 0, 110, 0.18), transparent 28%),
-    linear-gradient(180deg, #030512 0%, #020410 100%);
+    radial-gradient(circle at 92% 35%, rgba(96, 0, 110, 0.16), transparent 32%),
+    linear-gradient(180deg, #02040f 0%, #02030d 100%);
 }
-
-/* =========================
-   MAIN APP
-========================= */
 
 .app-shell {
   width: 100%;
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 34px 24px 60px;
+  max-width: none;
+  margin: 0;
+  padding: 28px 24px 72px;
 }
 
 .main {
   width: 100%;
 }
-
-/* =========================
-   HEADER
-========================= */
 
 .topbar {
   width: 100%;
@@ -51,13 +43,11 @@ body {
 .brand {
   font-size: 34px;
   font-weight: 800;
-  letter-spacing: -1px;
   color: #f5f6ff;
 }
 
 .brand strong {
   color: #ffc400;
-  font-weight: 800;
 }
 
 .status {
@@ -79,25 +69,17 @@ body {
   background: #68e9a4;
 }
 
-/* =========================
-   LIVE RESULT CARD
-========================= */
-
 .hero-card {
   width: 100%;
-  min-height: 420px;
+  min-height: 418px;
   border: 2px solid #425892;
   border-radius: 30px;
-  padding: 32px 28px 26px;
+  padding: 30px 26px 24px;
   background:
-    linear-gradient(
-      180deg,
-      rgba(9, 17, 43, 0.94),
-      rgba(6, 12, 32, 0.96)
-    );
+    linear-gradient(180deg, rgba(8, 15, 38, 0.98), rgba(5, 11, 29, 0.98));
   box-shadow:
     0 0 26px rgba(49, 74, 160, 0.08),
-    inset 0 0 22px rgba(27, 49, 105, 0.09);
+    inset 0 0 22px rgba(27, 49, 105, 0.08);
 }
 
 .hero-label {
@@ -109,18 +91,15 @@ body {
 }
 
 .big-result {
-  height: 185px;
+  height: 188px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #ffc300;
   font-size: 82px;
-  line-height: 1;
   font-weight: 900;
   letter-spacing: 5px;
 }
-
-/* SET / VALUE */
 
 .market-row {
   display: grid;
@@ -129,8 +108,8 @@ body {
 }
 
 .market-row > div {
-  height: 102px;
-  border: 2px solid #1f315e;
+  min-height: 101px;
+  border: 2px solid #21335f;
   border-radius: 17px;
   display: flex;
   flex-direction: column;
@@ -139,16 +118,14 @@ body {
 }
 
 .market-row span {
-  display: block;
   margin-bottom: 14px;
   color: #8f95ac;
   font-size: 15px;
 }
 
 .market-row strong {
-  color: #edf0fb;
   font-size: 28px;
-  font-weight: 700;
+  color: #edf0fb;
 }
 
 .updated {
@@ -159,11 +136,8 @@ body {
   letter-spacing: 2px;
 }
 
-/* =========================
-   TODAY RESULTS
-========================= */
-
 .result-section {
+  width: 100%;
   margin-top: 34px;
 }
 
@@ -171,17 +145,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
 }
 
 .section-head h2 {
   margin: 0;
   font-size: 31px;
   font-weight: 800;
-  letter-spacing: -1px;
 }
 
-/* Screenshot မှာ Refresh button မပေါ်ဘူး */
 #refreshBtn {
   display: none !important;
 }
@@ -189,27 +161,26 @@ body {
 .round-grid {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
-/* JS က card class နာမည် မတူရင်လည်း အလုပ်လုပ်အောင် */
 .round-card,
 .result-card,
 .round-item {
-  position: relative;
-  height: 96px;
+  min-height: 96px;
   border-radius: 18px;
   border: 2px solid #20345f;
   background: #08122d;
   overflow: hidden;
   display: flex;
-  align-items: center;
+  align-items: stretch;
 }
 
-/* left time */
 .round-time {
   flex: 1;
+  display: flex;
+  align-items: center;
   padding-left: 26px;
   font-size: 21px;
   font-weight: 600;
@@ -217,10 +188,8 @@ body {
   white-space: nowrap;
 }
 
-/* right result */
 .round-result {
   width: 100px;
-  height: 100%;
   background: #111e3b;
   display: flex;
   align-items: center;
@@ -230,13 +199,9 @@ body {
   color: #d4d9ea;
 }
 
-/* =========================
-   RESULT HISTORY
-========================= */
-
 .history-section {
-  margin-top: 26px;
   width: 100%;
+  margin-top: 26px;
 }
 
 .history-button {
@@ -252,12 +217,7 @@ body {
   justify-content: center;
   gap: 8px;
   font-size: 23px;
-  font-weight: 400;
 }
-
-/* =========================
-   REMOVE OLD BOTTOM NAV
-========================= */
 
 .bottom-nav,
 .bet-sheet,
@@ -267,14 +227,9 @@ body {
   display: none !important;
 }
 
-/* =========================
-   MOBILE
-========================= */
-
 @media (max-width: 600px) {
-
   .app-shell {
-    padding: 34px 24px 60px;
+    padding: 28px 24px 70px;
   }
 
   .brand {
@@ -286,8 +241,8 @@ body {
   }
 
   .big-result {
-    height: 182px;
-    font-size: 76px;
+    height: 185px;
+    font-size: 78px;
   }
 
   .section-head h2 {
@@ -295,7 +250,6 @@ body {
   }
 
   .round-time {
-    padding-left: 24px;
     font-size: 20px;
   }
 
@@ -305,15 +259,14 @@ body {
   }
 }
 
-@media (max-width: 420px) {
-
+@media (max-width: 430px) {
   .app-shell {
     padding-left: 16px;
     padding-right: 16px;
   }
 
   .brand {
-    font-size: 28px;
+    font-size: 29px;
   }
 
   .hero-card {
@@ -326,7 +279,7 @@ body {
   }
 
   .big-result {
-    font-size: 66px;
+    font-size: 68px;
   }
 
   .round-grid {
@@ -336,7 +289,7 @@ body {
   .round-card,
   .result-card,
   .round-item {
-    height: 88px;
+    min-height: 90px;
   }
 
   .round-time {
@@ -345,7 +298,7 @@ body {
   }
 
   .round-result {
-    width: 72px;
+    width: 76px;
     font-size: 22px;
   }
-  }
+}
