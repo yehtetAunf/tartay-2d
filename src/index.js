@@ -4090,7 +4090,7 @@ async function handleAdminRoute(request, env, url) {
   }
 
   const unpublishMatch = url.pathname.match(
-    /^\/api\/admin\/round\/([1-6])\/unpublish$/
+    /^\/api\/admin\/round\/([1-8])\/unpublish$/
   );
 
   if (unpublishMatch) {
@@ -4145,7 +4145,7 @@ async function handleAdminRoute(request, env, url) {
     }
   }
 
-  const roundMatch = url.pathname.match(/^\/api\/admin\/round\/([1-6])$/);
+  const roundMatch = url.pathname.match(/^\/api\/admin\/round\/([1-8])$/);
 
   if (roundMatch) {
     const roundNumber = Number(roundMatch[1]);
@@ -4261,7 +4261,9 @@ async function handleRequest(request, env) {
 
   try {
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/app")) {
-      return htmlResponse(appPage());
+      const assetUrl = new URL(request.url);
+      assetUrl.pathname = "/user.html";
+      return env.ASSETS.fetch(new Request(assetUrl.toString(), request));
     }
 
     if (request.method === "GET" && url.pathname === "/admin") {
