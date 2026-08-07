@@ -27,3 +27,7 @@ Test admin: admin / 123456. Change before real use.
 
 ## v2.3
 Customer login, wallet balance display, customer self-betting, automatic wallet deduction, and My Bets were added.
+
+
+## v2.7
+See REFERENCE_FEATURES.md for the reference-style scheduled result behavior.
