@@ -1,33 +1,14 @@
-# Tartay 2D v2.0
+# Tartay 2D Clean v3
+Fresh project written for Tartay 2D. It does not reuse the old Tartay login/balance/bet/wallet/customer code.
 
-Included:
-- Admin login
-- Bet entry and bet list
-- Admin result publishing with SET, VALUE and 2D
-- User result app styled as a full mobile result screen
-- Result history by date
-- Times: 5:00 PM through 12:00 AM
-- Automatic D1 creation of `result_records`; no extra SQL is required for this new table
+Functions: public live result, 8 scheduled rounds (5 PM to 12 AM Yangon time), admin pre-set SET/VALUE/2D, scheduled reveal, result history, KV storage, backup API, live/pause API.
 
-Links after deployment:
-- Admin: `/`
-- User App: `/user.html`
-- History: `/history.html`
+## Before deploy
+1. Create a Cloudflare KV namespace.
+2. Replace PUT_YOUR_KV_NAMESPACE_ID_HERE in wrangler.jsonc with its ID.
+3. Add Worker secret ADMIN_KEY in Cloudflare (or `npx wrangler secret put ADMIN_KEY`).
+4. Deploy with `npm install` then `npm run deploy`.
 
-Test admin: admin / 123456. Change before real use.
-
-
-## v2.1
-- Automatic WIN / LOSE after result publish
-- New bets are immediately graded when that time's result is already published
-- Payout rate: 95x (100 -> 9,500)
-- Total Payout and Profit/Loss dashboard cards
-- Payout column in Bet List
-
-
-## v2.3
-Customer login, wallet balance display, customer self-betting, automatic wallet deduction, and My Bets were added.
-
-
-## v2.7
-See REFERENCE_FEATURES.md for the reference-style scheduled result behavior.
+Admin: /admin
+User: /
+History: /history
