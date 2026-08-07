@@ -2,37 +2,42 @@
   box-sizing: border-box;
 }
 
-html,
-body {
+:root {
+  --bg: #02040f;
+  --card: #071128;
+  --card2: #0b1733;
+  --line: #334d88;
+  --line2: #1f315e;
+  --text: #f4f6ff;
+  --muted: #9aa2ba;
+  --yellow: #ffc400;
+  --green: #63e8a0;
+}
+
+html, body {
   margin: 0;
-  padding: 0;
   width: 100%;
   min-height: 100%;
-  background: #02030d;
-  color: #f6f7ff;
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
   overflow-x: hidden;
   background:
-    radial-gradient(circle at 92% 35%, rgba(96, 0, 110, 0.16), transparent 32%),
+    radial-gradient(circle at 92% 38%, rgba(100, 0, 100, .16), transparent 30%),
     linear-gradient(180deg, #02040f 0%, #02030d 100%);
 }
 
 .app-shell {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 28px 24px 72px;
-}
-
-.main {
-  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 42px 24px 56px;
 }
 
 .topbar {
-  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -42,63 +47,70 @@ body {
 
 .brand {
   font-size: 34px;
+  line-height: 1;
   font-weight: 800;
-  color: #f5f6ff;
+  letter-spacing: -1px;
 }
 
 .brand strong {
-  color: #ffc400;
+  color: var(--yellow);
 }
 
 .status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 2px solid #31d878;
-  color: #dffff0;
+  border: 2px solid #2ecf72;
   border-radius: 999px;
   padding: 10px 18px;
+  color: #e8fff2;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .status .dot {
   width: 13px;
   height: 13px;
   border-radius: 50%;
-  background: #68e9a4;
+  background: var(--green);
+}
+
+.status.offline {
+  border-color: #e45a6d;
+  color: #ffdfe4;
+}
+
+.status.offline .dot {
+  background: #e45a6d;
 }
 
 .hero-card {
   width: 100%;
   min-height: 418px;
-  border: 2px solid #425892;
-  border-radius: 30px;
-  padding: 30px 26px 24px;
+  border: 2px solid var(--line);
+  border-radius: 31px;
+  padding: 32px 28px 25px;
   background:
-    linear-gradient(180deg, rgba(8, 15, 38, 0.98), rgba(5, 11, 29, 0.98));
-  box-shadow:
-    0 0 26px rgba(49, 74, 160, 0.08),
-    inset 0 0 22px rgba(27, 49, 105, 0.08);
+    linear-gradient(180deg, rgba(8, 16, 42, .98), rgba(5, 11, 30, .98));
+  box-shadow: inset 0 0 26px rgba(45, 70, 145, .08);
 }
 
 .hero-label {
   text-align: center;
-  color: #b9bdd3;
+  color: #b9bfd2;
   font-size: 22px;
   letter-spacing: 3px;
-  font-weight: 400;
 }
 
 .big-result {
-  height: 188px;
+  height: 186px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffc300;
-  font-size: 82px;
+  color: var(--yellow);
+  font-size: 84px;
   font-weight: 900;
-  letter-spacing: 5px;
+  letter-spacing: 6px;
 }
 
 .market-row {
@@ -107,129 +119,118 @@ body {
   gap: 14px;
 }
 
-.market-row > div {
-  min-height: 101px;
-  border: 2px solid #21335f;
-  border-radius: 17px;
+.market-box {
+  height: 102px;
+  border: 2px solid var(--line2);
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
 
-.market-row span {
-  margin-bottom: 14px;
-  color: #8f95ac;
+.market-box span {
+  color: #8f96ad;
   font-size: 15px;
+  margin-bottom: 13px;
 }
 
-.market-row strong {
+.market-box strong {
   font-size: 28px;
-  color: #edf0fb;
+  font-weight: 700;
 }
 
 .updated {
-  text-align: center;
   margin-top: 8px;
-  color: #b8bdcf;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #b8bfd0;
   font-size: 21px;
   letter-spacing: 2px;
 }
 
+.tiny-clock {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
 .result-section {
-  width: 100%;
   margin-top: 34px;
 }
 
 .section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 28px;
+  margin-bottom: 30px;
 }
 
 .section-head h2 {
   margin: 0;
   font-size: 31px;
   font-weight: 800;
-}
-
-#refreshBtn {
-  display: none !important;
+  letter-spacing: -1px;
 }
 
 .round-grid {
-  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14px;
 }
 
-.round-card,
-.result-card,
-.round-item {
-  min-height: 96px;
-  border-radius: 18px;
-  border: 2px solid #20345f;
-  background: #08122d;
+.round-card {
+  height: 96px;
+  border: 2px solid #20365f;
+  border-radius: 19px;
   overflow: hidden;
-  display: flex;
-  align-items: stretch;
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  background: #08122d;
 }
 
 .round-time {
-  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
-  padding-left: 26px;
+  padding: 0 24px;
   font-size: 21px;
   font-weight: 600;
-  color: #f2f4ff;
   white-space: nowrap;
 }
 
+.round-time .clock {
+  margin-right: 8px;
+  font-size: 13px;
+}
+
 .round-result {
-  width: 100px;
-  background: #111e3b;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #111e3b;
+  color: #d7dced;
   font-size: 25px;
   font-weight: 700;
-  color: #d4d9ea;
-}
-
-.history-section {
-  width: 100%;
-  margin-top: 26px;
 }
 
 .history-button {
   width: 100%;
   min-height: 88px;
-  border: 2px solid #354b86;
+  margin-top: 26px;
+  border: 2px solid #354d87;
   border-radius: 20px;
-  background: transparent;
-  color: #f3f4fb;
-  text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  color: var(--text);
+  text-decoration: none;
   font-size: 23px;
+  background: transparent;
 }
 
-.bottom-nav,
-.bet-sheet,
-.overlay,
-#betOverlay,
-#betSheet {
-  display: none !important;
-}
-
-@media (max-width: 600px) {
+@media (max-width: 540px) {
   .app-shell {
-    padding: 28px 24px 70px;
+    padding: 34px 24px 48px;
   }
 
   .brand {
@@ -240,22 +241,8 @@ body {
     min-height: 418px;
   }
 
-  .big-result {
-    height: 185px;
-    font-size: 78px;
-  }
-
-  .section-head h2 {
-    font-size: 30px;
-  }
-
   .round-time {
     font-size: 20px;
-  }
-
-  .round-result {
-    width: 98px;
-    font-size: 24px;
   }
 }
 
@@ -269,9 +256,14 @@ body {
     font-size: 29px;
   }
 
+  .status {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
   .hero-card {
-    padding-left: 18px;
-    padding-right: 18px;
+    padding: 28px 18px 22px;
+    min-height: 400px;
   }
 
   .hero-label {
@@ -279,26 +271,42 @@ body {
   }
 
   .big-result {
+    height: 176px;
     font-size: 68px;
+  }
+
+  .market-box {
+    height: 90px;
+  }
+
+  .updated {
+    font-size: 17px;
+  }
+
+  .section-head h2 {
+    font-size: 29px;
   }
 
   .round-grid {
     gap: 10px;
   }
 
-  .round-card,
-  .result-card,
-  .round-item {
-    min-height: 90px;
+  .round-card {
+    height: 88px;
+    grid-template-columns: 1fr 74px;
   }
 
   .round-time {
-    padding-left: 14px;
+    padding: 0 14px;
     font-size: 17px;
   }
 
   .round-result {
-    width: 76px;
     font-size: 22px;
+  }
+
+  .history-button {
+    min-height: 80px;
+    font-size: 20px;
   }
 }

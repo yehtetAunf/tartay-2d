@@ -1,127 +1,87 @@
 const TIMES = [
-  "05:00 PM",
-  "06:00 PM",
-  "07:00 PM",
-  "08:00 PM",
-  "09:00 PM",
-  "10:00 PM",
-  "11:00 PM",
-  "12:00 AM"
+  "05:00 PM","06:00 PM","07:00 PM","08:00 PM",
+  "09:00 PM","10:00 PM","11:00 PM","12:00 AM"
 ];
 
-const bigResult = document.getElementById("bigResult");
-const liveSet = document.getElementById("liveSet");
-const liveValue = document.getElementById("liveValue");
-const updatedText = document.getElementById("updatedText");
-const statusBadge = document.getElementById("statusBadge");
-const statusText = document.getElementById("statusText");
-const roundGrid = document.getElementById("roundGrid");
-const refreshBtn = document.getElementById("refreshBtn");
+const $ = (id) => document.getElementById(id);
 
-function makeRoundCards(rounds = []) {
-  roundGrid.innerHTML = "";
+function drawRounds(rounds = []) {
+  const grid = $("roundGrid");
+  grid.innerHTML = "";
 
-  TIMES.forEach((time, index) => {
-    const round = rounds[index] || {};
-
+  TIMES.forEach((time, i) => {
+    const r = rounds[i] || {};
     const card = document.createElement("div");
     card.className = "round-card";
 
-    const timeBox = document.createElement("div");
-    timeBox.className = "round-time";
-    timeBox.innerHTML = `<span>◷</span>&nbsp; ${time}`;
+    const left = document.createElement("div");
+    left.className = "round-time";
+    left.innerHTML = `<span class="clock">◷</span><span>${time}</span>`;
 
-    const resultBox = document.createElement("div");
-    resultBox.className = "round-result";
-    resultBox.textContent =
-      round.result && round.result !== ""
-        ? round.result
-        : "--";
+    const right = document.createElement("div");
+    right.className = "round-result";
+    right.textContent = r.result && r.result !== "" ? r.result : "--";
 
-    card.appendChild(timeBox);
-    card.appendChild(resultBox);
-
-    roundGrid.appendChild(card);
+    card.append(left, right);
+    grid.appendChild(card);
   });
 }
 
 function setStatus(live) {
-  if (live) {
-    statusText.textContent = "LIVE";
-    statusBadge.classList.add("live");
-    statusBadge.classList.remove("offline");
-  } else {
-    statusText.textContent = "OFFLINE";
-    statusBadge.classList.remove("live");
-    statusBadge.classList.add("offline");
-  }
+  const badge = $("statusBadge");
+  $("statusText").textContent = live ? "LIVE" : "OFFLINE";
+  badge.classList.toggle("offline", !live);
 }
 
 function setLatest(data) {
-  const latest = data.latest;
+  const latest = data && data.latest ? data.latest : null;
 
   if (!latest) {
-    bigResult.textContent = "--";
-    liveSet.textContent = "--";
-    liveValue.textContent = "--";
-    updatedText.textContent = "Waiting for result";
+    $("bigResult").textContent = "--";
+    $("liveSet").textContent = "--";
+    $("liveValue").textContent = "--";
+    $("updatedText").textContent = "Waiting for result";
     return;
   }
 
-  bigResult.textContent = latest.result || "--";
-  liveSet.textContent = latest.set || "--";
-  liveValue.textContent = latest.value || "--";
+  $("bigResult").textContent = latest.result || "--";
+  $("liveSet").textContent = latest.set || "--";
+  $("liveValue").textContent = latest.value || "--";
 
   if (latest.publishedAt) {
-    const d = new Date(latest.publishedAt);
-
-    updatedText.textContent =
-      "Updated " +
-      d.toLocaleTimeString("en-US", {
-        timeZone: "Asia/Yangon",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true
-      });
+    const t = new Date(latest.publishedAt).toLocaleTimeString("en-US", {
+      timeZone: "Asia/Yangon",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+    $("updatedText").textContent = `Updated ${t}`;
   } else {
-    updatedText.textContent = "Waiting for result";
+    $("updatedText").textContent = "Waiting for result";
   }
 }
 
-async function loadResults() {
+async function load() {
   try {
-    const res = await fetch("/api/state", {
-      cache: "no-store"
+    const res = await fetch(`/api/state?t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "cache-control": "no-cache" }
     });
 
-    if (!res.ok) {
-      throw new Error("API error");
-    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
     const data = await res.json();
-
     setStatus(data.live !== false);
     setLatest(data);
-    makeRoundCards(data.rounds || []);
-  } catch (error) {
-    console.error(error);
-
+    drawRounds(Array.isArray(data.rounds) ? data.rounds : []);
+  } catch (err) {
+    console.error(err);
     setStatus(false);
-
-    bigResult.textContent = "--";
-    liveSet.textContent = "--";
-    liveValue.textContent = "--";
-    updatedText.textContent = "Waiting for result";
-
-    makeRoundCards([]);
+    setLatest(null);
+    drawRounds([]);
   }
 }
 
-if (refreshBtn) {
-  refreshBtn.addEventListener("click", loadResults);
-}
-
-makeRoundCards([]);
-loadResults();
-
-setInterval(loadResults, 10000);
+drawRounds([]);
+load();
+setInterval(load, 10000);
