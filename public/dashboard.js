@@ -20,3 +20,12 @@ async function resetCustomerPassword(id,username){const password=prompt(`New pas
 function showHistory(id){historyCustomer.value=String(id);loadWalletHistory(id);historyCustomer.scrollIntoView({behavior:'smooth',block:'center'})}
 async function loadWalletHistory(id){const tb=document.getElementById('walletHistoryBody');if(!id){tb.innerHTML='<tr><td colspan="7" class="empty-row">Select a customer.</td></tr>';return}tb.innerHTML='<tr><td colspan="7" class="empty-row">Loading...</td></tr>';try{const r=await fetch('/api/wallet/history?customer_id='+encodeURIComponent(id)),d=await r.json(),xs=d.transactions||[];tb.innerHTML=xs.length?xs.map(x=>`<tr><td>${x.id}</td><td>${esc(x.type)}</td><td>${money(x.amount)}</td><td>${money(x.balance_before)}</td><td>${money(x.balance_after)}</td><td>${esc(x.note||'-')}</td><td>${esc(x.created_at)}</td></tr>`).join(''):'<tr><td colspan="7" class="empty-row">No transactions found.</td></tr>'}catch{tb.innerHTML='<tr><td colspan="7">Could not load wallet history.</td></tr>'}}
 loadCustomers();
+
+// v2.7 Reference-style result calculation: SET last digit + VALUE integer last digit.
+function calculateScheduled2D(){
+  const s=String(setValue?.value||'').replace(/,/g,'').replace(/\D/g,'');
+  const v=String(marketValue?.value||'').replace(/,/g,'').split('.')[0].replace(/\D/g,'');
+  if(s&&v&&resultNumber){resultNumber.value=s.slice(-1)+v.slice(-1)}
+}
+setValue?.addEventListener('input',calculateScheduled2D);
+marketValue?.addEventListener('input',calculateScheduled2D);

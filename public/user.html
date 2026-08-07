@@ -1,8 +1,73 @@
-<!DOCTYPE html><html lang="my"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"><title>တာတေ 2D</title><link rel="stylesheet" href="/user-v2.css"></head>
-<body class="u-body"><header class="u-header"><div class="u-title">တာတေ <b>2D</b></div><div class="header-actions"><span id="balancePill" class="balance-pill hidden">Balance <b id="balanceText">0</b></span><a class="history-btn" href="/history.html">▣ History</a></div></header>
-<main class="u-main"><section class="hero"><div class="latest" id="latestNumber">--</div><div class="updated">◷ Updated = <span id="updatedText">--</span> <i>✓</i></div></section><section id="results" class="results-title-row"><h2>Today Results</h2><button id="refreshResultsBtn" class="mini-btn" type="button">Refresh</button></section><section id="resultCards" class="cards"></section></main>
-<div id="betOverlay" class="sheet-overlay hidden"></div>
-<section id="betSheet" class="bet-sheet" aria-hidden="true"><div class="sheet-handle"></div><div class="sheet-head"><div><small>တာတေ 2D</small><h2>2D ထိုးမယ်</h2></div><button id="closeBetSheet" class="close-sheet" type="button">✕</button></div>
-<section id="loginPanel" class="sheet-section"><h3>Account Login</h3><p class="sheet-note">2D ထိုးရန် အကောင့်ဝင်ပါ။</p><input id="loginUsername" placeholder="Username" autocomplete="username"><input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password"><button id="loginBtn" class="primary-btn" type="button">Login</button><div id="loginMessage" class="u-message"></div></section>
-<section id="betPanel" class="sheet-section hidden"><div class="account-row"><div><small>Account</small><strong id="customerName">-</strong></div><div class="wallet-big"><small>Wallet Balance</small><strong id="walletBalance">0</strong></div></div><div class="sheet-account-actions"><button id="logoutBtn" class="secondary-btn" type="button">Logout</button></div><h3>Place 2D Bet</h3><label>Result Time</label><select id="betTime"><option value="">Select time</option><option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option><option>9:00 PM</option><option>10:00 PM</option><option>11:00 PM</option><option>12:00 AM</option></select><label>2D Number</label><input id="betNumber" inputmode="numeric" maxlength="2" placeholder="00 - 99"><label>Amount</label><input id="betAmount" inputmode="numeric" placeholder="Example: 500"><button id="betBtn" class="primary-btn" type="button">Confirm Bet</button><div id="betMessage" class="u-message"></div><h3>My Bets</h3><div id="myBets" class="my-bets">No bets yet.</div></section></section>
-<nav class="bottom-nav"><a class="nav-link active" href="/user.html">⌂<span>Home</span></a><a class="nav-link" href="#results">◎<span>Results</span></a><button id="openBetSheet" class="bet-nav-btn" type="button"><span>🎯</span><strong>2D ထိုးမယ်</strong></button><a class="nav-link" href="/history.html">▤<span>History</span></a></nav><script src="/user-v2.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#02030b">
+  <title>တာတေ 2D</title>
+  <link rel="stylesheet" href="/user-v2.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">တာတေ <strong>2D</strong></div>
+      <div id="statusBadge" class="status live"><span class="dot"></span><span id="statusText">LIVE</span></div>
+    </header>
+
+    <main class="main">
+      <section class="hero-card">
+        <div class="hero-label">LIVE RESULT</div>
+        <div id="bigResult" class="big-result">--</div>
+        <div class="market-row">
+          <div><span>SET</span><strong id="liveSet">--</strong></div>
+          <div><span>VALUE</span><strong id="liveValue">--</strong></div>
+        </div>
+        <div class="updated">◷ <span id="updatedText">Waiting for result</span></div>
+      </section>
+
+      <section class="result-section">
+        <div class="section-head"><h2>Today Results</h2><button id="refreshBtn" type="button">Refresh</button></div>
+        <div id="roundGrid" class="round-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="betOverlay" class="overlay hidden"></div>
+  <section id="betSheet" class="bet-sheet" aria-hidden="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>🎯 2D ထိုးမယ်</h2><button id="closeSheet" type="button">✕</button></div>
+
+    <section id="loginPanel" class="sheet-panel">
+      <p class="sheet-note">2D ထိုးရန် Account Login ဝင်ပါ။</p>
+      <input id="loginUsername" placeholder="Username" autocomplete="username">
+      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="loginBtn" class="primary" type="button">Login</button>
+      <p id="loginMessage" class="message"></p>
+    </section>
+
+    <section id="betPanel" class="sheet-panel hidden">
+      <div class="account-box">
+        <div><small>Account</small><strong id="customerName">-</strong></div>
+        <div class="wallet"><small>Balance</small><strong id="walletBalance">0</strong></div>
+      </div>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+
+      <label>Result Time</label>
+      <select id="betTime"><option value="">Select time</option><option>5:00 PM</option><option>6:00 PM</option><option>7:00 PM</option><option>8:00 PM</option><option>9:00 PM</option><option>10:00 PM</option><option>11:00 PM</option><option>12:00 AM</option></select>
+      <label>2D Number</label><input id="betNumber" inputmode="numeric" maxlength="2" placeholder="00 - 99">
+      <label>Amount</label><input id="betAmount" inputmode="numeric" placeholder="Example: 500">
+      <button id="betBtn" class="primary" type="button">Confirm Bet</button>
+      <p id="betMessage" class="message"></p>
+      <h3>My Bets</h3><div id="myBets" class="my-bets">No bets yet.</div>
+    </section>
+  </section>
+
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="/user.html"><span>⌂</span><small>Home</small></a>
+    <a class="nav-item" href="/history.html"><span>▤</span><small>History</small></a>
+    <button id="openBet" class="bet-button" type="button"><span>🎯</span><b>2D ထိုးမယ်</b></button>
+  </nav>
+
+  <script src="/user-v2.js"></script>
+</body>
+</html>
