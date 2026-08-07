@@ -1,87 +1,142 @@
-const TIMES = [
-  "05:00 PM","06:00 PM","07:00 PM","08:00 PM",
-  "09:00 PM","10:00 PM","11:00 PM","12:00 AM"
-];
-
 const $ = (id) => document.getElementById(id);
-
-function drawRounds(rounds = []) {
-  const grid = $("roundGrid");
-  grid.innerHTML = "";
-
-  TIMES.forEach((time, i) => {
-    const r = rounds[i] || {};
-    const card = document.createElement("div");
-    card.className = "round-card";
-
-    const left = document.createElement("div");
-    left.className = "round-time";
-    left.innerHTML = `<span class="clock">◷</span><span>${time}</span>`;
-
-    const right = document.createElement("div");
-    right.className = "round-result";
-    right.textContent = r.result && r.result !== "" ? r.result : "--";
-
-    card.append(left, right);
-    grid.appendChild(card);
+const big = $("bigResult"),
+  liveSet = $("liveSet"),
+  liveValue = $("liveValue"),
+  updated = $("updatedText"),
+  grid = $("roundGrid"),
+  statusBadge = $("statusBadge"),
+  statusText = $("statusText");
+let serverBase = Date.now(),
+  perfBase = performance.now(),
+  preSpinFrames = [],
+  preSpinTarget = 0,
+  preSpinTimer = null,
+  preSpinInterval = null,
+  boundaryTimer = null,
+  lastPublishedStamp = "";
+const esc = (v) =>
+  String(v ?? "--")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+function serverNow() {
+  return serverBase + (performance.now() - perfBase);
+}
+function setStatus(code, text) {
+  statusBadge.className = "status " + code;
+  statusText.textContent = text;
+}
+function animate(nodes, cls = "number-blink") {
+  nodes.filter(Boolean).forEach((n) => {
+    n.classList.remove(cls);
+    void n.offsetWidth;
+    n.classList.add(cls);
   });
 }
-
-function setStatus(live) {
-  const badge = $("statusBadge");
-  $("statusText").textContent = live ? "LIVE" : "OFFLINE";
-  badge.classList.toggle("offline", !live);
+function stopPreSpin() {
+  if (preSpinTimer) clearTimeout(preSpinTimer);
+  if (preSpinInterval) clearInterval(preSpinInterval);
+  preSpinTimer = preSpinInterval = null;
 }
-
-function setLatest(data) {
-  const latest = data && data.latest ? data.latest : null;
-
-  if (!latest) {
-    $("bigResult").textContent = "--";
-    $("liveSet").textContent = "--";
-    $("liveValue").textContent = "--";
-    $("updatedText").textContent = "Waiting for result";
-    return;
-  }
-
-  $("bigResult").textContent = latest.result || "--";
-  $("liveSet").textContent = latest.set || "--";
-  $("liveValue").textContent = latest.value || "--";
-
-  if (latest.publishedAt) {
-    const t = new Date(latest.publishedAt).toLocaleTimeString("en-US", {
-      timeZone: "Asia/Yangon",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    });
-    $("updatedText").textContent = `Updated ${t}`;
-  } else {
-    $("updatedText").textContent = "Waiting for result";
-  }
+function showSpinFrame() {
+  if (!preSpinFrames.length) return;
+  const f = preSpinFrames[Math.floor(Math.random() * preSpinFrames.length)];
+  big.textContent = f.result || "--";
+  liveSet.textContent = f.set || "--";
+  liveValue.textContent = f.value || "--";
+  animate([big, liveSet, liveValue]);
 }
-
-async function load() {
+function schedulePreSpin(target) {
+  stopPreSpin();
+  preSpinTarget = Number(target) || 0;
+  if (!preSpinTarget || !preSpinFrames.length) return;
+  const lead = 15000,
+    delay = preSpinTarget - serverNow();
+  if (delay <= 0) return;
+  const begin = () => {
+    showSpinFrame();
+    preSpinInterval = setInterval(showSpinFrame, 2500);
+  };
+  if (delay <= lead) begin();
+  else preSpinTimer = setTimeout(begin, delay - lead);
+}
+function scheduleBoundary(target) {
+  if (boundaryTimer) clearTimeout(boundaryTimer);
+  const t = Number(target) || 0;
+  if (!t) return;
+  const delay = t - serverNow();
+  boundaryTimer = setTimeout(async () => {
+    for (let i = 0; i < 12; i++) {
+      await loadResults(true);
+      if (Number(preSpinTarget) !== t) break;
+      await new Promise((r) => setTimeout(r, 450));
+    }
+  }, Math.max(50, delay + 40));
+}
+function formatUpdated(v) {
+  if (!v) return "Waiting for result";
+  const d = new Date(String(v).replace(" ", "T") + "Z");
+  return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Yangon",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  }).format(d);
+}
+function renderRounds(rows) {
+  grid.innerHTML = (rows || [])
+    .map((r) => {
+      const pub =
+        r.status === "published" &&
+        /^\d{2}$/.test(String(r.result_number || ""));
+      return `<article class="round-card ${pub ? "published" : ""}">${ pub ? '<span class="check">✓</span>' : "" }<div class="round-time">◷ ${esc( r.result_time )}</div><div class="round-number ${pub ? "" : "waiting"}">${ pub ? esc(r.result_number) : "--" }</div></article>`;
+    })
+    .join("");
+}
+async function loadResults(boundary = false) {
   try {
-    const res = await fetch(`/api/state?t=${Date.now()}`, {
-      cache: "no-store",
-      headers: { "cache-control": "no-cache" }
-    });
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const data = await res.json();
-    setStatus(data.live !== false);
-    setLatest(data);
-    drawRounds(Array.isArray(data.rounds) ? data.rounds : []);
-  } catch (err) {
-    console.error(err);
-    setStatus(false);
-    setLatest(null);
-    drawRounds([]);
+    const r = await fetch("/api/results?t=" + Date.now(), {
+        cache: "no-store",
+      }),
+      d = await r.json();
+    if (!r.ok || !d.success) throw new Error();
+    serverBase = Number(d.serverNow) || Date.now();
+    perfBase = performance.now();
+    preSpinFrames = Array.isArray(d.preSpinFrames) ? d.preSpinFrames : [];
+    const oldTarget = preSpinTarget;
+    preSpinTarget = Number(d.nextAutoPublishAtMs) || 0;
+    renderRounds(d.results || []);
+    const live = d.live || {};
+    if (!preSpinInterval) {
+      big.textContent = live.result || "--";
+      liveSet.textContent = live.set || "--";
+      liveValue.textContent = live.value || "--";
+    }
+    updated.textContent = formatUpdated(live.updated_at);
+    const stamp = String(live.updated_at || "");
+    if (stamp && stamp !== lastPublishedStamp) {
+      lastPublishedStamp = stamp;
+      animate([big, liveSet, liveValue], "number-pop");
+    }
+    setStatus(
+      preSpinTarget ? "live" : "waiting",
+      preSpinTarget ? "LIVE" : "WAIT"
+    );
+    schedulePreSpin(preSpinTarget);
+    scheduleBoundary(preSpinTarget);
+    if (boundary && oldTarget && oldTarget !== preSpinTarget) stopPreSpin();
+  } catch {
+    setStatus("offline", "OFFLINE");
   }
 }
-
-drawRounds([]);
-load();
-setInterval(load, 10000);
+setInterval(() => {
+  if (!preSpinInterval) animate([big, liveSet, liveValue]);
+}, 3500);
+setInterval(() => loadResults(), 10000);
+loadResults();
