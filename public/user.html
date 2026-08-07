@@ -2,128 +2,63 @@
 <html lang="my">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#02030b">
-
   <title>တာတေ 2D</title>
-
   <link rel="stylesheet" href="/user-v2.css">
 </head>
-
 <body>
-
   <div class="app-shell">
-
-    <!-- TOP BAR -->
     <header class="topbar">
-
-      <div class="brand">
-        တာတေ <strong>2D</strong>
-      </div>
-
-      <div id="statusBadge" class="status live">
-        <span class="dot"></span>
-        <span id="statusText">LIVE</span>
-      </div>
-
+      <div class="brand">တာတေ <strong>2D</strong></div>
+      <div id="statusBadge" class="status live"><span class="dot"></span><span id="statusText">LIVE</span></div>
     </header>
-
-
     <main class="main">
-
-      <!-- LIVE RESULT -->
       <section class="hero-card">
-
-        <div class="hero-label">
-          LIVE RESULT
-        </div>
-
-        <div id="bigResult" class="big-result">
-          --
-        </div>
-
-
+        <div class="hero-label">LIVE RESULT</div>
+        <div id="bigResult" class="big-result">--</div>
         <div class="market-row">
-
-          <div>
-            <span>SET</span>
-            <strong id="liveSet">--</strong>
-          </div>
-
-          <div>
-            <span>VALUE</span>
-            <strong id="liveValue">--</strong>
-          </div>
-
+          <div><span>SET</span><strong id="liveSet">--</strong></div>
+          <div><span>VALUE</span><strong id="liveValue">--</strong></div>
         </div>
-
-
-        <div class="updated">
-          <span id="updatedText">
-            Waiting for result
-          </span>
-        </div>
-
+        <div class="updated">◷ <span id="updatedText">Waiting for result</span></div>
       </section>
-
-
-      <!-- TODAY RESULTS -->
       <section class="result-section">
-
-        <div class="section-head">
-
-          <h2>Today Results</h2>
-
-          <button
-            id="refreshBtn"
-            type="button"
-            aria-label="Refresh results">
-            Refresh
-          </button>
-
-        </div>
-
-
-        <!--
-          user-v2.js က
-          05:00 PM
-          06:00 PM
-          07:00 PM
-          08:00 PM
-          09:00 PM
-          10:00 PM
-          11:00 PM
-          12:00 AM
-          Cards 8 ခုကို ဒီထဲထည့်မယ်
-        -->
-        <div
-          id="roundGrid"
-          class="round-grid">
-        </div>
-
+        <div class="section-head"><h2>Today Results</h2><button id="refreshBtn" type="button">Refresh</button></div>
+        <div id="roundGrid" class="round-grid"></div>
       </section>
-
-
-      <!-- RESULT HISTORY -->
-      <section class="history-section">
-
-        <a
-          href="/history.html"
-          class="history-button">
-
-          <span>◷</span>
-          <span>Result History</span>
-
-        </a>
-
-      </section>
-
+      <section class="history-section"><a href="/history" class="history-button"><span>◷</span><span>Result History</span></a></section>
     </main>
-
   </div>
 
+  <div id="betOverlay" class="overlay hidden"></div>
+  <section id="betSheet" class="bet-sheet" aria-hidden="true">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>🎯 2D ထိုးမယ်</h2><button id="closeSheet" type="button">✕</button></div>
+    <section id="loginPanel" class="sheet-panel">
+      <p class="sheet-note">2D ထိုးရန် Account Login ဝင်ပါ။</p>
+      <input id="loginUsername" placeholder="Username" autocomplete="username">
+      <input id="loginPassword" type="password" placeholder="Password" autocomplete="current-password">
+      <button id="loginBtn" class="primary" type="button">Login</button>
+      <p id="loginMessage" class="message"></p>
+    </section>
+    <section id="betPanel" class="sheet-panel hidden">
+      <div class="account-box"><div><small>Account</small><strong id="customerName">-</strong></div><div class="wallet"><small>Balance</small><strong id="walletBalance">0</strong></div></div>
+      <button id="logoutBtn" class="secondary" type="button">Logout</button>
+      <label>Result Time</label>
+      <select id="betTime"><option value="">Select time</option><option>05:00 PM</option><option>06:00 PM</option><option>07:00 PM</option><option>08:00 PM</option><option>09:00 PM</option><option>10:00 PM</option><option>11:00 PM</option><option>12:00 AM</option></select>
+      <label>2D Number</label><input id="betNumber" inputmode="numeric" maxlength="2" placeholder="00 - 99">
+      <label>Amount</label><input id="betAmount" inputmode="numeric" placeholder="Example: 500">
+      <button id="betBtn" class="primary" type="button">Confirm Bet</button>
+      <p id="betMessage" class="message"></p><h3>My Bets</h3><div id="myBets" class="my-bets">No bets yet.</div>
+    </section>
+  </section>
 
+  <nav class="bottom-nav">
+    <a class="nav-item active" href="/user.html"><span>⌂</span><small>Home</small></a>
+    <a class="nav-item" href="/history"><span>▤</span><small>History</small></a>
+    <button id="openBet" class="bet-button" type="button"><span>🎯</span><b>2D ထိုးမယ်</b></button>
+  </nav>
   <script src="/user-v2.js"></script>
-
 </body>
 </html>
