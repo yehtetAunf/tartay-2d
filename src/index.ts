@@ -165,10 +165,46 @@ export default {
       if(!time||!validTime(time)) return json({success:false,message:"Invalid result time"},400);
       if(!number||!/^\d{2}$/.test(number)) return json({success:false,message:"Result number must contain exactly 2 digits"},400);
       await ensureDay(env.DB,date);
-      const resultUpdate = env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time);
-      const betUpdate = env.DB.prepare(`UPDATE bets SET status=CASE WHEN number=? THEN 'win' ELSE 'lose' END WHERE bet_type=? AND DATE(created_at,'+6 hours','+30 minutes')=?`).bind(number,time,date);
-      const batch = await env.DB.batch([resultUpdate, betUpdate]);
-      return json({success:true,message:"Result published successfully",bets_updated:batch[1]?.meta?.changes||0});
+      // Prevent publishing the same time twice. This avoids duplicate wallet payouts.
+      const existing = await env.DB.prepare(`SELECT result_number FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(date,time).first<any>();
+      if (existing && /^\d{2}$/.test(existing.result_number)) {
+        return json({success:false,message:"This result time has already been published"},409);
+      }
+
+      // Get only pending bets for this date/time. Customer-app bets have customer_id.
+      const pending = await env.DB.prepare(`SELECT id,customer_id,number,amount FROM bets WHERE bet_type=? AND status='pending' AND (bet_date=? OR (bet_date IS NULL AND DATE(created_at,'+6 hours','+30 minutes')=?)) ORDER BY id`).bind(time,date,date).all<any>();
+
+      const statements: D1PreparedStatement[] = [
+        env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time)
+      ];
+
+      let betsUpdated = 0;
+      let winners = 0;
+      let totalPayout = 0;
+
+      for (const bet of (pending.results || [])) {
+        const isWin = String(bet.number) === number;
+        statements.push(env.DB.prepare(`UPDATE bets SET status=? WHERE id=? AND status='pending'`).bind(isWin ? 'win' : 'lose', bet.id));
+        betsUpdated++;
+
+        // Admin-entered bets may not have a customer_id, so only wallet-credit customer-app bets.
+        const customerId = Number(bet.customer_id);
+        if (isWin && Number.isInteger(customerId) && customerId > 0) {
+          const payout = Number(bet.amount) * 95;
+          const customer = await env.DB.prepare(`SELECT balance FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
+          if (customer) {
+            const before = Number(customer.balance || 0);
+            const after = before + payout;
+            statements.push(env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,customerId));
+            statements.push(env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(customerId,'win_payout',payout,before,after,`WIN 2D ${number} • ${time} • Bet #${bet.id}`));
+            winners++;
+            totalPayout += payout;
+          }
+        }
+      }
+
+      await env.DB.batch(statements);
+      return json({success:true,message:"Result published successfully",bets_updated:betsUpdated,winners,total_payout:totalPayout});
     }
 
     if (url.pathname === "/api/customers" && request.method === "GET") {
