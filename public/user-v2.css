@@ -7,3 +7,170 @@
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:70}.hidden{display:none!important}.bet-sheet{position:fixed;left:50%;bottom:0;width:min(680px,100%);max-height:88vh;overflow:auto;transform:translate(-50%,105%);transition:.23s ease;background:#121d34;border:1px solid #344564;border-radius:20px 20px 0 0;z-index:80;padding:8px 15px calc(18px + env(safe-area-inset-bottom));box-shadow:0 -15px 45px rgba(0,0,0,.45)}.bet-sheet.open{transform:translate(-50%,0)}.sheet-handle{width:52px;height:4px;border-radius:10px;background:#61708b;margin:2px auto 10px}.sheet-head{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #2d3b58;padding-bottom:8px}.sheet-head h2{margin:0;font-size:20px}.sheet-head button{width:35px;height:35px;border:0;border-radius:50%;background:#24334e;color:#fff}.sheet-note{color:#9baac1;font-size:12px}.sheet-panel label{display:block;color:#c7d0df;font-size:12px;margin:10px 0 4px}.sheet-panel input,.sheet-panel select{width:100%;height:47px;border:1px solid #3e4d69;border-radius:9px;background:#080f20;color:#fff;padding:0 12px;font-size:16px;margin-bottom:5px}.primary{width:100%;height:47px;border:0;border-radius:9px;background:#2868ea;color:#fff;font-weight:900;font-size:16px;margin-top:7px}.secondary{border:1px solid #53617a;background:#25334c;color:#fff;border-radius:8px;padding:7px 12px}.message{min-height:18px;font-size:12px}.message.ok{color:#48d794}.message.err{color:#ff7777}.account-box{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:10px 0}.account-box small{display:block;color:#9daac0;font-size:10px}.account-box strong{display:block;margin-top:3px}.wallet{text-align:right}.wallet strong{font-size:24px;color:var(--yellow)}.my-bets{display:grid;gap:6px}.my-bet{display:grid;grid-template-columns:1fr .8fr 1fr .75fr;gap:5px;background:#080f20;border-radius:8px;padding:8px;font-size:11px}.my-bet b{color:var(--yellow)}.win{color:#46e88c}.lose{color:#ff7878}.pending{color:#ffd35b}
 @media(max-width:390px){.brand{font-size:21px}.big-result{font-size:58px}.round-card{height:45px}.round-time{font-size:11px}.round-number{font-size:24px}.main{padding:7px}.round-grid{gap:4px}}
 .history-section{margin-top:24px;margin-bottom:12px}.history-button{height:62px;border:1px solid #5368a4;border-radius:18px;display:flex;align-items:center;justify-content:center;gap:9px;color:#f6fbff;text-decoration:none;font-size:18px;background:rgba(5,8,23,.55)}
+/* ===== MOBILE FULL SIZE FIX ===== */
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.app-shell {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 24px 110px;
+  box-sizing: border-box;
+}
+
+.topbar {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  padding: 28px 8px 22px;
+  box-sizing: border-box;
+}
+
+.brand {
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.status {
+  font-size: 14px;
+  padding: 10px 18px;
+}
+
+.main {
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+}
+
+.hero-card {
+  width: 100%;
+  min-height: 410px;
+  padding: 30px 26px;
+  box-sizing: border-box;
+  border-radius: 30px;
+}
+
+.hero-label {
+  font-size: 22px;
+  letter-spacing: 3px;
+}
+
+.big-result {
+  font-size: 76px;
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.market-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+
+.market-row > div {
+  min-height: 105px;
+  padding: 18px;
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+.market-row span {
+  font-size: 16px;
+}
+
+.market-row strong {
+  font-size: 28px;
+}
+
+.updated {
+  font-size: 20px;
+  margin-top: 14px;
+}
+
+.result-section {
+  width: 100%;
+  margin-top: 30px;
+}
+
+.section-head h2 {
+  font-size: 31px;
+}
+
+#refreshBtn {
+  display: none;
+}
+
+.round-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+
+.round-card {
+  min-height: 95px;
+  border-radius: 18px;
+  font-size: 20px;
+}
+
+.history-section {
+  width: 100%;
+  margin-top: 26px;
+}
+
+.history-button {
+  width: 100%;
+  min-height: 82px;
+  font-size: 22px;
+  border-radius: 20px;
+}
+
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  max-width: none;
+  min-height: 82px;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .app-shell {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .brand {
+    font-size: 28px;
+  }
+
+  .hero-card {
+    min-height: 390px;
+    padding: 26px 20px;
+  }
+
+  .big-result {
+    font-size: 68px;
+  }
+
+  .section-head h2 {
+    font-size: 28px;
+  }
+}
