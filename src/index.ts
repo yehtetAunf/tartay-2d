@@ -9,6 +9,8 @@ interface ResultBody { result_date?: string; result_time?: string; set_value?: s
 interface CustomerBody { username?: string; password?: string; full_name?: string; phone?: string; }
 interface WalletBody { customer_id?: number | string; type?: string; amount?: number | string; note?: string; }
 interface StatusBody { status?: string; }
+interface CustomerLoginBody { username?: string; password?: string; }
+interface CustomerBetBody { number?: string; amount?: number | string; result_time?: string; }
 
 const RESULT_TIMES = ["5:00 PM","6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM","11:00 PM","12:00 AM"] as const;
 
@@ -40,6 +42,24 @@ async function ensureDay(db: D1Database, date: string): Promise<void> {
   ).bind(date,time));
   await db.batch(statements);
 }
+
+async function ensureV23(db: D1Database): Promise<void> {
+  await db.prepare(`CREATE TABLE IF NOT EXISTS customer_sessions (token TEXT PRIMARY KEY, customer_id INTEGER NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, expires_at DATETIME NOT NULL)`).run();
+  const cols=await db.prepare(`PRAGMA table_info(bets)`).all<any>();
+  const names=new Set((cols.results||[]).map((x:any)=>x.name));
+  if(!names.has("customer_id")) await db.prepare(`ALTER TABLE bets ADD COLUMN customer_id INTEGER`).run();
+  if(!names.has("bet_date")) await db.prepare(`ALTER TABLE bets ADD COLUMN bet_date TEXT`).run();
+}
+function bearer(request: Request): string {
+  const h=request.headers.get("Authorization")||"";
+  return h.startsWith("Bearer ")?h.slice(7).trim():"";
+}
+async function currentCustomer(request: Request, db: D1Database): Promise<any|null> {
+  await ensureV23(db);
+  const token=bearer(request); if(!token)return null;
+  return db.prepare(`SELECT c.id,c.username,c.full_name,c.phone,c.balance,c.status FROM customer_sessions s JOIN customers c ON c.id=s.customer_id WHERE s.token=? AND s.expires_at>CURRENT_TIMESTAMP LIMIT 1`).bind(token).first<any>();
+}
+
 const orderSql = `CASE result_time
  WHEN '5:00 PM' THEN 1 WHEN '6:00 PM' THEN 2 WHEN '7:00 PM' THEN 3 WHEN '8:00 PM' THEN 4
  WHEN '9:00 PM' THEN 5 WHEN '10:00 PM' THEN 6 WHEN '11:00 PM' THEN 7 WHEN '12:00 AM' THEN 8 ELSE 99 END`;
@@ -56,6 +76,55 @@ export default {
       const user=await env.DB.prepare(`SELECT id,username,password_hash,full_name,role,status FROM users WHERE username=? LIMIT 1`).bind(username).first<any>();
       if(!user||user.status!==1||user.password_hash!==password) return json({success:false,message:"Invalid username or password"},401);
       return json({success:true,message:"Login successful",user:{id:user.id,username:user.username,full_name:user.full_name,role:user.role}});
+    }
+
+    if (url.pathname === "/api/customer/login" && request.method === "POST") {
+      await ensureV23(env.DB);
+      let body: CustomerLoginBody; try { body=await request.json<CustomerLoginBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const username=body.username?.trim(), password=body.password;
+      if(!username||!password) return json({success:false,message:"Username and password are required"},400);
+      const c=await env.DB.prepare(`SELECT id,username,password_hash,full_name,phone,balance,status FROM customers WHERE username=? LIMIT 1`).bind(username).first<any>();
+      if(!c||c.password_hash!==password) return json({success:false,message:"Invalid username or password"},401);
+      if(c.status!=="active") return json({success:false,message:"This account is blocked"},403);
+      const token=crypto.randomUUID()+crypto.randomUUID();
+      await env.DB.prepare(`INSERT INTO customer_sessions(token,customer_id,expires_at) VALUES(?,?,datetime('now','+30 days'))`).bind(token,c.id).run();
+      return json({success:true,token,customer:{id:c.id,username:c.username,full_name:c.full_name,phone:c.phone,balance:c.balance}});
+    }
+    if (url.pathname === "/api/customer/me" && request.method === "GET") {
+      const c=await currentCustomer(request,env.DB);
+      if(!c)return json({success:false,message:"Please login"},401);
+      return json({success:true,customer:c});
+    }
+    if (url.pathname === "/api/customer/logout" && request.method === "POST") {
+      const token=bearer(request); if(token) await env.DB.prepare(`DELETE FROM customer_sessions WHERE token=?`).bind(token).run();
+      return json({success:true});
+    }
+    if (url.pathname === "/api/customer/bets" && request.method === "GET") {
+      const c=await currentCustomer(request,env.DB); if(!c)return json({success:false,message:"Please login"},401);
+      const rows=await env.DB.prepare(`SELECT id,number,amount,bet_type,status,created_at FROM bets WHERE customer_id=? ORDER BY id DESC LIMIT 100`).bind(c.id).all();
+      return json({success:true,bets:rows.results});
+    }
+    if (url.pathname === "/api/customer/bets" && request.method === "POST") {
+      const c=await currentCustomer(request,env.DB); if(!c)return json({success:false,message:"Please login"},401);
+      if(c.status!=="active")return json({success:false,message:"This account is blocked"},403);
+      let body: CustomerBetBody; try { body=await request.json<CustomerBetBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const number=body.number?.trim(), amount=Number(body.amount), time=body.result_time?.trim();
+      if(!number||!/^\d{2}$/.test(number))return json({success:false,message:"2D Number must contain exactly 2 digits"},400);
+      if(!time||!validTime(time))return json({success:false,message:"Invalid result time"},400);
+      if(!Number.isInteger(amount)||amount<=0)return json({success:false,message:"Amount must be a positive whole number"},400);
+      const date=todayMyanmar(); await ensureDay(env.DB,date);
+      const published=await env.DB.prepare(`SELECT result_number FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(date,time).first<any>();
+      if(published && /^\d{2}$/.test(published.result_number))return json({success:false,message:"This result time is already closed"},400);
+      const fresh=await env.DB.prepare(`SELECT balance FROM customers WHERE id=?`).bind(c.id).first<any>();
+      const before=Number(fresh?.balance||0); if(before<amount)return json({success:false,message:"Insufficient balance"},400);
+      const after=before-amount;
+      const batch=await env.DB.batch([
+        env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=? AND balance=?`).bind(after,c.id,before),
+        env.DB.prepare(`INSERT INTO bets(customer_id,customer_name,phone,number,amount,bet_type,status,bet_date) VALUES(?,?,?,?,?,?,?,?)`).bind(c.id,c.full_name,c.phone||"",number,amount,time,"pending",date),
+        env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(c.id,"bet",amount,before,after,`2D ${number} • ${time}`)
+      ]);
+      if((batch[0]?.meta?.changes||0)!==1)return json({success:false,message:"Balance changed. Please try again."},409);
+      return json({success:true,message:"Bet placed successfully",balance:after,bet_id:batch[1]?.meta?.last_row_id},201);
     }
 
     if (url.pathname === "/api/bets" && request.method === "GET") {
