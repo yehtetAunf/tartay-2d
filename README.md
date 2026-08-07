@@ -1,1 +1,1 @@
-NewZealand 2D
+tartay 2D
