@@ -49,6 +49,7 @@ async function ensureV23(db: D1Database): Promise<void> {
   const names=new Set((cols.results||[]).map((x:any)=>x.name));
   if(!names.has("customer_id")) await db.prepare(`ALTER TABLE bets ADD COLUMN customer_id INTEGER`).run();
   if(!names.has("bet_date")) await db.prepare(`ALTER TABLE bets ADD COLUMN bet_date TEXT`).run();
+  if(!names.has("payout_paid")) await db.prepare(`ALTER TABLE bets ADD COLUMN payout_paid INTEGER NOT NULL DEFAULT 0`).run();
 }
 function bearer(request: Request): string {
   const h=request.headers.get("Authorization")||"";
@@ -165,46 +166,39 @@ export default {
       if(!time||!validTime(time)) return json({success:false,message:"Invalid result time"},400);
       if(!number||!/^\d{2}$/.test(number)) return json({success:false,message:"Result number must contain exactly 2 digits"},400);
       await ensureDay(env.DB,date);
-      // Prevent publishing the same time twice. This avoids duplicate wallet payouts.
-      const existing = await env.DB.prepare(`SELECT result_number FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(date,time).first<any>();
-      if (existing && /^\d{2}$/.test(existing.result_number)) {
-        return json({success:false,message:"This result time has already been published"},409);
+      await ensureV23(env.DB);
+
+      // Find customer-linked winning bets that have not been paid yet.
+      // Payout rate: 95x the stake. payout_paid prevents duplicate credits
+      // if the same result is published again.
+      const unpaid = await env.DB.prepare(`SELECT id,customer_id,amount FROM bets WHERE customer_id IS NOT NULL AND number=? AND bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=? AND COALESCE(payout_paid,0)=0`).bind(number,time,date).all<any>();
+      const byCustomer = new Map<number,{amount:number,betIds:number[]}>();
+      for (const b of (unpaid.results||[])) {
+        const customerId=Number(b.customer_id);
+        if(!Number.isInteger(customerId)||customerId<=0) continue;
+        const payout=Number(b.amount||0)*95;
+        const x=byCustomer.get(customerId)||{amount:0,betIds:[]};
+        x.amount+=payout; x.betIds.push(Number(b.id)); byCustomer.set(customerId,x);
       }
 
-      // Get only pending bets for this date/time. Customer-app bets have customer_id.
-      const pending = await env.DB.prepare(`SELECT id,customer_id,number,amount FROM bets WHERE bet_type=? AND status='pending' AND (bet_date=? OR (bet_date IS NULL AND DATE(created_at,'+6 hours','+30 minutes')=?)) ORDER BY id`).bind(time,date,date).all<any>();
-
-      const statements: D1PreparedStatement[] = [
-        env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time)
+      const statements:any[] = [
+        env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time),
+        env.DB.prepare(`UPDATE bets SET status=CASE WHEN number=? THEN 'win' ELSE 'lose' END WHERE bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=?`).bind(number,time,date)
       ];
 
-      let betsUpdated = 0;
-      let winners = 0;
-      let totalPayout = 0;
-
-      for (const bet of (pending.results || [])) {
-        const isWin = String(bet.number) === number;
-        statements.push(env.DB.prepare(`UPDATE bets SET status=? WHERE id=? AND status='pending'`).bind(isWin ? 'win' : 'lose', bet.id));
-        betsUpdated++;
-
-        // Admin-entered bets may not have a customer_id, so only wallet-credit customer-app bets.
-        const customerId = Number(bet.customer_id);
-        if (isWin && Number.isInteger(customerId) && customerId > 0) {
-          const payout = Number(bet.amount) * 95;
-          const customer = await env.DB.prepare(`SELECT balance FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
-          if (customer) {
-            const before = Number(customer.balance || 0);
-            const after = before + payout;
-            statements.push(env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,customerId));
-            statements.push(env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(customerId,'win_payout',payout,before,after,`WIN 2D ${number} • ${time} • Bet #${bet.id}`));
-            winners++;
-            totalPayout += payout;
-          }
-        }
+      let totalPayout=0;
+      for (const [customerId, info] of byCustomer) {
+        const c=await env.DB.prepare(`SELECT balance FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
+        if(!c) continue;
+        const before=Number(c.balance||0), after=before+info.amount;
+        totalPayout+=info.amount;
+        statements.push(env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,customerId));
+        statements.push(env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(customerId,"payout",info.amount,before,after,`2D WIN ${number} • ${time} • ${date}`));
+        for (const betId of info.betIds) statements.push(env.DB.prepare(`UPDATE bets SET payout_paid=1 WHERE id=? AND COALESCE(payout_paid,0)=0`).bind(betId));
       }
 
-      await env.DB.batch(statements);
-      return json({success:true,message:"Result published successfully",bets_updated:betsUpdated,winners,total_payout:totalPayout});
+      const batch = await env.DB.batch(statements);
+      return json({success:true,message:"Result published successfully",bets_updated:batch[1]?.meta?.changes||0,payout:totalPayout});
     }
 
     if (url.pathname === "/api/customers" && request.method === "GET") {
