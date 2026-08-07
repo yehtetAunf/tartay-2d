@@ -15,3 +15,11 @@ Links after deployment:
 - History: `/history.html`
 
 Test admin: admin / 123456. Change before real use.
+
+
+## v2.1
+- Automatic WIN / LOSE after result publish
+- New bets are immediately graded when that time's result is already published
+- Payout rate: 95x (100 -> 9,500)
+- Total Payout and Profit/Loss dashboard cards
+- Payout column in Bet List
