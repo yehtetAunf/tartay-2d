@@ -1,14 +1,16 @@
 import { DurableObject } from "cloudflare:workers";
 
-const DATA_KEY = "six_times_2d_state_v5";
+const DATA_KEY = "tartay_2d_state_v1";
 
 const TIMES = [
-  "09:00 AM",
-  "11:00 AM",
-  "01:00 PM",
-  "03:00 PM",
   "05:00 PM",
-  "07:00 PM"
+  "06:00 PM",
+  "07:00 PM",
+  "08:00 PM",
+  "09:00 PM",
+  "10:00 PM",
+  "11:00 PM",
+  "12:00 AM"
 ];
 
 const RATE_LIMIT = 10;
@@ -20,7 +22,7 @@ const YANGON_UTC_OFFSET_MINUTES = 6 * 60 + 30;
 const OVERRIDE_MS = 2 * 60 * 1000;
 
 const BACKUP_VERSION = 1;
-const BACKUP_APP_ID = "new-zealand-2d";
+const BACKUP_APP_ID = "tartay-2d";
 const MAX_JSON_BYTES = 2 * 1024 * 1024;
 
 const HISTORY_PREFIX = "history:";
@@ -372,7 +374,7 @@ function normaliseState(rawState) {
       : fresh.live;
 
   const rounds =
-    Array.isArray(state.rounds) && state.rounds.length === 6
+    Array.isArray(state.rounds) && state.rounds.length === TIMES.length
       ? state.rounds
       : fresh.rounds;
 
@@ -386,7 +388,7 @@ function normaliseState(rawState) {
       frozen: normaliseSnapshot(live.frozen, false),
       override: normaliseSnapshot(live.override, true)
     },
-    rounds: rounds.slice(0, 6).map((round, index) => ({
+    rounds: rounds.slice(0, TIMES.length).map((round, index) => ({
       round: index + 1,
       time: timeToMinutes(round?.time) === null ? TIMES[index] : String(round.time),
       scheduleDate: isRealDate(round?.scheduleDate)
@@ -444,7 +446,7 @@ async function getHistory(env, selectedDate) {
 
 async function putHistory(env, selectedDate, items) {
   const sorted = items
-    .slice(0, 6)
+    .slice(0, TIMES.length)
     .sort((a, b) => Number(a.round) - Number(b.round));
 
   if (sorted.length === 0) {
@@ -763,8 +765,8 @@ function validateBackupStateForRestore(state) {
     restoreValidationError("Paused Live အတွက် Frozen Data မရှိပါ");
   }
 
-  if (!Array.isArray(state.rounds) || state.rounds.length !== 6) {
-    restoreValidationError("Round ၆ ခု မပြည့်ပါ");
+  if (!Array.isArray(state.rounds) || state.rounds.length !== TIMES.length) {
+    restoreValidationError("Round ၈ ခု မပြည့်ပါ");
   }
 
   state.rounds.forEach((round, index) => {
@@ -839,9 +841,9 @@ function validateBackupHistoryForRestore(history) {
         historyDate + " History Records ပုံစံမှားနေပါတယ်"
       );
     }
-    if (items.length > 6) {
+    if (items.length > TIMES.length) {
       restoreValidationError(
-        historyDate + " History Round ၆ ခုထက်ကျော်နေပါတယ်"
+        historyDate + " History Round ၈ ခုထက်ကျော်နေပါတယ်"
       );
     }
 
@@ -862,7 +864,7 @@ function validateBackupHistoryForRestore(history) {
       if (
         !Number.isInteger(roundNumber) ||
         roundNumber < 1 ||
-        roundNumber > 6
+        roundNumber > TIMES.length
       ) {
         restoreValidationError(label + " Round Number မှားနေပါတယ်");
       }
@@ -3277,7 +3279,7 @@ body{
   });
 })();
 
-var HISTORY_TIMES=["09:00 AM","11:00 AM","01:00 PM","03:00 PM","05:00 PM","07:00 PM"];
+var HISTORY_TIMES=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
 var HISTORY_START_DATE="2026-06-01";
 var HISTORY_TONES=["cyan","pink","blue","yellow","green"];
 
@@ -3445,8 +3447,8 @@ function adminPage(siteKey) {
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;padding:16px;background:#f4f7fb;font-family:Arial,sans-serif}
-.wrap{max-width:820px;margin:auto}.card{margin-bottom:14px;padding:16px;background:#fff;border-radius:17px;box-shadow:0 4px 14px #0001}
+body{margin:0;padding:16px;background:linear-gradient(160deg,#071126 0%,#0b1730 45%,#101b36 100%);font-family:Arial,sans-serif;color:#eaf2ff;min-height:100vh}
+.wrap{max-width:820px;margin:auto}.card{margin-bottom:14px;padding:16px;background:linear-gradient(145deg,#ffffff,#f5f8ff);color:#101828;border-radius:20px;box-shadow:0 12px 32px #0004;border:1px solid #ffffff22}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
 input,select,button,textarea{width:100%;padding:13px;margin-top:7px;border:1px solid #ddd;border-radius:10px;font-size:16px}
 button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}
@@ -3465,7 +3467,7 @@ button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}but
 </head>
 <body>
 <main class="wrap">
-<h1>Tartay 2D Admin</h1>
+<h1 style="margin:12px 0 20px;font-size:32px">⚡ Tartay <span style="color:#f7b500">2D</span> Admin</h1><div style="margin:-10px 0 18px;color:#a9b9d6">8 Rounds · 05:00 PM — 12:00 AM</div>
 <section class="card">
   <label>Admin Password</label>
   <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Admin password" onkeydown="if(event.key==='Enter'){loadAdmin()}">
@@ -3538,7 +3540,7 @@ button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}but
 </main>
 <script>
 var TURNSTILE_SITE_KEY=__SITE_KEY__;
-var ADMIN_TIMES=["09:00 AM","11:00 AM","01:00 PM","03:00 PM","05:00 PM","07:00 PM"];
+var ADMIN_TIMES=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
 var adminState=null,widgetId=null,tokenPromise=null,tokenTimer=null,requestRunning=false;
 var ADMIN_PASSWORD_SESSION_KEY="nz2d_admin_password_session";
 
@@ -3681,11 +3683,11 @@ function renderHistoryRoundOptions(){
     return '<option value="'+(index+1)+'">Round '+(index+1)+' — '+esc(time)+'</option>';
   }).join("");
 }
-function clearOldInputs(){for(var index=0;index<6;index++){el("oldResult"+index).value=""}}
+function clearOldInputs(){for(var index=0;index<ADMIN_TIMES.length;index++){el("oldResult"+index).value=""}}
 async function saveOldHistoryFromAdmin(){
   var date=el("oldHistoryDate").value;if(!date){message("History Date ရွေးပါ");return}
   var results=[];
-  for(var index=0;index<6;index++){
+  for(var index=0;index<ADMIN_TIMES.length;index++){
     var value=el("oldResult"+index).value.replace(/\D/g,"").slice(0,2);
     if(!/^\d{2}$/.test(value)){message(ADMIN_TIMES[index]+" အတွက် 2D ဂဏန်း ၂ လုံးထည့်ပါ");return}
     results.push(value);
@@ -3955,7 +3957,7 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Array.isArray(body.results) || body.results.length !== 6) {
+    if (!Array.isArray(body.results) || body.results.length !== TIMES.length) {
       throw new HttpError(400, "2D ဂဏန်း ၆ ခုလုံးထည့်ပါ");
     }
 
@@ -3987,7 +3989,7 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 6) {
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > TIMES.length) {
       throw new HttpError(400, "History Round မှားနေပါတယ်");
     }
 
@@ -4056,7 +4058,7 @@ async function handleAdminRoute(request, env, url) {
     if (!isRealDate(date)) {
       throw new HttpError(400, "History Date မှားနေပါတယ်");
     }
-    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > 6) {
+    if (!Number.isInteger(roundNumber) || roundNumber < 1 || roundNumber > TIMES.length) {
       throw new HttpError(400, "History Round မှားနေပါတယ်");
     }
 
