@@ -216,6 +216,17 @@ export default {
         return json({success:true,message:"Customer created successfully",customer_id:r.meta.last_row_id},201);
       } catch(e:any) { return json({success:false,message:"Username or phone already exists"},409); }
     }
+    const customerPasswordMatch=url.pathname.match(/^\/api\/customers\/(\d+)\/password$/);
+    if(customerPasswordMatch && request.method === "POST") {
+      let body: {password?: string}; try { body=await request.json<{password?: string}>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const password=body.password;
+      if(!password||password.length<4) return json({success:false,message:"Password must be at least 4 characters"},400);
+      const customerId=Number(customerPasswordMatch[1]);
+      const c=await env.DB.prepare(`SELECT id FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
+      if(!c) return json({success:false,message:"Customer not found"},404);
+      await env.DB.batch([env.DB.prepare(`UPDATE customers SET password_hash=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(password,customerId),env.DB.prepare(`DELETE FROM customer_sessions WHERE customer_id=?`).bind(customerId)]);
+      return json({success:true,message:"Password reset successfully"});
+    }
     const customerStatusMatch=url.pathname.match(/^\/api\/customers\/(\d+)\/status$/);
     if(customerStatusMatch && request.method === "POST") {
       let body: StatusBody; try { body=await request.json<StatusBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
