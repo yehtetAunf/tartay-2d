@@ -1,16 +1,127 @@
-const $=id=>document.getElementById(id);
-const TIMES=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
-const esc=v=>String(v??'--').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
-function setStatus(code,text){$('statusBadge').className='status '+code;$('statusText').textContent=text}
-function fmt(v){if(!v)return'Waiting for result';try{return new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Yangon',hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true}).format(new Date(v))}catch{return'Waiting for result'}}
-function renderRounds(rows=[]){const map=new Map(rows.map(r=>[String(r.time||r.result_time||'').replace(/^5:/,'05:').replace(/^6:/,'06:').replace(/^7:/,'07:').replace(/^8:/,'08:').replace(/^9:/,'09:'),r]));$('roundGrid').innerHTML=TIMES.map(t=>{const r=map.get(t)||{};const result=/^\d{2}$/.test(String(r.result||r.result_number||''))?String(r.result||r.result_number):'--';const pub=result!=='--';return `<article class="round-card ${pub?'published':''}">${pub?'<span class="check">✓</span>':''}<div class="round-time">◷ ${t}</div><div class="round-number ${pub?'':'waiting'}">${esc(result)}</div></article>`}).join('')}
-async function loadResults(){try{const r=await fetch('/api/state?t='+Date.now(),{cache:'no-store'});const d=await r.json();if(!r.ok)throw new Error();const rows=Array.isArray(d.rounds)?d.rounds:[];renderRounds(rows);const latest=d.latest||rows.filter(x=>x.publishedAt&&/^\d{2}$/.test(String(x.result||''))).at(-1)||null;$('bigResult').textContent=latest?.result||'--';$('liveSet').textContent=latest?.set||'--';$('liveValue').textContent=latest?.value||'--';$('updatedText').textContent=latest?fmt(latest.publishedAt||d.updatedAt):'Waiting for result';setStatus(d.live===false?'waiting':'live',d.live===false?'WAIT':'LIVE')}catch(e){renderRounds([]);setStatus('offline','OFFLINE')}}
-$('refreshBtn').onclick=loadResults;
-setInterval(loadResults,10000);
-renderRounds([]);loadResults();
+const TIMES = [
+  "05:00 PM",
+  "06:00 PM",
+  "07:00 PM",
+  "08:00 PM",
+  "09:00 PM",
+  "10:00 PM",
+  "11:00 PM",
+  "12:00 AM"
+];
 
-const overlay=$('betOverlay'),sheet=$('betSheet');
-function openSheet(){sheet.classList.add('open');sheet.setAttribute('aria-hidden','false');overlay.classList.remove('hidden')}
-function closeSheet(){sheet.classList.remove('open');sheet.setAttribute('aria-hidden','true');overlay.classList.add('hidden')}
-$('openBet').onclick=openSheet;$('closeSheet').onclick=closeSheet;overlay.onclick=closeSheet;
-$('loginBtn').onclick=()=>{$('loginMessage').textContent='Account system is not connected yet.';$('loginMessage').className='message err'};
+const bigResult = document.getElementById("bigResult");
+const liveSet = document.getElementById("liveSet");
+const liveValue = document.getElementById("liveValue");
+const updatedText = document.getElementById("updatedText");
+const statusBadge = document.getElementById("statusBadge");
+const statusText = document.getElementById("statusText");
+const roundGrid = document.getElementById("roundGrid");
+const refreshBtn = document.getElementById("refreshBtn");
+
+function makeRoundCards(rounds = []) {
+  roundGrid.innerHTML = "";
+
+  TIMES.forEach((time, index) => {
+    const round = rounds[index] || {};
+
+    const card = document.createElement("div");
+    card.className = "round-card";
+
+    const timeBox = document.createElement("div");
+    timeBox.className = "round-time";
+    timeBox.innerHTML = `<span>◷</span>&nbsp; ${time}`;
+
+    const resultBox = document.createElement("div");
+    resultBox.className = "round-result";
+    resultBox.textContent =
+      round.result && round.result !== ""
+        ? round.result
+        : "--";
+
+    card.appendChild(timeBox);
+    card.appendChild(resultBox);
+
+    roundGrid.appendChild(card);
+  });
+}
+
+function setStatus(live) {
+  if (live) {
+    statusText.textContent = "LIVE";
+    statusBadge.classList.add("live");
+    statusBadge.classList.remove("offline");
+  } else {
+    statusText.textContent = "OFFLINE";
+    statusBadge.classList.remove("live");
+    statusBadge.classList.add("offline");
+  }
+}
+
+function setLatest(data) {
+  const latest = data.latest;
+
+  if (!latest) {
+    bigResult.textContent = "--";
+    liveSet.textContent = "--";
+    liveValue.textContent = "--";
+    updatedText.textContent = "Waiting for result";
+    return;
+  }
+
+  bigResult.textContent = latest.result || "--";
+  liveSet.textContent = latest.set || "--";
+  liveValue.textContent = latest.value || "--";
+
+  if (latest.publishedAt) {
+    const d = new Date(latest.publishedAt);
+
+    updatedText.textContent =
+      "Updated " +
+      d.toLocaleTimeString("en-US", {
+        timeZone: "Asia/Yangon",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+      });
+  } else {
+    updatedText.textContent = "Waiting for result";
+  }
+}
+
+async function loadResults() {
+  try {
+    const res = await fetch("/api/state", {
+      cache: "no-store"
+    });
+
+    if (!res.ok) {
+      throw new Error("API error");
+    }
+
+    const data = await res.json();
+
+    setStatus(data.live !== false);
+    setLatest(data);
+    makeRoundCards(data.rounds || []);
+  } catch (error) {
+    console.error(error);
+
+    setStatus(false);
+
+    bigResult.textContent = "--";
+    liveSet.textContent = "--";
+    liveValue.textContent = "--";
+    updatedText.textContent = "Waiting for result";
+
+    makeRoundCards([]);
+  }
+}
+
+if (refreshBtn) {
+  refreshBtn.addEventListener("click", loadResults);
+}
+
+makeRoundCards([]);
+loadResults();
+
+setInterval(loadResults, 10000);
