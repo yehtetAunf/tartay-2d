@@ -1,0 +1,12 @@
+Tartay 2D - ready package
+
+1. Upload all files/folders to the tartay-2d GitHub repository.
+2. Keep the folder structure exactly as included (especially src/index.js).
+3. GitHub secrets required:
+   CLOUDFLARE_API_TOKEN
+   CLOUDFLARE_ACCOUNT_ID
+4. Cloudflare Worker secrets required by the original admin/security system:
+   ADMIN_PASSWORD
+   TURNSTILE_SECRET
+5. TURNSTILE_SITE_KEY remains configured in wrangler.jsonc.
+6. Original KV/Durable Object/cron/result/history logic is preserved.
