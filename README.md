@@ -23,3 +23,7 @@ Test admin: admin / 123456. Change before real use.
 - Payout rate: 95x (100 -> 9,500)
 - Total Payout and Profit/Loss dashboard cards
 - Payout column in Bet List
+
+
+## v2.3
+Customer login, wallet balance display, customer self-betting, automatic wallet deduction, and My Bets were added.
