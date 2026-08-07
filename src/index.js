@@ -1857,17 +1857,29 @@ body.screen-fitted{overflow-y:hidden}
 body::before{
   content:"";
   position:fixed;
-  inset:0;
+  inset:-4%;
   z-index:-2;
   pointer-events:none;
   opacity:.72;
-  background-image:
-    radial-gradient(circle,#9fdcff 0 1px,transparent 1.5px),
-    radial-gradient(circle,#f2a7ff 0 1px,transparent 1.5px),
-    radial-gradient(circle,#fff 0 .8px,transparent 1.2px);
-  background-size:137px 137px,193px 193px,83px 83px;
-  background-position:11px 17px,59px 91px,29px 43px;
+  background:
+    radial-gradient(circle at 18% 25%,rgba(255,116,31,.22),transparent 25%),
+    radial-gradient(circle at 78% 18%,rgba(255,45,104,.14),transparent 30%),
+    radial-gradient(circle at 55% 75%,rgba(40,66,170,.18),transparent 42%),
+    linear-gradient(155deg,#16080b 0%,#070819 42%,#02030b 100%);
+  background-size:115% 115%;
+  animation:tartayLivingBackground 14s ease-in-out infinite alternate;
+  transform:scale(1.04);
 }
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(180deg,rgba(1,2,10,.18),rgba(1,2,10,.60));
+}
+@keyframes tartayLivingBackground{
+  0%{transform:scale(1.04) translate3d(-1%,0,0);filter:saturate(.95) brightness(.92)}
+  50%{transform:scale(1.08) translate3d(1%,-1%,0);filter:saturate(1.08) brightness(1.02)}
+  100%{transform:scale(1.05) translate3d(0,1%,0);filter:saturate(1) brightness(.96)}
+}
+@media(prefers-reduced-motion:reduce){body::before{animation:none}}
 button,a{font:inherit}
 .app-viewport{width:100%;overflow:hidden;display:flex;justify-content:center;align-items:flex-start}
 .app-shell{width:min(100%,820px);min-height:100vh;flex:0 0 auto;margin:0;padding-bottom:calc(24px + env(safe-area-inset-bottom));transform-origin:top center;will-change:transform}
@@ -2313,7 +2325,7 @@ button,a{font:inherit}
 .menu-title{margin:23px 8px 28px;color:#f4f8ff;font-size:28px;font-weight:900}
 .menu-links{display:grid;gap:12px}
 .menu-links a{display:flex;align-items:center;min-height:54px;padding:14px 16px;border:1px solid rgba(92,144,255,.28);border-radius:15px;color:#eaf4ff;background:rgba(10,17,42,.78);text-decoration:none;font-weight:800}
-.telegram-modal{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,7,.78);backdrop-filter:blur(7px)}
+.telegram-modal{display:none!important;position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,7,.78);backdrop-filter:blur(7px)}
 .telegram-modal[hidden]{display:none}
 .telegram-dialog{width:min(100%,560px);max-height:calc(100vh - 36px);overflow:auto;padding:24px 19px;border:1px solid #5576ff;border-radius:25px;color:#eef4ff;background:linear-gradient(155deg,#091029,#030511);box-shadow:0 0 22px rgba(75,83,255,.55),0 22px 70px rgba(0,0,0,.72)}
 .telegram-title{margin:0;color:#e9efff;text-align:center;font-size:24px;font-weight:900;text-shadow:0 0 9px #6c65ff}
@@ -2325,7 +2337,7 @@ button,a{font:inherit}
 .telegram-join:focus-visible,.telegram-close:focus-visible,.menu-button:focus-visible,.menu-close:focus-visible{outline:3px solid #f4c542;outline-offset:3px}
 @media(max-width:600px){
   .app-shell{min-height:0;padding-bottom:2px}
-  .top{grid-template-columns:38px 1fr auto;min-height:58px;padding:max(4px,env(safe-area-inset-top)) 9px 3px;gap:5px}
+  .top{grid-template-columns:38px 1fr auto;min-height:92px;padding:max(4px,env(safe-area-inset-top)) 9px 3px;gap:5px}
   .menu-button{width:35px;height:35px;border-radius:10px;gap:4px}.menu-button span{width:25px;height:2.5px}
   .brand{font-size:clamp(21px,6.5vw,27px);letter-spacing:-.8px}
   .status{min-width:70px;padding:7px 8px;gap:4px;font-size:10px;border-width:1px}.status-wave{font-size:12px}.status-dot{width:7px;height:7px}
@@ -2411,7 +2423,6 @@ button,a{font:inherit}
     <div class="menu-links">
       <a href="/app">⌂ &nbsp; Home</a>
       <a href="/history">◷ &nbsp; Result History</a>
-      <a href="https://t.me/New_2d" target="_blank" rel="noopener noreferrer">➤ &nbsp; Telegram Channel</a>
     </div>
   </nav>
 </div>
@@ -3125,8 +3136,8 @@ body{
 }
 .result-grid{
   display:grid;
-  grid-template-columns:repeat(6,minmax(0,1fr));
-  gap:5px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px 10px;
 }
 .slot{
   min-width:0;
@@ -3144,16 +3155,16 @@ body{
 .slot-result{
   display:grid;
   place-items:center;
-  min-height:58px;
+  min-height:92px;
   margin-top:8px;
   color:var(--white);
-  background:linear-gradient(180deg,#0a1625,#06101b);
-  border:1px solid var(--result-border);
-  border-radius:11px;
+  background:linear-gradient(155deg,#0877e8,#0a2d7e 58%,#071c55);
+  border:1.5px solid #19c8ff;
+  border-radius:18px;
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.035),
     0 4px 10px rgba(0,0,0,.20);
-  font-size:29px;
+  font-size:38px;
   line-height:1;
   font-weight:900;
   font-variant-numeric:tabular-nums;
@@ -3185,6 +3196,9 @@ body{
   font-size:12px;
   text-align:center;
 }
+.history-card{border-color:#386dff;background:linear-gradient(160deg,rgba(4,24,64,.98),rgba(2,10,30,.99));box-shadow:0 0 20px rgba(31,118,255,.25),inset 0 0 28px rgba(0,129,255,.08)}
+.card-date-row{margin:-5px -1px 16px;padding:15px 18px;border-radius:17px;background:linear-gradient(100deg,#0879e8,#0755c9 55%,#0640aa);color:#eef8ff;box-shadow:0 0 18px rgba(0,132,255,.25)}
+.card-divider{display:none}.slot-time{min-height:42px;color:#f5f8ff;font-size:15px;line-height:1.15;white-space:normal}.slot-result.waiting{color:#f4f7ff}.history-note{margin:22px 4px;padding:14px;border-radius:18px;background:rgba(7,54,118,.45);color:#dbeaff}
 @media(min-width:560px){
   .history-list{gap:23px}
   .history-card{padding:20px 17px 22px}
@@ -3202,8 +3216,8 @@ body{
   .card-date-row svg{width:26px;height:26px}
   .card-date{font-size:20px}
   .result-grid{gap:3px}
-  .slot-time{font-size:8px;letter-spacing:-.45px}
-  .slot-result{min-height:49px;font-size:23px;border-radius:9px}
+  .slot-time{font-size:11px;letter-spacing:0;min-height:34px}
+  .slot-result{min-height:68px;font-size:28px;border-radius:14px}
 }
 </style>
 </head>
@@ -3383,7 +3397,7 @@ function historyDaysFromStart(endDate){
 async function loadHistory(){
   var input=document.getElementById("historyDate");
   var date=input.value||todayYangon();
-  var days=historyDaysFromStart(date);
+  var days=1;
   var message=document.getElementById("historyMessage");
   var list=document.getElementById("historyList");
 
