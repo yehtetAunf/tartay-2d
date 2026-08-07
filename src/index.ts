@@ -6,6 +6,9 @@ interface Env {
 interface LoginBody { username?: string; password?: string; }
 interface BetBody { customer_name?: string; phone?: string; number?: string; amount?: number | string; bet_type?: string; }
 interface ResultBody { result_date?: string; result_time?: string; set_value?: string; market_value?: string; result_number?: string; }
+interface CustomerBody { username?: string; password?: string; full_name?: string; phone?: string; }
+interface WalletBody { customer_id?: number | string; type?: string; amount?: number | string; note?: string; }
+interface StatusBody { status?: string; }
 
 const RESULT_TIMES = ["5:00 PM","6:00 PM","7:00 PM","8:00 PM","9:00 PM","10:00 PM","11:00 PM","12:00 AM"] as const;
 
@@ -97,6 +100,52 @@ export default {
       const betUpdate = env.DB.prepare(`UPDATE bets SET status=CASE WHEN number=? THEN 'win' ELSE 'lose' END WHERE bet_type=? AND DATE(created_at,'+6 hours','+30 minutes')=?`).bind(number,time,date);
       const batch = await env.DB.batch([resultUpdate, betUpdate]);
       return json({success:true,message:"Result published successfully",bets_updated:batch[1]?.meta?.changes||0});
+    }
+
+    if (url.pathname === "/api/customers" && request.method === "GET") {
+      const rows=await env.DB.prepare(`SELECT id,username,full_name,phone,balance,status,created_at,updated_at FROM customers ORDER BY id DESC`).all();
+      return json({success:true,customers:rows.results});
+    }
+    if (url.pathname === "/api/customers" && request.method === "POST") {
+      let body: CustomerBody; try { body=await request.json<CustomerBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const username=body.username?.trim(), password=body.password, fullName=body.full_name?.trim(), phone=body.phone?.trim()||null;
+      if(!username||!password||!fullName) return json({success:false,message:"Username, password and full name are required"},400);
+      if(username.length<3) return json({success:false,message:"Username must be at least 3 characters"},400);
+      if(password.length<4) return json({success:false,message:"Password must be at least 4 characters"},400);
+      try {
+        const r=await env.DB.prepare(`INSERT INTO customers(username,password_hash,full_name,phone) VALUES(?,?,?,?)`).bind(username,password,fullName,phone).run();
+        return json({success:true,message:"Customer created successfully",customer_id:r.meta.last_row_id},201);
+      } catch(e:any) { return json({success:false,message:"Username or phone already exists"},409); }
+    }
+    const customerStatusMatch=url.pathname.match(/^\/api\/customers\/(\d+)\/status$/);
+    if(customerStatusMatch && request.method === "POST") {
+      let body: StatusBody; try { body=await request.json<StatusBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const status=body.status?.trim().toLowerCase();
+      if(status!=="active"&&status!=="blocked") return json({success:false,message:"Status must be active or blocked"},400);
+      await env.DB.prepare(`UPDATE customers SET status=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(status,Number(customerStatusMatch[1])).run();
+      return json({success:true,message:"Customer status updated"});
+    }
+    if (url.pathname === "/api/wallet" && request.method === "POST") {
+      let body: WalletBody; try { body=await request.json<WalletBody>(); } catch { return json({success:false,message:"Invalid JSON data"},400); }
+      const customerId=Number(body.customer_id), type=body.type?.trim().toLowerCase(), amount=Number(body.amount), note=body.note?.trim()||"";
+      if(!Number.isInteger(customerId)||customerId<=0) return json({success:false,message:"Invalid customer"},400);
+      if(type!=="deposit"&&type!=="withdraw") return json({success:false,message:"Type must be deposit or withdraw"},400);
+      if(!Number.isInteger(amount)||amount<=0) return json({success:false,message:"Amount must be a positive whole number"},400);
+      const c=await env.DB.prepare(`SELECT id,balance FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
+      if(!c) return json({success:false,message:"Customer not found"},404);
+      const before=Number(c.balance||0), after=type==="deposit"?before+amount:before-amount;
+      if(after<0) return json({success:false,message:"Insufficient balance"},400);
+      await env.DB.batch([
+        env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,customerId),
+        env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(customerId,type,amount,before,after,note)
+      ]);
+      return json({success:true,message:type==="deposit"?"Deposit successful":"Withdraw successful",balance:after});
+    }
+    if (url.pathname === "/api/wallet/history" && request.method === "GET") {
+      const customerId=Number(url.searchParams.get("customer_id"));
+      if(!Number.isInteger(customerId)||customerId<=0) return json({success:false,message:"Invalid customer"},400);
+      const rows=await env.DB.prepare(`SELECT id,customer_id,type,amount,balance_before,balance_after,note,created_at FROM wallet_transactions WHERE customer_id=? ORDER BY id DESC LIMIT 100`).bind(customerId).all();
+      return json({success:true,transactions:rows.results});
     }
 
     if(url.pathname.startsWith("/api/")) return json({success:false,message:"Not Found"},404);
