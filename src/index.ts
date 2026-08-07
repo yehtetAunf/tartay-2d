@@ -23,6 +23,29 @@ function todayMyanmar(): string {
   const get=(t:string)=>parts.find(p=>p.type===t)?.value||"";
   return `${get("year")}-${get("month")}-${get("day")}`;
 }
+function timeToMinutes(time:string): number|null {
+  const m=String(time||"").trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i); if(!m)return null;
+  let h=Number(m[1]); const minute=Number(m[2]); const period=m[3].toUpperCase();
+  if(h<1||h>12||minute<0||minute>59)return null; if(h===12)h=0; if(period==="PM")h+=12; return h*60+minute;
+}
+function slotEpochMs(date:string,time:string): number|null {
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return null; const mins=timeToMinutes(time); if(mins===null)return null;
+  const [y,m,d]=date.split("-").map(Number); return Date.UTC(y,m-1,d,Math.floor(mins/60),mins%60)-390*60*1000;
+}
+function isSlotDue(date:string,time:string,now=Date.now()): boolean { const t=slotEpochMs(date,time); return t!==null && now>=t; }
+function seededNumber(seed:string): number { let h=2166136261>>>0; for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)} return h>>>0; }
+function buildNearbyPool(finalResult:string,seed:string): string[] {
+  if(!/^\d{2}$/.test(finalResult))return []; const a=finalResult[0],b=finalResult[1],first:string[]=[],second:string[]=[];
+  for(let i=0;i<100;i++){const c=String(i).padStart(2,"0"); if(c===finalResult)continue; const ma=c.includes(a),mb=c.includes(b); if(!ma&&!mb)continue; (ma?first:second).push(c)}
+  const shuffle=(arr:string[],salt:string)=>arr.slice().sort((x,y)=>(seededNumber(seed+salt+x)%100000)-(seededNumber(seed+salt+y)%100000));
+  return shuffle(first,":a").concat(shuffle(second,":b")).slice(0,40);
+}
+function forceSetDigit(value:string,digit:string): string { const n=Number(String(value||"0").replace(/,/g,""))||0; const f=n.toFixed(2).split("."); return f[0]+"."+(f[1]||"00")[0]+digit; }
+function forceValueDigit(value:string,digit:string): string { const n=Number(String(value||"0").replace(/,/g,""))||0; const f=n.toFixed(2).split("."); const i=f[0]||"0"; return (i.length>1?i.slice(0,-1)+digit:digit)+"."+(f[1]||"00"); }
+function buildPreSpinFrames(row:any): any[] {
+  const finalResult=String(row?.result_number||""); if(!/^\d{2}$/.test(finalResult))return [];
+  return buildNearbyPool(finalResult,`${row.result_date}|${row.result_time}|${finalResult}`).map((r,i)=>({result:r,set:forceSetDigit(row.set_value,r[0]),value:forceValueDigit(row.market_value,r[1]),step:i}));
+}
 async function ensureResultTable(db: D1Database): Promise<void> {
   await db.prepare(`CREATE TABLE IF NOT EXISTS result_records (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,9 +54,15 @@ async function ensureResultTable(db: D1Database): Promise<void> {
     set_value TEXT NOT NULL DEFAULT '--',
     market_value TEXT NOT NULL DEFAULT '--',
     result_number TEXT NOT NULL DEFAULT '--',
+    status TEXT NOT NULL DEFAULT 'waiting',
+    published_at TEXT,
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(result_date, result_time)
   )`).run();
+  const cols=await db.prepare(`PRAGMA table_info(result_records)`).all<any>();
+  const names=new Set((cols.results||[]).map((x:any)=>x.name));
+  if(!names.has("status")) await db.prepare(`ALTER TABLE result_records ADD COLUMN status TEXT NOT NULL DEFAULT 'waiting'`).run();
+  if(!names.has("published_at")) await db.prepare(`ALTER TABLE result_records ADD COLUMN published_at TEXT`).run();
 }
 async function ensureDay(db: D1Database, date: string): Promise<void> {
   await ensureResultTable(db);
@@ -64,6 +93,27 @@ async function currentCustomer(request: Request, db: D1Database): Promise<any|nu
 const orderSql = `CASE result_time
  WHEN '5:00 PM' THEN 1 WHEN '6:00 PM' THEN 2 WHEN '7:00 PM' THEN 3 WHEN '8:00 PM' THEN 4
  WHEN '9:00 PM' THEN 5 WHEN '10:00 PM' THEN 6 WHEN '11:00 PM' THEN 7 WHEN '12:00 AM' THEN 8 ELSE 99 END`;
+
+async function settleResult(db:D1Database,date:string,time:string,number:string): Promise<{betsUpdated:number,payout:number}> {
+  await ensureV23(db);
+  const row=await db.prepare(`SELECT status FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(date,time).first<any>();
+  if(row?.status==="published") return {betsUpdated:0,payout:0};
+  const unpaid=await db.prepare(`SELECT id,customer_id,amount FROM bets WHERE customer_id IS NOT NULL AND number=? AND bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=? AND COALESCE(payout_paid,0)=0`).bind(number,time,date).all<any>();
+  const byCustomer=new Map<number,{amount:number,betIds:number[]}>();
+  for(const b of (unpaid.results||[])){const cid=Number(b.customer_id); if(!Number.isInteger(cid)||cid<=0)continue; const x=byCustomer.get(cid)||{amount:0,betIds:[]}; x.amount+=Number(b.amount||0)*95; x.betIds.push(Number(b.id)); byCustomer.set(cid,x)}
+  const statements:any[]=[
+    db.prepare(`UPDATE result_records SET status='published',published_at=CURRENT_TIMESTAMP,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=? AND status!='published'`).bind(date,time),
+    db.prepare(`UPDATE bets SET status=CASE WHEN number=? THEN 'win' ELSE 'lose' END WHERE bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=?`).bind(number,time,date)
+  ];
+  let totalPayout=0;
+  for(const [cid,info] of byCustomer){const c=await db.prepare(`SELECT balance FROM customers WHERE id=? LIMIT 1`).bind(cid).first<any>(); if(!c)continue; const before=Number(c.balance||0),after=before+info.amount; totalPayout+=info.amount; statements.push(db.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,cid)); statements.push(db.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(cid,"payout",info.amount,before,after,`2D WIN ${number} • ${time} • ${date}`)); for(const id of info.betIds)statements.push(db.prepare(`UPDATE bets SET payout_paid=1 WHERE id=? AND COALESCE(payout_paid,0)=0`).bind(id))}
+  const result=await db.batch(statements); return {betsUpdated:Number(result[1]?.meta?.changes||0),payout:totalPayout};
+}
+async function autoPublishDue(db:D1Database,date:string): Promise<void> {
+  await ensureDay(db,date);
+  const rows=await db.prepare(`SELECT result_date,result_time,result_number,status FROM result_records WHERE result_date=? AND result_number GLOB '[0-9][0-9]' AND status!='published' ORDER BY ${orderSql}`).bind(date).all<any>();
+  for(const row of (rows.results||[])){if(isSlotDue(row.result_date,row.result_time)) await settleResult(db,row.result_date,row.result_time,row.result_number)}
+}
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -114,8 +164,7 @@ export default {
       if(!time||!validTime(time))return json({success:false,message:"Invalid result time"},400);
       if(!Number.isInteger(amount)||amount<=0)return json({success:false,message:"Amount must be a positive whole number"},400);
       const date=todayMyanmar(); await ensureDay(env.DB,date);
-      const published=await env.DB.prepare(`SELECT result_number FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(date,time).first<any>();
-      if(published && /^\d{2}$/.test(published.result_number))return json({success:false,message:"This result time is already closed"},400);
+      if(isSlotDue(date,time)) return json({success:false,message:"This result time is already closed"},400);
       const fresh=await env.DB.prepare(`SELECT balance FROM customers WHERE id=?`).bind(c.id).first<any>();
       const before=Number(fresh?.balance||0); if(before<amount)return json({success:false,message:"Insufficient balance"},400);
       const after=before-amount;
@@ -141,8 +190,9 @@ export default {
       if(!Number.isInteger(amount)||amount<=0) return json({success:false,message:"Amount must be a positive whole number"},400);
       const betDate = todayMyanmar();
       await ensureDay(env.DB, betDate);
-      const published = await env.DB.prepare(`SELECT result_number FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(betDate,time).first<{result_number:string}>();
-      const initialStatus = published && /^\d{2}$/.test(published.result_number)
+      await autoPublishDue(env.DB,betDate);
+      const published = await env.DB.prepare(`SELECT result_number,status FROM result_records WHERE result_date=? AND result_time=? LIMIT 1`).bind(betDate,time).first<any>();
+      const initialStatus = published?.status === "published" && /^\d{2}$/.test(String(published.result_number||""))
         ? (published.result_number === number ? "win" : "lose")
         : "pending";
       const result=await env.DB.prepare(`INSERT INTO bets(customer_name,phone,number,amount,bet_type,status) VALUES(?,?,?,?,?,?)`).bind(customer,phone,number,amount,time,initialStatus).run();
@@ -151,13 +201,18 @@ export default {
 
     if (url.pathname === "/api/results" && request.method === "GET") {
       const date=url.searchParams.get("date")||todayMyanmar();
-      await ensureDay(env.DB,date);
-      const rows=await env.DB.prepare(`SELECT id,result_date,result_time,set_value,market_value,result_number,updated_at FROM result_records WHERE result_date=? ORDER BY ${orderSql}`).bind(date).all();
-      return json({success:true,date,results:rows.results});
+      await ensureDay(env.DB,date); await autoPublishDue(env.DB,date);
+      const rows=await env.DB.prepare(`SELECT id,result_date,result_time,set_value,market_value,result_number,status,published_at,updated_at FROM result_records WHERE result_date=? ORDER BY ${orderSql}`).bind(date).all<any>();
+      const raw=(rows.results||[]) as any[];
+      const publicRows=raw.map((r:any)=>({id:r.id,result_date:r.result_date,result_time:r.result_time,set_value:r.status==="published"?r.set_value:"--",market_value:r.status==="published"?r.market_value:"--",result_number:r.status==="published"?r.result_number:"--",status:r.status==="published"?"published":"waiting",published_at:r.status==="published"?r.published_at:null,updated_at:r.status==="published"?(r.published_at||r.updated_at):null}));
+      const now=Date.now();
+      const next=raw.find((r:any)=>r.status!=="published" && /^\d{2}$/.test(String(r.result_number||"")) && Number(slotEpochMs(r.result_date,r.result_time)||0)>now);
+      const published=raw.filter((r:any)=>r.status==="published" && /^\d{2}$/.test(String(r.result_number||""))); const latest=published.length?published[published.length-1]:null;
+      return json({success:true,date,serverNow:now,results:publicRows,live:latest?{result:latest.result_number,set:latest.set_value,value:latest.market_value,updated_at:latest.published_at||latest.updated_at}:{result:"--",set:"--",value:"--",updated_at:null},nextAutoPublishAtMs:next?slotEpochMs(next.result_date,next.result_time):0,preSpinFrames:next?buildPreSpinFrames(next):[]});
     }
     if (url.pathname === "/api/results/history" && request.method === "GET") {
       await ensureResultTable(env.DB);
-      const dates=await env.DB.prepare(`SELECT DISTINCT result_date FROM result_records WHERE result_number!='--' ORDER BY result_date DESC LIMIT 60`).all();
+      const dates=await env.DB.prepare(`SELECT DISTINCT result_date FROM result_records WHERE status='published' AND result_number!='--' ORDER BY result_date DESC LIMIT 60`).all();
       return json({success:true,dates:dates.results});
     }
     if (url.pathname === "/api/results" && request.method === "POST") {
@@ -165,40 +220,11 @@ export default {
       const date=body.result_date?.trim()||todayMyanmar(), time=body.result_time?.trim(), setValue=body.set_value?.trim()||"--", marketValue=body.market_value?.trim()||"--", number=body.result_number?.trim();
       if(!time||!validTime(time)) return json({success:false,message:"Invalid result time"},400);
       if(!number||!/^\d{2}$/.test(number)) return json({success:false,message:"Result number must contain exactly 2 digits"},400);
-      await ensureDay(env.DB,date);
-      await ensureV23(env.DB);
-
-      // Find customer-linked winning bets that have not been paid yet.
-      // Payout rate: 95x the stake. payout_paid prevents duplicate credits
-      // if the same result is published again.
-      const unpaid = await env.DB.prepare(`SELECT id,customer_id,amount FROM bets WHERE customer_id IS NOT NULL AND number=? AND bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=? AND COALESCE(payout_paid,0)=0`).bind(number,time,date).all<any>();
-      const byCustomer = new Map<number,{amount:number,betIds:number[]}>();
-      for (const b of (unpaid.results||[])) {
-        const customerId=Number(b.customer_id);
-        if(!Number.isInteger(customerId)||customerId<=0) continue;
-        const payout=Number(b.amount||0)*95;
-        const x=byCustomer.get(customerId)||{amount:0,betIds:[]};
-        x.amount+=payout; x.betIds.push(Number(b.id)); byCustomer.set(customerId,x);
-      }
-
-      const statements:any[] = [
-        env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time),
-        env.DB.prepare(`UPDATE bets SET status=CASE WHEN number=? THEN 'win' ELSE 'lose' END WHERE bet_type=? AND COALESCE(bet_date,DATE(created_at,'+6 hours','+30 minutes'))=?`).bind(number,time,date)
-      ];
-
-      let totalPayout=0;
-      for (const [customerId, info] of byCustomer) {
-        const c=await env.DB.prepare(`SELECT balance FROM customers WHERE id=? LIMIT 1`).bind(customerId).first<any>();
-        if(!c) continue;
-        const before=Number(c.balance||0), after=before+info.amount;
-        totalPayout+=info.amount;
-        statements.push(env.DB.prepare(`UPDATE customers SET balance=?,updated_at=CURRENT_TIMESTAMP WHERE id=?`).bind(after,customerId));
-        statements.push(env.DB.prepare(`INSERT INTO wallet_transactions(customer_id,type,amount,balance_before,balance_after,note) VALUES(?,?,?,?,?,?)`).bind(customerId,"payout",info.amount,before,after,`2D WIN ${number} • ${time} • ${date}`));
-        for (const betId of info.betIds) statements.push(env.DB.prepare(`UPDATE bets SET payout_paid=1 WHERE id=? AND COALESCE(payout_paid,0)=0`).bind(betId));
-      }
-
-      const batch = await env.DB.batch(statements);
-      return json({success:true,message:"Result published successfully",bets_updated:batch[1]?.meta?.changes||0,payout:totalPayout});
+      await ensureDay(env.DB,date); await ensureV23(env.DB);
+      const due=isSlotDue(date,time);
+      await env.DB.prepare(`UPDATE result_records SET set_value=?,market_value=?,result_number=?,status='waiting',published_at=NULL,updated_at=CURRENT_TIMESTAMP WHERE result_date=? AND result_time=?`).bind(setValue,marketValue,number,date,time).run();
+      if(due){const settled=await settleResult(env.DB,date,time,number); return json({success:true,message:"Result published successfully",scheduled:false,bets_updated:settled.betsUpdated,payout:settled.payout});}
+      return json({success:true,message:`Result scheduled for ${time}. It will appear automatically at the set time.`,scheduled:true,publish_at_ms:slotEpochMs(date,time)});
     }
 
     if (url.pathname === "/api/customers" && request.method === "GET") {
