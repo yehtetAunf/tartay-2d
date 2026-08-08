@@ -10,18 +10,6 @@ const ROUNDS = [
 ];
 
 
-/*
-  Release hour in Myanmar time.
-
-  05:00 PM = 17
-  06:00 PM = 18
-  ...
-  11:00 PM = 23
-
-  12:00 AM belongs to the NEXT calendar day,
-  but to the PREVIOUS Tartay operational day.
-*/
-
 const ROUND_RELEASE_HOURS = {
   "05:00 PM": 17,
   "06:00 PM": 18,
@@ -39,13 +27,19 @@ const ROUND_RELEASE_HOURS = {
 ======================================== */
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=UTF-8",
-      "Cache-Control": "no-store"
+  return new Response(
+    JSON.stringify(data),
+    {
+      status,
+      headers: {
+        "Content-Type":
+          "application/json; charset=UTF-8",
+
+        "Cache-Control":
+          "no-store"
+      }
     }
-  });
+  );
 }
 
 
@@ -54,42 +48,56 @@ function json(data, status = 200) {
 ======================================== */
 
 function formatDateUTC(date) {
-  const year = date.getUTCFullYear();
 
-  const month = String(
-    date.getUTCMonth() + 1
-  ).padStart(2, "0");
+  const year =
+    date.getUTCFullYear();
 
-  const day = String(
-    date.getUTCDate()
-  ).padStart(2, "0");
+
+  const month =
+    String(
+      date.getUTCMonth() + 1
+    ).padStart(2, "0");
+
+
+  const day =
+    String(
+      date.getUTCDate()
+    ).padStart(2, "0");
+
 
   return `${year}-${month}-${day}`;
 }
 
 
 function parseDateUTC(dateString) {
+
   if (
-    !/^\d{4}-\d{2}-\d{2}$/.test(dateString)
+    !/^\d{4}-\d{2}-\d{2}$/
+      .test(dateString)
   ) {
     return null;
   }
+
 
   const [
     year,
     month,
     day
-  ] = dateString
-    .split("-")
-    .map(Number);
+  ] =
+    dateString
+      .split("-")
+      .map(Number);
 
-  const date = new Date(
-    Date.UTC(
-      year,
-      month - 1,
-      day
-    )
-  );
+
+  const date =
+    new Date(
+      Date.UTC(
+        year,
+        month - 1,
+        day
+      )
+    );
+
 
   if (
     date.getUTCFullYear() !== year ||
@@ -98,6 +106,7 @@ function parseDateUTC(dateString) {
   ) {
     return null;
   }
+
 
   return date;
 }
@@ -108,37 +117,68 @@ function parseDateUTC(dateString) {
 ======================================== */
 
 function getMyanmarNow() {
+
   const parts =
     new Intl.DateTimeFormat(
       "en-US",
       {
-        timeZone: "Asia/Yangon",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hourCycle: "h23"
+        timeZone:
+          "Asia/Yangon",
+
+        year:
+          "numeric",
+
+        month:
+          "2-digit",
+
+        day:
+          "2-digit",
+
+        hour:
+          "2-digit",
+
+        minute:
+          "2-digit",
+
+        second:
+          "2-digit",
+
+        hourCycle:
+          "h23"
       }
     ).formatToParts(
       new Date()
     );
 
-  const getPart = type =>
-    Number(
-      parts.find(
-        p => p.type === type
-      )?.value
-    );
+
+  const getPart =
+    type =>
+      Number(
+        parts.find(
+          p =>
+            p.type === type
+        )?.value
+      );
+
 
   return {
-    year: getPart("year"),
-    month: getPart("month"),
-    day: getPart("day"),
-    hour: getPart("hour"),
-    minute: getPart("minute"),
-    second: getPart("second")
+    year:
+      getPart("year"),
+
+    month:
+      getPart("month"),
+
+    day:
+      getPart("day"),
+
+    hour:
+      getPart("hour"),
+
+    minute:
+      getPart("minute"),
+
+    second:
+      getPart("second")
   };
 }
 
@@ -148,29 +188,24 @@ function getMyanmarNow() {
 ======================================== */
 
 /*
-  Tartay day starts at 05:00 PM.
+  Operational Day
 
-  Example:
-
-  Aug 8
-  05 PM → Round 1
+  05:00 PM → Round 1
   ...
-  11 PM → Round 7
+  11:00 PM → Round 7
+  12:00 AM → Round 8
 
-  Aug 9
-  12 AM → Round 8
-
-  Therefore:
-
-  Aug 9 12:00 AM - 04:59 PM
-  still belongs to operational date Aug 8.
+  12:00 AM belongs to the
+  previous Tartay 2D day.
 */
 
 function getMyanmarDate() {
+
   const now =
     getMyanmarNow();
 
-  let date =
+
+  const date =
     new Date(
       Date.UTC(
         now.year,
@@ -179,11 +214,17 @@ function getMyanmarDate() {
       )
     );
 
-  if (now.hour < 17) {
+
+  if (
+    now.hour < 17
+  ) {
+
     date.setUTCDate(
       date.getUTCDate() - 1
     );
+
   }
+
 
   return formatDateUTC(
     date
@@ -192,40 +233,32 @@ function getMyanmarDate() {
 
 
 /* ========================================
-   ROUND RELEASE CHECK
+   ROUND RELEASE TIME
 ======================================== */
-
-/*
-  Returns TRUE only when the selected
-  round is allowed to be publicly visible.
-
-  This protects:
-
-  - Home
-  - Today Rounds
-  - History
-
-  Admin can save future results,
-  but users cannot see them early.
-*/
 
 function isRoundReleased(
   resultDate,
   roundTime
 ) {
+
   const operationalDate =
     parseDateUTC(
       resultDate
     );
 
-  if (!operationalDate) {
+
+  if (
+    !operationalDate
+  ) {
     return false;
   }
+
 
   const releaseHour =
     ROUND_RELEASE_HOURS[
       roundTime
     ];
+
 
   if (
     releaseHour === undefined
@@ -234,47 +267,46 @@ function isRoundReleased(
   }
 
 
-  /*
-    Build the calendar date/time
-    when this round becomes public.
-
-    05 PM - 11 PM:
-      same calendar date.
-
-    12 AM:
-      next calendar date at 00:00.
-  */
-
-  let releaseDate =
+  const releaseDate =
     new Date(
       operationalDate.getTime()
     );
+
 
   let releaseCalendarHour =
     releaseHour;
 
 
+  /*
+    12:00 AM is on the next
+    calendar day but belongs
+    to the previous operational day.
+  */
+
   if (
-    roundTime === "12:00 AM"
+    roundTime ===
+    "12:00 AM"
   ) {
+
     releaseDate.setUTCDate(
       releaseDate.getUTCDate() + 1
     );
 
     releaseCalendarHour = 0;
+
   }
 
-
-  /*
-    Compare using Myanmar calendar
-    components instead of server UTC.
-  */
 
   const now =
     getMyanmarNow();
 
 
-  const currentMyanmarAsUTC =
+  /*
+    Compare Myanmar local
+    calendar components.
+  */
+
+  const currentMyanmarTime =
     Date.UTC(
       now.year,
       now.month - 1,
@@ -285,7 +317,7 @@ function isRoundReleased(
     );
 
 
-  const releaseMyanmarAsUTC =
+  const releaseMyanmarTime =
     Date.UTC(
       releaseDate.getUTCFullYear(),
       releaseDate.getUTCMonth(),
@@ -297,8 +329,74 @@ function isRoundReleased(
 
 
   return (
-    currentMyanmarAsUTC >=
-    releaseMyanmarAsUTC
+    currentMyanmarTime >=
+    releaseMyanmarTime
+  );
+}
+
+
+/* ========================================
+   RESULT PUBLICATION RULE
+======================================== */
+
+/*
+  RESULT IS PUBLIC IF:
+
+  1. Publish Now was used
+     OR
+
+  2. Save Schedule was used
+     + Auto publish = ON
+     + Round time has arrived
+*/
+
+function isResultPublic(
+  result
+) {
+
+  if (!result) {
+    return false;
+  }
+
+
+  /*
+    Publish Now
+  */
+
+  if (
+    result.publish_mode ===
+      "publish" ||
+    result.published_at
+  ) {
+
+    return true;
+
+  }
+
+
+  /*
+    Scheduled result
+    without auto publish
+  */
+
+  if (
+    Number(
+      result.auto_publish
+    ) !== 1
+  ) {
+
+    return false;
+
+  }
+
+
+  /*
+    Scheduled + Auto Publish
+  */
+
+  return isRoundReleased(
+    result.result_date,
+    result.round_time
   );
 }
 
@@ -307,20 +405,25 @@ function isRoundReleased(
    FILTER PUBLIC RESULTS
 ======================================== */
 
-function filterReleasedResults(
+function filterPublicResults(
   results
 ) {
+
   if (
-    !Array.isArray(results)
+    !Array.isArray(
+      results
+    )
   ) {
+
     return [];
+
   }
 
+
   return results.filter(
-    item =>
-      isRoundReleased(
-        item.result_date,
-        item.round_time
+    result =>
+      isResultPublic(
+        result
       )
   );
 }
@@ -330,17 +433,24 @@ function filterReleasedResults(
    TOKEN HELPERS
 ======================================== */
 
-function base64UrlEncode(bytes) {
+function base64UrlEncode(
+  bytes
+) {
+
   let binary = "";
+
 
   for (
     const byte of bytes
   ) {
+
     binary +=
       String.fromCharCode(
         byte
       );
+
   }
+
 
   return btoa(binary)
     .replace(/\+/g, "-")
@@ -349,19 +459,28 @@ function base64UrlEncode(bytes) {
 }
 
 
-function base64UrlDecode(value) {
-  value = value
-    .replace(/-/g, "+")
-    .replace(/_/g, "/");
+function base64UrlDecode(
+  value
+) {
+
+  value =
+    value
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+
 
   while (
     value.length % 4
   ) {
+
     value += "=";
+
   }
+
 
   const binary =
     atob(value);
+
 
   return Uint8Array.from(
     binary,
@@ -374,15 +493,23 @@ function base64UrlDecode(value) {
 async function getSigningKey(
   secret
 ) {
+
   return crypto.subtle.importKey(
     "raw",
+
     new TextEncoder()
       .encode(secret),
+
     {
-      name: "HMAC",
-      hash: "SHA-256"
+      name:
+        "HMAC",
+
+      hash:
+        "SHA-256"
     },
+
     false,
+
     [
       "sign",
       "verify"
@@ -398,14 +525,18 @@ async function getSigningKey(
 async function createAdminToken(
   secret
 ) {
+
   const payload = {
-    role: "admin",
+
+    role:
+      "admin",
 
     exp:
       Math.floor(
         Date.now() / 1000
       ) +
       (12 * 60 * 60)
+
   };
 
 
@@ -433,7 +564,9 @@ async function createAdminToken(
   const signature =
     await crypto.subtle.sign(
       "HMAC",
+
       key,
+
       new TextEncoder()
         .encode(
           encodedPayload
@@ -461,12 +594,16 @@ async function verifyAdminToken(
   token,
   secret
 ) {
+
   try {
+
     if (
       !token ||
       !secret
     ) {
+
       return false;
+
     }
 
 
@@ -481,7 +618,9 @@ async function verifyAdminToken(
       !payloadPart ||
       !signaturePart
     ) {
+
       return false;
+
     }
 
 
@@ -494,10 +633,13 @@ async function verifyAdminToken(
     const valid =
       await crypto.subtle.verify(
         "HMAC",
+
         key,
+
         base64UrlDecode(
           signaturePart
         ),
+
         new TextEncoder()
           .encode(
             payloadPart
@@ -505,8 +647,12 @@ async function verifyAdminToken(
       );
 
 
-    if (!valid) {
+    if (
+      !valid
+    ) {
+
       return false;
+
     }
 
 
@@ -529,7 +675,9 @@ async function verifyAdminToken(
       payload.role !==
       "admin"
     ) {
+
       return false;
+
     }
 
 
@@ -540,14 +688,19 @@ async function verifyAdminToken(
           Date.now() / 1000
         )
     ) {
+
       return false;
+
     }
 
 
     return true;
 
+
   } catch {
+
     return false;
+
   }
 }
 
@@ -560,6 +713,7 @@ async function requireAdmin(
   request,
   env
 ) {
+
   const authorization =
     request.headers.get(
       "Authorization"
@@ -567,11 +721,14 @@ async function requireAdmin(
 
 
   if (
-    !authorization.startsWith(
-      "Bearer "
-    )
+    !authorization
+      .startsWith(
+        "Bearer "
+      )
   ) {
+
     return false;
+
   }
 
 
@@ -595,10 +752,15 @@ async function requireAdmin(
 async function readJson(
   request
 ) {
+
   try {
+
     return await request.json();
+
   } catch {
+
     return null;
+
   }
 }
 
@@ -611,6 +773,7 @@ async function handleAdminLogin(
   request,
   env
 ) {
+
   const body =
     await readJson(
       request
@@ -622,22 +785,30 @@ async function handleAdminLogin(
     typeof body.password !==
       "string"
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Password is required."
     }, 400);
+
   }
 
 
   if (
     !env.ADMIN_PASSWORD
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "ADMIN_PASSWORD secret is not configured."
     }, 500);
+
   }
 
 
@@ -645,11 +816,15 @@ async function handleAdminLogin(
     body.password !==
     env.ADMIN_PASSWORD
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Invalid password."
     }, 401);
+
   }
 
 
@@ -660,21 +835,26 @@ async function handleAdminLogin(
 
 
   return json({
-    success: true,
+    success:
+      true,
+
     token,
-    expires_in: 43200
+
+    expires_in:
+      43200
   });
 }
 
 
 /* ========================================
-   ADMIN SAVE RESULT
+   ADMIN SAVE / PUBLISH RESULT
 ======================================== */
 
 async function handleSaveResult(
   request,
   env
 ) {
+
   const authorized =
     await requireAdmin(
       request,
@@ -682,12 +862,18 @@ async function handleSaveResult(
     );
 
 
-  if (!authorized) {
+  if (
+    !authorized
+  ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Unauthorized."
     }, 401);
+
   }
 
 
@@ -697,12 +883,18 @@ async function handleSaveResult(
     );
 
 
-  if (!body) {
+  if (
+    !body
+  ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Invalid JSON body."
     }, 400);
+
   }
 
 
@@ -728,78 +920,167 @@ async function handleSaveResult(
 
 
   const setValue =
-    body.set_value === null ||
-    body.set_value === undefined
+    body.set_value ===
+      null ||
+    body.set_value ===
+      undefined
+
       ? null
+
       : String(
           body.set_value
         ).trim();
 
 
   const valueValue =
-    body.value_value === null ||
-    body.value_value === undefined
+    body.value_value ===
+      null ||
+    body.value_value ===
+      undefined
+
       ? null
+
       : String(
           body.value_value
         ).trim();
 
+
+  /*
+    schedule
+    publish
+  */
+
+  const publishMode =
+    body.publish_mode ===
+      "publish"
+
+      ? "publish"
+
+      : "schedule";
+
+
+  const autoPublish =
+    body.auto_publish === false
+      ? 0
+      : 1;
+
+
+  /*
+    Publish Now gets
+    published_at immediately.
+
+    Save Schedule resets it
+    to NULL.
+  */
+
+  const publishedAt =
+    publishMode ===
+      "publish"
+
+      ? new Date()
+          .toISOString()
+
+      : null;
+
+
+  /* VALIDATE DATE */
 
   if (
     !parseDateUTC(
       resultDate
     )
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Invalid result_date."
     }, 400);
+
   }
 
+
+  /* VALIDATE ROUND */
 
   if (
     !ROUNDS.includes(
       roundTime
     )
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "Invalid round_time."
     }, 400);
+
   }
 
 
+  /* VALIDATE 2D */
+
   if (
-    !/^\d{2}$/.test(
-      result2d
-    )
+    !/^\d{2}$/
+      .test(
+        result2d
+      )
   ) {
+
     return json({
-      success: false,
+      success:
+        false,
+
       error:
         "result_2d must be exactly 2 digits."
     }, 400);
+
   }
 
+
+  /*
+    SAVE / UPDATE DATABASE
+  */
 
   await env.DB
     .prepare(`
       INSERT INTO app_results (
+
         result_date,
         round_time,
         result_2d,
+
         set_value,
         value_value,
+
+        publish_mode,
+        auto_publish,
+        published_at,
+
         created_at,
         updated_at
+
       )
 
       VALUES (
-        ?, ?, ?, ?, ?,
+
+        ?,
+        ?,
+        ?,
+
+        ?,
+        ?,
+
+        ?,
+        ?,
+        ?,
+
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
+
       )
 
       ON CONFLICT(
@@ -808,6 +1089,7 @@ async function handleSaveResult(
       )
 
       DO UPDATE SET
+
         result_2d =
           excluded.result_2d,
 
@@ -817,46 +1099,91 @@ async function handleSaveResult(
         value_value =
           excluded.value_value,
 
+        publish_mode =
+          excluded.publish_mode,
+
+        auto_publish =
+          excluded.auto_publish,
+
+        published_at =
+          excluded.published_at,
+
         updated_at =
           CURRENT_TIMESTAMP
     `)
 
     .bind(
+
       resultDate,
       roundTime,
       result2d,
+
       setValue,
-      valueValue
+      valueValue,
+
+      publishMode,
+      autoPublish,
+      publishedAt
+
     )
 
     .run();
 
 
+  /*
+    Calculate current
+    public visibility
+  */
+
+  const resultObject = {
+
+    result_date:
+      resultDate,
+
+    round_time:
+      roundTime,
+
+    result_2d:
+      result2d,
+
+    set_value:
+      setValue,
+
+    value_value:
+      valueValue,
+
+    publish_mode:
+      publishMode,
+
+    auto_publish:
+      autoPublish,
+
+    published_at:
+      publishedAt
+
+  };
+
+
+  const publicNow =
+    isResultPublic(
+      resultObject
+    );
+
+
   return json({
-    success: true,
 
-    released:
-      isRoundReleased(
-        resultDate,
-        roundTime
-      ),
+    success:
+      true,
 
-    result: {
-      result_date:
-        resultDate,
+    mode:
+      publishMode,
 
-      round_time:
-        roundTime,
+    public:
+      publicNow,
 
-      result_2d:
-        result2d,
+    result:
+      resultObject
 
-      set_value:
-        setValue,
-
-      value_value:
-        valueValue
-    }
   });
 }
 
@@ -869,6 +1196,7 @@ async function handleTodayResults(
   url,
   env
 ) {
+
   const resultDate =
     url.searchParams.get(
       "date"
@@ -881,11 +1209,17 @@ async function handleTodayResults(
       resultDate
     )
   ) {
+
     return json({
-      success: false,
+
+      success:
+        false,
+
       error:
         "Invalid date."
+
     }, 400);
+
   }
 
 
@@ -893,30 +1227,58 @@ async function handleTodayResults(
     await env.DB
       .prepare(`
         SELECT
+
           id,
+
           result_date,
           round_time,
           result_2d,
+
           set_value,
           value_value,
+
+          publish_mode,
+          auto_publish,
+          published_at,
+
           created_at,
           updated_at
 
         FROM app_results
 
-        WHERE result_date = ?
+        WHERE
+          result_date = ?
 
         ORDER BY
+
           CASE round_time
-            WHEN '05:00 PM' THEN 1
-            WHEN '06:00 PM' THEN 2
-            WHEN '07:00 PM' THEN 3
-            WHEN '08:00 PM' THEN 4
-            WHEN '09:00 PM' THEN 5
-            WHEN '10:00 PM' THEN 6
-            WHEN '11:00 PM' THEN 7
-            WHEN '12:00 AM' THEN 8
+
+            WHEN '05:00 PM'
+              THEN 1
+
+            WHEN '06:00 PM'
+              THEN 2
+
+            WHEN '07:00 PM'
+              THEN 3
+
+            WHEN '08:00 PM'
+              THEN 4
+
+            WHEN '09:00 PM'
+              THEN 5
+
+            WHEN '10:00 PM'
+              THEN 6
+
+            WHEN '11:00 PM'
+              THEN 7
+
+            WHEN '12:00 AM'
+              THEN 8
+
             ELSE 99
+
           END
       `)
 
@@ -928,23 +1290,32 @@ async function handleTodayResults(
 
 
   /*
-    IMPORTANT:
-    Future saved rounds are removed
-    before response is sent to users.
+    IMPORTANT
+
+    Only public results
+    go to User App.
   */
 
-  const releasedResults =
-    filterReleasedResults(
+  const publicResults =
+    filterPublicResults(
       response.results || []
     );
 
 
   return json({
-    success: true,
-    date: resultDate,
-    rounds: ROUNDS,
+
+    success:
+      true,
+
+    date:
+      resultDate,
+
+    rounds:
+      ROUNDS,
+
     results:
-      releasedResults
+      publicResults
+
   });
 }
 
@@ -957,6 +1328,7 @@ async function handleHistory(
   url,
   env
 ) {
+
   let limit =
     Number(
       url.searchParams.get(
@@ -971,52 +1343,76 @@ async function handleHistory(
     ) ||
     limit < 1
   ) {
+
     limit = 100;
+
   }
 
 
   if (
     limit > 500
   ) {
+
     limit = 500;
+
   }
 
-
-  /*
-    Fetch up to 500 records first.
-
-    We filter unreleased future
-    results before returning them.
-  */
 
   const response =
     await env.DB
       .prepare(`
         SELECT
+
           id,
+
           result_date,
           round_time,
           result_2d,
+
           set_value,
           value_value,
+
+          publish_mode,
+          auto_publish,
+          published_at,
+
           created_at,
           updated_at
 
         FROM app_results
 
         ORDER BY
+
           result_date DESC,
 
           CASE round_time
-            WHEN '12:00 AM' THEN 8
-            WHEN '11:00 PM' THEN 7
-            WHEN '10:00 PM' THEN 6
-            WHEN '09:00 PM' THEN 5
-            WHEN '08:00 PM' THEN 4
-            WHEN '07:00 PM' THEN 3
-            WHEN '06:00 PM' THEN 2
-            WHEN '05:00 PM' THEN 1
+
+            WHEN '12:00 AM'
+              THEN 8
+
+            WHEN '11:00 PM'
+              THEN 7
+
+            WHEN '10:00 PM'
+              THEN 6
+
+            WHEN '09:00 PM'
+              THEN 5
+
+            WHEN '08:00 PM'
+              THEN 4
+
+            WHEN '07:00 PM'
+              THEN 3
+
+            WHEN '06:00 PM'
+              THEN 2
+
+            WHEN '05:00 PM'
+              THEN 1
+
             ELSE 0
+
           END DESC
 
         LIMIT 500
@@ -1025,8 +1421,13 @@ async function handleHistory(
       .all();
 
 
-  const releasedResults =
-    filterReleasedResults(
+  /*
+    Hide scheduled results
+    that are not public yet.
+  */
+
+  const publicResults =
+    filterPublicResults(
       response.results || []
     )
       .slice(
@@ -1036,9 +1437,13 @@ async function handleHistory(
 
 
   return json({
-    success: true,
+
+    success:
+      true,
+
     results:
-      releasedResults
+      publicResults
+
   });
 }
 
@@ -1048,33 +1453,40 @@ async function handleHistory(
 ======================================== */
 
 export class RoundAlarm {
+
   constructor(
     state,
     env
   ) {
+
     this.state =
       state;
 
     this.env =
       env;
+
   }
 
 
   async fetch() {
+
     return new Response(
       "RoundAlarm is active",
       {
         status: 200
       }
     );
+
   }
 
 
   async alarm() {
+
     /*
       Reserved for future
       scheduled processing.
     */
+
   }
 }
 
@@ -1084,11 +1496,14 @@ export class RoundAlarm {
 ======================================== */
 
 export default {
+
   async fetch(
     request,
     env
   ) {
+
     try {
+
       const url =
         new URL(
           request.url
@@ -1100,10 +1515,13 @@ export default {
       if (
         request.method ===
           "GET" &&
+
         url.pathname ===
           "/api/status"
       ) {
+
         return json({
+
           app:
             "Tartay 2D",
 
@@ -1111,59 +1529,70 @@ export default {
             "Online",
 
           version:
-            "2.2.0",
+            "2.3.0",
 
           database:
             "connected",
 
           operational_date:
             getMyanmarDate()
+
         });
+
       }
 
 
-      /* ADMIN LOGIN */
+      /* LOGIN */
 
       if (
         request.method ===
           "POST" &&
+
         url.pathname ===
           "/api/admin/login"
       ) {
+
         return handleAdminLogin(
           request,
           env
         );
+
       }
 
 
-      /* ADMIN SAVE RESULT */
+      /* SAVE / PUBLISH */
 
       if (
         request.method ===
           "POST" &&
+
         url.pathname ===
           "/api/admin/result"
       ) {
+
         return handleSaveResult(
           request,
           env
         );
+
       }
 
 
-      /* TODAY RESULTS */
+      /* TODAY */
 
       if (
         request.method ===
           "GET" &&
+
         url.pathname ===
           "/api/results/today"
       ) {
+
         return handleTodayResults(
           url,
           env
         );
+
       }
 
 
@@ -1172,13 +1601,16 @@ export default {
       if (
         request.method ===
           "GET" &&
+
         url.pathname ===
           "/api/results/history"
       ) {
+
         return handleHistory(
           url,
           env
         );
+
       }
 
 
@@ -1190,15 +1622,21 @@ export default {
             "/api/"
           )
       ) {
+
         return json({
-          success: false,
+
+          success:
+            false,
+
           error:
             "API route not found."
+
         }, 404);
+
       }
 
 
-      /* STATIC FILES */
+      /* STATIC APP */
 
       return env.ASSETS.fetch(
         request
@@ -1206,6 +1644,7 @@ export default {
 
 
     } catch (error) {
+
       console.error(
         "Tartay Worker Error:",
         error
@@ -1213,10 +1652,17 @@ export default {
 
 
       return json({
-        success: false,
+
+        success:
+          false,
+
         error:
           "Internal server error."
+
       }, 500);
+
     }
+
   }
+
 };
