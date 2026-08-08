@@ -1,338 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tartay 2D Admin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<title>Tartay 2D Admin</title>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #06172a;
-      color: #ffffff;
-      min-height: 100vh;
-    }
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
 
-    .container {
-      width: 92%;
-      max-width: 520px;
-      margin: auto;
-      padding: 30px 0;
-    }
+body{
+  font-family:Arial,sans-serif;
+  background:#06172a;
+  color:#fff;
+  min-height:100vh;
+}
 
-    .logo-small {
-      color: #7ea9d8;
-      font-size: 12px;
-      letter-spacing: 1.5px;
-      margin-bottom: 5px;
-    }
+.container{
+  width:92%;
+  max-width:520px;
+  margin:auto;
+  padding:30px 0;
+}
 
-    h1 {
-      font-size: 26px;
-      margin-bottom: 25px;
-    }
+.logo-small{
+  color:#7ea9d8;
+  font-size:12px;
+  letter-spacing:1.5px;
+  margin-bottom:5px;
+}
 
-    .card {
-      background: #0d2947;
-      border: 1px solid #1c4772;
-      border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 16px;
-    }
+h1{
+  font-size:26px;
+  margin-bottom:25px;
+}
 
-    label {
-      display: block;
-      font-size: 13px;
-      color: #9db4cb;
-      margin-bottom: 7px;
-    }
+.card{
+  background:#0d2947;
+  border:1px solid #1c4772;
+  border-radius:16px;
+  padding:20px;
+  margin-bottom:16px;
+}
 
-    input,
-    select {
-      width: 100%;
-      padding: 13px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      border: 1px solid #315579;
-      background: #071b30;
-      color: white;
-      outline: none;
-      font-size: 15px;
-    }
+label{
+  display:block;
+  font-size:13px;
+  color:#9db4cb;
+  margin-bottom:7px;
+}
 
-    input:focus,
-    select:focus {
-      border-color: #1677ff;
-    }
+input,
+select{
+  width:100%;
+  padding:13px;
+  margin-bottom:15px;
+  border-radius:10px;
+  border:1px solid #315579;
+  background:#071b30;
+  color:white;
+  outline:none;
+  font-size:15px;
+}
 
-    button {
-      width: 100%;
-      padding: 13px;
-      border: 0;
-      border-radius: 10px;
-      background: #1677ff;
-      color: white;
-      font-weight: bold;
-      font-size: 15px;
-      cursor: pointer;
-    }
+button{
+  width:100%;
+  padding:14px;
+  border:0;
+  border-radius:10px;
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+  cursor:pointer;
+}
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+button:disabled{
+  opacity:.6;
+}
 
-    .secondary {
-      background: #173b5f;
-      margin-top: 10px;
-    }
+.login-btn{
+  background:#1677ff;
+}
 
-    .hidden {
-      display: none !important;
-    }
+.schedule-btn{
+  background:#1769aa;
+  margin-top:5px;
+}
 
-    .status {
-      margin-top: 12px;
-      text-align: center;
-      font-size: 13px;
-      min-height: 18px;
-    }
+.publish-btn{
+  background:#29915c;
+  margin-top:12px;
+}
 
-    .success {
-      color: #58d69d;
-    }
+.secondary{
+  background:#173b5f;
+  margin-top:10px;
+}
 
-    .error {
-      color: #ff6b6b;
-    }
+.hidden{
+  display:none;
+}
 
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
+.status{
+  margin-top:15px;
+  text-align:center;
+  font-size:14px;
+  min-height:20px;
+}
 
-    .badge {
-      background: #123b35;
-      color: #65e2aa;
-      border-radius: 20px;
-      padding: 7px 11px;
-      font-size: 11px;
-    }
+.success{
+  color:#58d69d;
+}
 
-    .result-preview {
-      text-align: center;
-      font-size: 38px;
-      font-weight: bold;
-      letter-spacing: 5px;
-      padding: 10px 0 20px;
-    }
+.error{
+  color:#ff6b6b;
+}
 
-    .section-title {
-      font-size: 16px;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-  </style>
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.badge{
+  background:#123b35;
+  color:#65e2aa;
+  border-radius:20px;
+  padding:7px 11px;
+  font-size:11px;
+}
+
+.result-preview{
+  text-align:center;
+  font-size:42px;
+  font-weight:bold;
+  letter-spacing:5px;
+  padding:10px 0 20px;
+}
+
+.section-title{
+  font-size:17px;
+  font-weight:bold;
+  margin-bottom:18px;
+}
+
+.auto-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:3px 0 18px;
+  color:#fff;
+  font-size:15px;
+}
+
+.auto-row input{
+  width:20px;
+  height:20px;
+  margin:0;
+}
+
+.auto-row label{
+  margin:0;
+  color:#fff;
+  font-size:15px;
+}
+</style>
 </head>
 
 <body>
 
 <div class="container">
 
-  <!-- LOGIN PAGE -->
-  <div id="loginPage">
+<!-- LOGIN -->
+<div id="loginPage">
 
-    <div class="logo-small">
-      TARTAY 2D
+  <div class="logo-small">
+    TARTAY 2D
+  </div>
+
+  <h1>Admin Login</h1>
+
+  <div class="card">
+
+    <label>Admin Password</label>
+
+    <input
+      id="password"
+      type="password"
+      placeholder="Enter admin password"
+    >
+
+    <button
+      id="loginBtn"
+      class="login-btn"
+      onclick="login()"
+    >
+      Login
+    </button>
+
+    <div
+      id="loginStatus"
+      class="status"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="hidden">
+
+  <div class="topbar">
+
+    <div>
+      <div class="logo-small">
+        TARTAY 2D
+      </div>
+
+      <h1 style="margin-bottom:0;">
+        Admin
+      </h1>
     </div>
 
-    <h1>Admin Login</h1>
-
-    <div class="card">
-
-      <label for="password">
-        Admin Password
-      </label>
-
-      <input
-        id="password"
-        type="password"
-        placeholder="Enter admin password"
-        autocomplete="current-password"
-      >
-
-      <button
-        id="loginBtn"
-        type="button"
-        onclick="login()"
-      >
-        Login
-      </button>
-
-      <div
-        id="loginStatus"
-        class="status"
-      ></div>
-
+    <div class="badge">
+      ● ONLINE
     </div>
 
   </div>
 
 
-  <!-- ADMIN DASHBOARD -->
-  <div
-    id="dashboard"
-    class="hidden"
-  >
+  <div class="card">
 
-    <div class="topbar">
-
-      <div>
-
-        <div class="logo-small">
-          TARTAY 2D
-        </div>
-
-        <h1 style="margin-bottom:0;">
-          Admin
-        </h1>
-
-      </div>
-
-      <div class="badge">
-        ● ONLINE
-      </div>
-
+    <div class="section-title">
+      Set 2D Result
     </div>
 
 
-    <!-- RESULT FORM -->
-    <div class="card">
+    <label>Round</label>
 
-      <div class="section-title">
-        Set 2D Result
-      </div>
-
-
-      <label for="round">
-        Round
-      </label>
-
-      <select id="round">
-
-        <option value="05:00 PM">
-          05:00 PM
-        </option>
-
-        <option value="06:00 PM">
-          06:00 PM
-        </option>
-
-        <option value="07:00 PM">
-          07:00 PM
-        </option>
-
-        <option value="08:00 PM">
-          08:00 PM
-        </option>
-
-        <option value="09:00 PM">
-          09:00 PM
-        </option>
-
-        <option value="10:00 PM">
-          10:00 PM
-        </option>
-
-        <option value="11:00 PM">
-          11:00 PM
-        </option>
-
-        <option value="12:00 AM">
-          12:00 AM
-        </option>
-
-      </select>
+    <select id="round">
+      <option>05:00 PM</option>
+      <option>06:00 PM</option>
+      <option>07:00 PM</option>
+      <option>08:00 PM</option>
+      <option>09:00 PM</option>
+      <option>10:00 PM</option>
+      <option>11:00 PM</option>
+      <option>12:00 AM</option>
+    </select>
 
 
-      <label for="result2d">
-        2D Result
-      </label>
+    <label>2D Result</label>
 
-      <input
-        id="result2d"
-        type="text"
-        inputmode="numeric"
-        maxlength="2"
-        placeholder="Example: 25"
-        oninput="previewResult()"
-      >
+    <input
+      id="result2d"
+      type="text"
+      inputmode="numeric"
+      maxlength="2"
+      placeholder="Example: 25"
+      oninput="previewResult()"
+    >
 
 
-      <div
-        id="resultPreview"
-        class="result-preview"
-      >
-        --
-      </div>
+    <div
+      id="resultPreview"
+      class="result-preview"
+    >
+      --
+    </div>
 
 
-      <label for="setValue">
-        SET
-      </label>
+    <label>SET</label>
+
+    <input
+      id="setValue"
+      type="text"
+      placeholder="SET value"
+    >
+
+
+    <label>VALUE</label>
+
+    <input
+      id="valueValue"
+      type="text"
+      placeholder="VALUE"
+    >
+
+
+    <div class="auto-row">
 
       <input
-        id="setValue"
-        type="text"
-        placeholder="SET value"
+        id="autoPublish"
+        type="checkbox"
+        checked
       >
 
-
-      <label for="valueValue">
-        VALUE
+      <label for="autoPublish">
+        Auto publish
       </label>
-
-      <input
-        id="valueValue"
-        type="text"
-        placeholder="VALUE"
-      >
-
-
-      <button
-        id="saveBtn"
-        type="button"
-        onclick="saveResult()"
-      >
-        Save Result
-      </button>
-
-
-      <div
-        id="saveStatus"
-        class="status"
-      ></div>
 
     </div>
 
 
     <button
-      class="secondary"
-      type="button"
-      onclick="logout()"
+      id="scheduleBtn"
+      class="schedule-btn"
+      onclick="saveSchedule()"
     >
-      Logout
+      Save Schedule
     </button>
 
+
+    <button
+      id="publishBtn"
+      class="publish-btn"
+      onclick="publishNow()"
+    >
+      Publish Now
+    </button>
+
+
+    <div
+      id="saveStatus"
+      class="status"
+    ></div>
+
   </div>
+
+
+  <button
+    class="secondary"
+    onclick="logout()"
+  >
+    Logout
+  </button>
+
+</div>
 
 </div>
 
@@ -342,49 +352,50 @@
 let adminToken = "";
 
 
-/* ================================
-   RESULT PREVIEW
-================================ */
+/* RESULT PREVIEW */
 
-function previewResult() {
+function previewResult(){
 
   const input =
-    document.getElementById("result2d");
+    document.getElementById(
+      "result2d"
+    );
 
   const value =
     input.value
-      .replace(/\D/g, "")
-      .slice(0, 2);
+      .replace(/\D/g,"")
+      .slice(0,2);
 
   input.value = value;
 
-  document
-    .getElementById("resultPreview")
-    .textContent =
-      value || "--";
+  document.getElementById(
+    "resultPreview"
+  ).textContent =
+    value || "--";
 }
 
 
-/* ================================
-   LOGIN
-================================ */
+/* LOGIN */
 
-async function login() {
-
-  const passwordInput =
-    document.getElementById("password");
+async function login(){
 
   const password =
-    passwordInput.value.trim();
+    document.getElementById(
+      "password"
+    ).value;
 
   const status =
-    document.getElementById("loginStatus");
+    document.getElementById(
+      "loginStatus"
+    );
 
   const button =
-    document.getElementById("loginBtn");
+    document.getElementById(
+      "loginBtn"
+    );
 
 
-  if (!password) {
+  if(!password){
 
     status.textContent =
       "Please enter password";
@@ -405,43 +416,34 @@ async function login() {
     "status";
 
 
-  try {
+  try{
 
     const response =
-      await fetch("/api/admin/login", {
+      await fetch(
+        "/api/admin/login",
+        {
+          method:"POST",
 
-        method: "POST",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-        headers: {
-          "Content-Type":
-            "application/json"
-        },
-
-        body: JSON.stringify({
-          password: password
-        })
-
-      });
-
-
-    let data = {};
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch (e) {
-
-      data = {};
-
-    }
+          body:JSON.stringify({
+            password
+          })
+        }
+      );
 
 
-    if (
+    const data =
+      await response.json();
+
+
+    if(
       !response.ok ||
       !data.success
-    ) {
+    ){
 
       status.textContent =
         data.error ||
@@ -454,17 +456,8 @@ async function login() {
     }
 
 
-    /*
-      New API:
-      Login should return token.
-
-      Fallback included for current
-      backend compatibility.
-    */
-
     adminToken =
-      data.token ||
-      password;
+      data.token;
 
 
     sessionStorage.setItem(
@@ -473,34 +466,10 @@ async function login() {
     );
 
 
-    status.textContent =
-      "Login successful ✓";
-
-    status.className =
-      "status success";
+    showDashboard();
 
 
-    passwordInput.value = "";
-
-
-    document
-      .getElementById("loginPage")
-      .classList
-      .add("hidden");
-
-
-    document
-      .getElementById("dashboard")
-      .classList
-      .remove("hidden");
-
-
-  } catch (error) {
-
-    console.error(
-      "Login error:",
-      error
-    );
+  }catch(error){
 
     status.textContent =
       "Login connection error";
@@ -508,47 +477,78 @@ async function login() {
     status.className =
       "status error";
 
-  } finally {
+  }finally{
 
     button.disabled = false;
 
   }
-
 }
 
 
-/* ================================
-   SAVE RESULT
-================================ */
+/* SHOW DASHBOARD */
 
-async function saveResult() {
+function showDashboard(){
 
-  const round =
-    document
-      .getElementById("round")
-      .value;
-
-
-  const result2d =
-    document
-      .getElementById("result2d")
-      .value
-      .trim();
+  document
+    .getElementById(
+      "loginPage"
+    )
+    .classList
+    .add("hidden");
 
 
-  const setValue =
-    document
-      .getElementById("setValue")
-      .value
-      .trim();
+  document
+    .getElementById(
+      "dashboard"
+    )
+    .classList
+    .remove("hidden");
+}
 
 
-  const valueValue =
-    document
-      .getElementById("valueValue")
-      .value
-      .trim();
+/* GET FORM DATA */
 
+function getResultData(){
+
+  return {
+
+    round_time:
+      document
+        .getElementById(
+          "round"
+        ).value,
+
+    result_2d:
+      document
+        .getElementById(
+          "result2d"
+        ).value,
+
+    set_value:
+      document
+        .getElementById(
+          "setValue"
+        ).value.trim(),
+
+    value_value:
+      document
+        .getElementById(
+          "valueValue"
+        ).value.trim(),
+
+    auto_publish:
+      document
+        .getElementById(
+          "autoPublish"
+        ).checked
+
+  };
+}
+
+
+/* VALIDATE */
+
+function validateResult(data){
 
   const status =
     document.getElementById(
@@ -556,27 +556,11 @@ async function saveResult() {
     );
 
 
-  const button =
-    document.getElementById(
-      "saveBtn"
-    );
-
-
-  if (!adminToken) {
-
-    status.textContent =
-      "Admin session expired. Please login again.";
-
-    status.className =
-      "status error";
-
-    logout();
-
-    return;
-  }
-
-
-  if (!/^\d{2}$/.test(result2d)) {
+  if(
+    !/^\d{2}$/.test(
+      data.result_2d
+    )
+  ){
 
     status.textContent =
       "2D result must be exactly 2 digits.";
@@ -584,83 +568,148 @@ async function saveResult() {
     status.className =
       "status error";
 
+    return false;
+  }
+
+
+  return true;
+}
+
+
+/* SAVE SCHEDULE */
+
+async function saveSchedule(){
+
+  const data =
+    getResultData();
+
+
+  if(
+    !validateResult(data)
+  ){
     return;
   }
 
 
-  button.disabled = true;
+  await sendResult(
+    data,
+    "schedule"
+  );
+}
+
+
+/* PUBLISH NOW */
+
+async function publishNow(){
+
+  const data =
+    getResultData();
+
+
+  if(
+    !validateResult(data)
+  ){
+    return;
+  }
+
+
+  await sendResult(
+    data,
+    "publish"
+  );
+}
+
+
+/* SEND RESULT */
+
+async function sendResult(
+  data,
+  mode
+){
+
+  const status =
+    document.getElementById(
+      "saveStatus"
+    );
+
+  const scheduleBtn =
+    document.getElementById(
+      "scheduleBtn"
+    );
+
+  const publishBtn =
+    document.getElementById(
+      "publishBtn"
+    );
+
+
+  scheduleBtn.disabled = true;
+  publishBtn.disabled = true;
+
 
   status.textContent =
-    "Saving...";
+    mode === "schedule"
+      ? "Saving schedule..."
+      : "Publishing...";
 
   status.className =
     "status";
 
 
-  try {
+  try{
 
     const response =
       await fetch(
         "/api/admin/result",
         {
+          method:"POST",
 
-          method: "POST",
-
-          headers: {
-
+          headers:{
             "Content-Type":
               "application/json",
 
             "Authorization":
-              "Bearer " +
-              adminToken,
-
-            /*
-              Compatibility with
-              current Tartay backend
-            */
-
-            "X-Admin-Password":
-              adminToken
-
+              `Bearer ${adminToken}`
           },
 
           body:
             JSON.stringify({
-
-              round_time:
-                round,
-
-              result_2d:
-                result2d,
-
-              set_value:
-                setValue,
-
-              value_value:
-                valueValue
-
+              ...data,
+              publish_mode:mode
             })
-
         }
       );
 
 
-    let data = {};
-
-    try {
-
-      data =
-        await response.json();
-
-    } catch (e) {
-
-      data = {};
-
-    }
+    const result =
+      await response.json();
 
 
-    if (response.status === 401) {
+    if(
+      response.status === 401
+    ){
+
+      sessionStorage.removeItem(
+        "tartay_admin_token"
+      );
+
+      adminToken = "";
+
+      document
+        .getElementById(
+          "dashboard"
+        )
+        .classList
+        .add("hidden");
+
+
+      document
+        .getElementById(
+          "loginPage"
+        )
+        .classList
+        .remove("hidden");
+
 
       status.textContent =
         "Session expired. Please login again.";
@@ -668,32 +717,18 @@ async function saveResult() {
       status.className =
         "status error";
 
-
-      sessionStorage.removeItem(
-        "tartay_admin_token"
-      );
-
-
-      adminToken = "";
-
-
-      setTimeout(
-        logout,
-        1000
-      );
-
       return;
     }
 
 
-    if (
+    if(
       !response.ok ||
-      !data.success
-    ) {
+      !result.success
+    ){
 
       status.textContent =
-        data.error ||
-        "Save failed";
+        result.error ||
+        "Operation failed";
 
       status.className =
         "status error";
@@ -702,46 +737,30 @@ async function saveResult() {
     }
 
 
-    status.textContent =
-      "Result saved successfully ✓";
+    const round =
+      data.round_time;
+
+
+    if(
+      mode === "schedule"
+    ){
+
+      status.textContent =
+        `${round} Round သိမ်းခြင်းအောင်မြင်ပါတယ် ✓`;
+
+    }else{
+
+      status.textContent =
+        `${round} Round ထုတ်ပြခြင်းအောင်မြင်ပါတယ် ✓`;
+
+    }
+
 
     status.className =
       "status success";
 
 
-    /*
-      Clear fields after successful save
-    */
-
-    document
-      .getElementById("result2d")
-      .value = "";
-
-
-    document
-      .getElementById("setValue")
-      .value = "";
-
-
-    document
-      .getElementById("valueValue")
-      .value = "";
-
-
-    document
-      .getElementById(
-        "resultPreview"
-      )
-      .textContent = "--";
-
-
-  } catch (error) {
-
-    console.error(
-      "Save error:",
-      error
-    );
-
+  }catch(error){
 
     status.textContent =
       "Connection error";
@@ -749,24 +768,20 @@ async function saveResult() {
     status.className =
       "status error";
 
+  }finally{
 
-  } finally {
-
-    button.disabled = false;
+    scheduleBtn.disabled = false;
+    publishBtn.disabled = false;
 
   }
-
 }
 
 
-/* ================================
-   LOGOUT
-================================ */
+/* LOGOUT */
 
-function logout() {
+function logout(){
 
   adminToken = "";
-
 
   sessionStorage.removeItem(
     "tartay_admin_token"
@@ -774,59 +789,23 @@ function logout() {
 
 
   document
-    .getElementById("dashboard")
+    .getElementById(
+      "dashboard"
+    )
     .classList
     .add("hidden");
 
 
   document
-    .getElementById("loginPage")
+    .getElementById(
+      "loginPage"
+    )
     .classList
     .remove("hidden");
-
-
-  document
-    .getElementById("password")
-    .value = "";
-
-
-  document
-    .getElementById("loginStatus")
-    .textContent = "";
-
-
-  document
-    .getElementById("saveStatus")
-    .textContent = "";
-
 }
 
 
-/* ================================
-   ENTER KEY LOGIN
-================================ */
-
-document
-  .getElementById("password")
-  .addEventListener(
-    "keydown",
-    function(event) {
-
-      if (event.key === "Enter") {
-
-        event.preventDefault();
-
-        login();
-
-      }
-
-    }
-  );
-
-
-/* ================================
-   RESTORE ADMIN SESSION
-================================ */
+/* RESTORE SESSION */
 
 const savedToken =
   sessionStorage.getItem(
@@ -834,22 +813,12 @@ const savedToken =
   );
 
 
-if (savedToken) {
+if(savedToken){
 
   adminToken =
     savedToken;
 
-
-  document
-    .getElementById("loginPage")
-    .classList
-    .add("hidden");
-
-
-  document
-    .getElementById("dashboard")
-    .classList
-    .remove("hidden");
+  showDashboard();
 
 }
 
