@@ -22,7 +22,7 @@ const YANGON_UTC_OFFSET_MINUTES = 6 * 60 + 30;
 const OVERRIDE_MS = 2 * 60 * 1000;
 
 const BACKUP_VERSION = 1;
-const BACKUP_APP_ID = "new-zealand-2d";
+const BACKUP_APP_ID = "tartay-2d";
 const MAX_JSON_BYTES = 2 * 1024 * 1024;
 
 const HISTORY_PREFIX = "history:";
@@ -676,7 +676,7 @@ async function buildFullBackup(env) {
   return {
     backupVersion: BACKUP_VERSION,
     appId: BACKUP_APP_ID,
-    appName: "New Zealand 2D",
+    appName: "Tartay 2D",
     dataKey: DATA_KEY,
     createdAt: new Date().toISOString(),
     createdAtYangon: yangonNowText(),
@@ -1274,7 +1274,7 @@ function getRoundAlarmStub(env, roundNumber) {
     throw new HttpError(500, "ROUND_ALARMS Durable Object Binding မရှိသေးပါ");
   }
 
-  const id = env.ROUND_ALARMS.idFromName("new-zealand-2d-round-" + roundNumber);
+  const id = env.ROUND_ALARMS.idFromName("tartay-2d-round-" + roundNumber);
   return env.ROUND_ALARMS.get(id);
 }
 
@@ -1819,7 +1819,7 @@ function appPage() {
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;width:100%;min-height:100%;font-family:Arial,"Noto Sans Myanmar",sans-serif;background:#10192c;color:#fff}
 body{min-height:100dvh;overflow-x:hidden}
-.motion-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#10192c url("/tartay-couple.png") center/cover no-repeat}
+.motion-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#10192c url("/tartay-background.png") center/cover no-repeat}
 .motion-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.17) saturate(.65)}
 .motion-bg:after{content:"";position:absolute;inset:0;background:rgba(10,19,37,.84)}
 .page{position:relative;z-index:1;width:100%;max-width:760px;min-height:100dvh;margin:0 auto;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
@@ -1848,7 +1848,7 @@ body{min-height:100dvh;overflow-x:hidden}
 </style>
 </head>
 <body>
-<div class="motion-bg" aria-hidden="true"><video autoplay muted loop playsinline poster="/tartay-couple.png"><source src="/tartay-couple.mp4" type="video/mp4"></video></div>
+<div class="motion-bg" aria-hidden="true"></div>
 <div class="page">
   <header class="topbar">
     <button class="back-btn" type="button" onclick="history.back()">‹</button>
@@ -1907,7 +1907,7 @@ function historyPage() {
 <meta name="theme-color" content="#051a3f">
 <title>2D History</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#061d43;color:white}body{background:#061d43}.history-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#061d43 url("/tartay-couple.png") center/cover no-repeat}.history-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.30) saturate(.78)}.history-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,15,42,.48),rgba(2,15,42,.66) 48%,rgba(2,15,42,.82))}button,input{font:inherit}.page{position:relative;z-index:1;width:100%;max-width:1180px;margin:0 auto;padding:28px 38px 36px}.header{display:grid;grid-template-columns:96px 1fr 96px;align-items:center}.back,.calendar-btn{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:rgba(3,24,58,.78);border:3px solid #14508e;color:#fff;text-decoration:none;font-size:58px;box-shadow:0 0 18px rgba(0,187,255,.08)}.calendar-btn{justify-self:end;border-color:#19c8ff;box-shadow:0 0 18px rgba(0,205,255,.45);font-size:43px;cursor:pointer}.header h1{text-align:center;font-size:70px;margin:0;font-weight:700}.datebar{margin-top:45px;height:145px;border-radius:38px;background:linear-gradient(135deg,#0964cf,#0758c3);display:flex;align-items:center;padding:0 45px;gap:28px;box-shadow:inset 0 0 30px rgba(0,177,255,.2)}.date-icon{width:104px;height:104px;border-radius:22px;background:rgba(25,113,224,.6);display:grid;place-items:center;font-size:55px}.date-text{font-size:64px;font-weight:700;letter-spacing:2px}.picker{position:absolute;opacity:0;pointer-events:none}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:55px 48px;margin:44px 50px 0}.slot{text-align:center}.slot-time{min-height:98px;font-size:42px;font-weight:700;line-height:1.16;display:flex;align-items:flex-start;justify-content:center}.result{height:205px;border-radius:31px;border:3px solid #149fff;background:linear-gradient(145deg,#1766c8,#0b3e9d 70%,#082c76);display:grid;place-items:center;font-size:58px;font-weight:900;box-shadow:0 0 18px rgba(0,205,255,.5),inset 0 0 28px rgba(39,160,255,.35)}.note{margin:62px 5px 0;min-height:95px;border-radius:48px;background:rgba(8,56,111,.58);display:flex;align-items:center;justify-content:center;gap:28px;font-size:34px;padding:20px 35px}.shield{font-size:50px}.message{text-align:center;color:#a9c7ef;font-size:20px;margin-top:20px}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#061d43;color:white}body{background:#061d43}.history-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#061d43 url("/tartay-background.png") center/cover no-repeat}.history-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.30) saturate(.78)}.history-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,15,42,.48),rgba(2,15,42,.66) 48%,rgba(2,15,42,.82))}button,input{font:inherit}.page{position:relative;z-index:1;width:100%;max-width:1180px;margin:0 auto;padding:28px 38px 36px}.header{display:grid;grid-template-columns:96px 1fr 96px;align-items:center}.back,.calendar-btn{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:rgba(3,24,58,.78);border:3px solid #14508e;color:#fff;text-decoration:none;font-size:58px;box-shadow:0 0 18px rgba(0,187,255,.08)}.calendar-btn{justify-self:end;border-color:#19c8ff;box-shadow:0 0 18px rgba(0,205,255,.45);font-size:43px;cursor:pointer}.header h1{text-align:center;font-size:70px;margin:0;font-weight:700}.datebar{margin-top:45px;height:145px;border-radius:38px;background:linear-gradient(135deg,#0964cf,#0758c3);display:flex;align-items:center;padding:0 45px;gap:28px;box-shadow:inset 0 0 30px rgba(0,177,255,.2)}.date-icon{width:104px;height:104px;border-radius:22px;background:rgba(25,113,224,.6);display:grid;place-items:center;font-size:55px}.date-text{font-size:64px;font-weight:700;letter-spacing:2px}.picker{position:absolute;opacity:0;pointer-events:none}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:55px 48px;margin:44px 50px 0}.slot{text-align:center}.slot-time{min-height:98px;font-size:42px;font-weight:700;line-height:1.16;display:flex;align-items:flex-start;justify-content:center}.result{height:205px;border-radius:31px;border:3px solid #149fff;background:linear-gradient(145deg,#1766c8,#0b3e9d 70%,#082c76);display:grid;place-items:center;font-size:58px;font-weight:900;box-shadow:0 0 18px rgba(0,205,255,.5),inset 0 0 28px rgba(39,160,255,.35)}.note{margin:62px 5px 0;min-height:95px;border-radius:48px;background:rgba(8,56,111,.58);display:flex;align-items:center;justify-content:center;gap:28px;font-size:34px;padding:20px 35px}.shield{font-size:50px}.message{text-align:center;color:#a9c7ef;font-size:20px;margin-top:20px}
 @media(max-width:600px){.page{max-width:none;padding:18px 12px 26px}.header{grid-template-columns:54px 1fr 54px}.back,.calendar-btn{width:52px;height:52px;border-width:2px;font-size:34px}.calendar-btn{font-size:26px}.header h1{font-size:36px}.datebar{margin-top:22px;height:78px;border-radius:22px;padding:0 18px;gap:14px}.date-icon{width:54px;height:54px;border-radius:14px;font-size:30px}.date-text{font-size:32px}.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px 10px;margin:24px 0 0}.slot-time{min-height:48px;font-size:20px}.result{height:92px;border-radius:18px;border-width:2px;font-size:30px}.note{margin:28px 0 0;min-height:62px;border-radius:30px;gap:12px;font-size:16px;padding:12px 14px}.shield{font-size:28px}.message{font-size:15px;margin-top:12px}}
 @media(max-width:380px){.page{padding-left:8px;padding-right:8px}.header h1{font-size:32px}.date-text{font-size:28px}.grid{gap-left:8px}.slot-time{font-size:18px}.result{height:84px;font-size:28px}}
 @media(max-width:700px){.page{padding:20px 16px 28px}.header{grid-template-columns:62px 1fr 62px}.back,.calendar-btn{width:58px;height:58px;font-size:36px;border-width:2px}.calendar-btn{font-size:28px}.header h1{font-size:42px}.datebar{margin-top:30px;height:88px;border-radius:24px;padding:0 20px;gap:16px}.date-icon{width:62px;height:62px;border-radius:15px;font-size:34px}.date-text{font-size:36px}.grid{margin:28px 7px 0;grid-template-columns:repeat(4,1fr);gap:28px 14px}.slot-time{min-height:62px;font-size:23px}.result{height:118px;border-radius:20px;font-size:34px;border-width:2px}.note{margin-top:38px;min-height:72px;border-radius:35px;font-size:20px;gap:14px;padding:14px}.shield{font-size:32px}}
@@ -1915,7 +1915,7 @@ function historyPage() {
 </style>
 </head>
 <body>
-<div class="history-bg" aria-hidden="true"><video autoplay muted loop playsinline poster="/tartay-couple.png"><source src="/tartay-couple.mp4" type="video/mp4"></video></div>
+<div class="history-bg" aria-hidden="true"></div>
 <div class="page">
   <header class="header">
     <a class="back" href="/app" aria-label="Back">‹</a>
@@ -1952,7 +1952,7 @@ function adminPage(siteKey) {
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#075ca8">
 <link rel="icon" href="/favicon.ico">
-<title>New Zealand 2D Admin</title>
+<title>Tartay 2D Admin</title>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 <style>
 *{box-sizing:border-box}
@@ -1976,7 +1976,7 @@ button{border:0;background:#075ca8;color:#fff;font-weight:800;cursor:pointer}but
 </head>
 <body>
 <main class="wrap">
-<h1>New Zealand 2D Admin</h1>
+<h1>Tartay 2D Admin</h1>
 <section class="card">
   <label>Admin Password</label>
   <input id="adminPassword" type="password" autocomplete="current-password" placeholder="Admin password" onkeydown="if(event.key==='Enter'){loadAdmin()}">
