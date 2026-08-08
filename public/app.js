@@ -9,9 +9,11 @@ const times = [
   "12:00 AM"
 ];
 
-const roundsContainer = document.querySelector("#rounds");
-
-let latestResults = [];
+const roundsEl = document.getElementById("rounds");
+const setEl = document.getElementById("set");
+const valueEl = document.getElementById("value");
+const twoDEl = document.getElementById("twoD");
+const roundEl = document.getElementById("round");
 
 
 /* =========================
@@ -19,64 +21,12 @@ let latestResults = [];
 ========================= */
 
 function createRoundCards() {
-  if (!roundsContainer) return;
-
-  roundsContainer.innerHTML = times
-    .map(
-      time => `
-        <article data-round="${time}">
-          <b>${time}</b>
-          <span>--</span>
-        </article>
-      `
-    )
-    .join("");
-}
-
-
-/* =========================
-   LOAD TODAY RESULTS
-========================= */
-
-async function loadTodayResults() {
-  try {
-    const response = await fetch(
-      "/api/results/today",
-      {
-        method: "GET",
-        cache: "no-store"
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        "Failed to load results"
-      );
-    }
-
-    const data = await response.json();
-
-    if (!data.success) {
-      throw new Error(
-        data.error || "Unable to load results"
-      );
-    }
-
-    latestResults =
-      Array.isArray(data.results)
-        ? data.results
-        : [];
-
-    updateRoundCards(latestResults);
-
-    updateCurrentResult(latestResults);
-
-  } catch (error) {
-    console.error(
-      "Today results error:",
-      error
-    );
-  }
+  roundsEl.innerHTML = times.map(time => `
+    <article data-round="${time}">
+      <b>${time}</b>
+      <span>--</span>
+    </article>
+  `).join("");
 }
 
 
@@ -85,27 +35,22 @@ async function loadTodayResults() {
 ========================= */
 
 function updateRoundCards(results) {
+
   times.forEach(time => {
 
-    const card =
-      document.querySelector(
-        `[data-round="${time}"]`
-      );
+    const card = document.querySelector(
+      `[data-round="${time}"]`
+    );
 
     if (!card) return;
 
-    const result =
-      results.find(
-        item =>
-          item.round_time === time
-      );
+    const result = results.find(
+      item => item.round_time === time
+    );
 
-    const resultSpan =
-      card.querySelector("span");
+    const resultEl = card.querySelector("span");
 
-    if (!resultSpan) return;
-
-    resultSpan.textContent =
+    resultEl.textContent =
       result?.result_2d || "--";
   });
 }
@@ -116,134 +61,142 @@ function updateRoundCards(results) {
 ========================= */
 
 function updateCurrentResult(results) {
-  if (!results.length) {
-    setText(
-      [
-        "#currentResult",
-        "#current-result",
-        "[data-current-result]"
-      ],
-      "--"
-    );
 
-    setText(
-      [
-        "#setValue",
-        "#set-value",
-        "[data-set-value]"
-      ],
-      "--"
-    );
+  if (!results || results.length === 0) {
 
-    setText(
-      [
-        "#valueValue",
-        "#value-value",
-        "[data-value-value]"
-      ],
-      "--"
-    );
+    setEl.textContent = "--";
+    valueEl.textContent = "--";
+    twoDEl.textContent = "--";
+    roundEl.textContent = "Waiting for result";
 
     return;
   }
 
 
   /*
-    Backend already returns rounds
-    in chronological order.
+    Backend sends today's results
+    ordered by round time.
 
-    Last saved result becomes
-    Current Result.
+    Last saved round = current result.
   */
 
-  const latest =
-    results[results.length - 1];
+  const latest = results[results.length - 1];
 
 
-  setText(
-    [
-      "#currentResult",
-      "#current-result",
-      "[data-current-result]"
-    ],
-    latest.result_2d || "--"
-  );
+  twoDEl.textContent =
+    latest.result_2d || "--";
 
 
-  setText(
-    [
-      "#setValue",
-      "#set-value",
-      "[data-set-value]"
-    ],
-    latest.set_value || "--"
-  );
+  roundEl.textContent =
+    latest.round_time || "Waiting for result";
 
 
-  setText(
-    [
-      "#valueValue",
-      "#value-value",
-      "[data-value-value]"
-    ],
-    latest.value_value || "--"
-  );
+  setEl.textContent =
+    latest.set_value || "--";
+
+
+  valueEl.textContent =
+    latest.value_value || "--";
 }
 
 
 /* =========================
-   HELPER
+   LOAD TODAY RESULTS
 ========================= */
 
-function setText(selectors, value) {
-  for (const selector of selectors) {
+async function loadTodayResults() {
 
-    const element =
-      document.querySelector(selector);
+  try {
 
-    if (element) {
-      element.textContent = value;
-      return;
+    const response = await fetch(
+      "/api/results/today",
+      {
+        method: "GET",
+        cache: "no-store"
+      }
+    );
+
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP ${response.status}`
+      );
     }
+
+
+    const data = await response.json();
+
+
+    if (!data.success) {
+      throw new Error(
+        data.error || "Unable to load results"
+      );
+    }
+
+
+    const results =
+      Array.isArray(data.results)
+        ? data.results
+        : [];
+
+
+    updateRoundCards(results);
+
+    updateCurrentResult(results);
+
+
+    console.log(
+      "Tartay 2D results loaded:",
+      results
+    );
+
+
+  } catch (error) {
+
+    console.error(
+      "Result loading error:",
+      error
+    );
+
   }
 }
 
 
 /* =========================
-   SERVER STATUS
+   CHECK SERVER STATUS
 ========================= */
 
 async function checkStatus() {
+
   try {
-    const response =
-      await fetch(
-        "/api/status",
-        {
-          cache: "no-store"
-        }
-      );
 
-    if (!response.ok) return;
+    const response = await fetch(
+      "/api/status",
+      {
+        cache: "no-store"
+      }
+    );
 
-    const data =
-      await response.json();
+    const data = await response.json();
 
     console.log(
-      "Tartay 2D:",
-      data.status
+      "Tartay 2D status:",
+      data
     );
 
   } catch (error) {
+
     console.error(
-      "Status error:",
+      "Status check failed:",
       error
     );
+
   }
 }
 
 
 /* =========================
-   INITIAL LOAD
+   START APP
 ========================= */
 
 createRoundCards();
@@ -257,23 +210,16 @@ loadTodayResults();
    AUTO REFRESH
 ========================= */
 
-/*
-  Refresh results every
-  10 seconds.
+setInterval(() => {
 
-  If Admin saves a new result,
-  User App will update
-  automatically.
-*/
+  loadTodayResults();
 
-setInterval(
-  loadTodayResults,
-  10000
-);
+}, 10000);
 
 
 /* =========================
-   REFRESH WHEN APP RETURNS
+   REFRESH WHEN USER
+   RETURNS TO APP
 ========================= */
 
 document.addEventListener(
@@ -281,10 +227,11 @@ document.addEventListener(
   () => {
 
     if (
-      document.visibilityState
-      === "visible"
+      document.visibilityState === "visible"
     ) {
+
       loadTodayResults();
+
     }
 
   }
