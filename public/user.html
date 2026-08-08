@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#02030b">
+  <meta name="theme-color" content="#0c1428">
   <title>တာတေ 2D</title>
-  <link rel="stylesheet" href="/user-v2.css?v=bgvideo3">
+  <link rel="stylesheet" href="/user-v2.css?v=jordan8-final">
 </head>
 <body>
   <div class="video-bg" aria-hidden="true">
@@ -18,28 +18,27 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand">တာတေ <strong>2D</strong></div>
-      <div id="statusBadge" class="status live"><span class="dot"></span><span id="statusText">LIVE</span></div>
+      <a class="top-history" href="/history.html"><span>▣</span> History</a>
     </header>
 
     <main class="main">
-      <section class="hero-card">
-        <div class="hero-label">LIVE RESULT</div>
-        <div id="bigResult" class="big-result">--</div>
-        <div class="market-row">
-          <div><span>SET</span><strong id="liveSet">--</strong></div>
-          <div><span>VALUE</span><strong id="liveValue">--</strong></div>
+      <section class="live-panel">
+        <div class="live-row">
+          <div id="statusBadge" class="status live"><span class="dot"></span><span id="statusText">LIVE</span></div>
         </div>
-        <div class="updated"><span id="updatedText">Waiting for result</span></div>
+        <div id="bigResult" class="big-result">--</div>
+        <div class="updated">◷ <b>Updated =</b> <span id="updatedText">Waiting for result</span></div>
+        <div class="market-summary">
+          <div><small>SET</small><strong id="liveSet">--</strong></div>
+          <div><small>VALUE</small><strong id="liveValue">--</strong></div>
+        </div>
       </section>
 
-      <section class="result-section">
-        <div class="section-head"><h2>Today Results</h2></div>
-        <div id="roundGrid" class="round-grid"></div>
+      <section class="results-wrap">
+        <div id="roundGrid" class="round-list"></div>
       </section>
-
-      <a class="history-button" href="/history.html">◷ Result History</a>
     </main>
   </div>
-  <script src="/user-v2.js?v=bgvideo3"></script>
+  <script src="/user-v2.js?v=jordan8-final"></script>
 </body>
 </html>
