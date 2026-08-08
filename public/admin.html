@@ -66,6 +66,11 @@
       font-size: 15px;
     }
 
+    input:focus,
+    select:focus {
+      border-color: #1677ff;
+    }
+
     button {
       width: 100%;
       padding: 13px;
@@ -80,6 +85,7 @@
 
     button:disabled {
       opacity: 0.6;
+      cursor: not-allowed;
     }
 
     .secondary {
@@ -88,7 +94,7 @@
     }
 
     .hidden {
-      display: none;
+      display: none !important;
     }
 
     .status {
@@ -131,6 +137,7 @@
 
     .section-title {
       font-size: 16px;
+      font-weight: bold;
       margin-bottom: 15px;
     }
   </style>
@@ -140,65 +147,125 @@
 
 <div class="container">
 
+  <!-- LOGIN PAGE -->
   <div id="loginPage">
-    <div class="logo-small">TARTAY 2D</div>
+
+    <div class="logo-small">
+      TARTAY 2D
+    </div>
+
     <h1>Admin Login</h1>
 
     <div class="card">
 
-      <label>Admin Password</label>
+      <label for="password">
+        Admin Password
+      </label>
 
       <input
         id="password"
         type="password"
         placeholder="Enter admin password"
+        autocomplete="current-password"
       >
 
-      <button id="loginBtn" onclick="login()">
+      <button
+        id="loginBtn"
+        type="button"
+        onclick="login()"
+      >
         Login
       </button>
 
-      <div id="loginStatus" class="status"></div>
+      <div
+        id="loginStatus"
+        class="status"
+      ></div>
 
     </div>
+
   </div>
 
 
-  <div id="dashboard" class="hidden">
+  <!-- ADMIN DASHBOARD -->
+  <div
+    id="dashboard"
+    class="hidden"
+  >
 
     <div class="topbar">
+
       <div>
-        <div class="logo-small">TARTAY 2D</div>
-        <h1 style="margin-bottom:0;">Admin</h1>
+
+        <div class="logo-small">
+          TARTAY 2D
+        </div>
+
+        <h1 style="margin-bottom:0;">
+          Admin
+        </h1>
+
       </div>
 
       <div class="badge">
         ● ONLINE
       </div>
+
     </div>
 
 
+    <!-- RESULT FORM -->
     <div class="card">
 
       <div class="section-title">
         Set 2D Result
       </div>
 
-      <label>Round</label>
+
+      <label for="round">
+        Round
+      </label>
 
       <select id="round">
-        <option>05:00 PM</option>
-        <option>06:00 PM</option>
-        <option>07:00 PM</option>
-        <option>08:00 PM</option>
-        <option>09:00 PM</option>
-        <option>10:00 PM</option>
-        <option>11:00 PM</option>
-        <option>12:00 AM</option>
+
+        <option value="05:00 PM">
+          05:00 PM
+        </option>
+
+        <option value="06:00 PM">
+          06:00 PM
+        </option>
+
+        <option value="07:00 PM">
+          07:00 PM
+        </option>
+
+        <option value="08:00 PM">
+          08:00 PM
+        </option>
+
+        <option value="09:00 PM">
+          09:00 PM
+        </option>
+
+        <option value="10:00 PM">
+          10:00 PM
+        </option>
+
+        <option value="11:00 PM">
+          11:00 PM
+        </option>
+
+        <option value="12:00 AM">
+          12:00 AM
+        </option>
+
       </select>
 
 
-      <label>2D Result</label>
+      <label for="result2d">
+        2D Result
+      </label>
 
       <input
         id="result2d"
@@ -218,7 +285,9 @@
       </div>
 
 
-      <label>SET</label>
+      <label for="setValue">
+        SET
+      </label>
 
       <input
         id="setValue"
@@ -227,7 +296,9 @@
       >
 
 
-      <label>VALUE</label>
+      <label for="valueValue">
+        VALUE
+      </label>
 
       <input
         id="valueValue"
@@ -238,6 +309,7 @@
 
       <button
         id="saveBtn"
+        type="button"
         onclick="saveResult()"
       >
         Save Result
@@ -254,6 +326,7 @@
 
     <button
       class="secondary"
+      type="button"
       onclick="logout()"
     >
       Logout
@@ -266,29 +339,43 @@
 
 <script>
 
-let adminPassword = "";
+let adminToken = "";
 
+
+/* ================================
+   RESULT PREVIEW
+================================ */
 
 function previewResult() {
 
+  const input =
+    document.getElementById("result2d");
+
   const value =
-    document
-      .getElementById("result2d")
-      .value
+    input.value
       .replace(/\D/g, "")
       .slice(0, 2);
 
-  document.getElementById("result2d").value = value;
+  input.value = value;
 
-  document.getElementById("resultPreview").textContent =
-    value || "--";
+  document
+    .getElementById("resultPreview")
+    .textContent =
+      value || "--";
 }
 
 
+/* ================================
+   LOGIN
+================================ */
+
 async function login() {
 
+  const passwordInput =
+    document.getElementById("password");
+
   const password =
-    document.getElementById("password").value;
+    passwordInput.value.trim();
 
   const status =
     document.getElementById("loginStatus");
@@ -296,16 +383,27 @@ async function login() {
   const button =
     document.getElementById("loginBtn");
 
+
   if (!password) {
-    status.textContent = "Please enter password";
-    status.className = "status error";
+
+    status.textContent =
+      "Please enter password";
+
+    status.className =
+      "status error";
+
     return;
   }
 
+
   button.disabled = true;
 
-  status.textContent = "Checking...";
-  status.className = "status";
+  status.textContent =
+    "Checking...";
+
+  status.className =
+    "status";
+
 
   try {
 
@@ -315,7 +413,8 @@ async function login() {
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
 
         body: JSON.stringify({
@@ -325,13 +424,28 @@ async function login() {
       });
 
 
-    const data = await response.json();
+    let data = {};
+
+    try {
+
+      data =
+        await response.json();
+
+    } catch (e) {
+
+      data = {};
+
+    }
 
 
-    if (!response.ok || !data.success) {
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       status.textContent =
-        data.error || "Invalid password";
+        data.error ||
+        "Invalid password";
 
       status.className =
         "status error";
@@ -340,12 +454,33 @@ async function login() {
     }
 
 
-    adminPassword = password;
+    /*
+      New API:
+      Login should return token.
+
+      Fallback included for current
+      backend compatibility.
+    */
+
+    adminToken =
+      data.token ||
+      password;
+
 
     sessionStorage.setItem(
-      "tartay_admin",
-      password
+      "tartay_admin_token",
+      adminToken
     );
+
+
+    status.textContent =
+      "Login successful ✓";
+
+    status.className =
+      "status success";
+
+
+    passwordInput.value = "";
 
 
     document
@@ -362,6 +497,11 @@ async function login() {
 
   } catch (error) {
 
+    console.error(
+      "Login error:",
+      error
+    );
+
     status.textContent =
       "Login connection error";
 
@@ -377,26 +517,63 @@ async function login() {
 }
 
 
+/* ================================
+   SAVE RESULT
+================================ */
 
 async function saveResult() {
 
   const round =
-    document.getElementById("round").value;
+    document
+      .getElementById("round")
+      .value;
+
 
   const result2d =
-    document.getElementById("result2d").value;
+    document
+      .getElementById("result2d")
+      .value
+      .trim();
+
 
   const setValue =
-    document.getElementById("setValue").value.trim();
+    document
+      .getElementById("setValue")
+      .value
+      .trim();
+
 
   const valueValue =
-    document.getElementById("valueValue").value.trim();
+    document
+      .getElementById("valueValue")
+      .value
+      .trim();
+
 
   const status =
-    document.getElementById("saveStatus");
+    document.getElementById(
+      "saveStatus"
+    );
+
 
   const button =
-    document.getElementById("saveBtn");
+    document.getElementById(
+      "saveBtn"
+    );
+
+
+  if (!adminToken) {
+
+    status.textContent =
+      "Admin session expired. Please login again.";
+
+    status.className =
+      "status error";
+
+    logout();
+
+    return;
+  }
 
 
   if (!/^\d{2}$/.test(result2d)) {
@@ -423,43 +600,100 @@ async function saveResult() {
   try {
 
     const response =
-      await fetch("/api/admin/result", {
+      await fetch(
+        "/api/admin/result",
+        {
 
-        method: "POST",
+          method: "POST",
 
-        headers: {
+          headers: {
 
-          "Content-Type":
-            "application/json",
+            "Content-Type":
+              "application/json",
 
-          "X-Admin-Password":
-            adminPassword
+            "Authorization":
+              "Bearer " +
+              adminToken,
 
-        },
+            /*
+              Compatibility with
+              current Tartay backend
+            */
 
-        body: JSON.stringify({
+            "X-Admin-Password":
+              adminToken
 
-          round_time: round,
+          },
 
-          result_2d: result2d,
+          body:
+            JSON.stringify({
 
-          set_value: setValue,
+              round_time:
+                round,
 
-          value_value: valueValue
+              result_2d:
+                result2d,
 
-        })
+              set_value:
+                setValue,
 
-      });
+              value_value:
+                valueValue
+
+            })
+
+        }
+      );
 
 
-    const data =
-      await response.json();
+    let data = {};
+
+    try {
+
+      data =
+        await response.json();
+
+    } catch (e) {
+
+      data = {};
+
+    }
 
 
-    if (!response.ok || !data.success) {
+    if (response.status === 401) {
 
       status.textContent =
-        data.error || "Save failed";
+        "Session expired. Please login again.";
+
+      status.className =
+        "status error";
+
+
+      sessionStorage.removeItem(
+        "tartay_admin_token"
+      );
+
+
+      adminToken = "";
+
+
+      setTimeout(
+        logout,
+        1000
+      );
+
+      return;
+    }
+
+
+    if (
+      !response.ok ||
+      !data.success
+    ) {
+
+      status.textContent =
+        data.error ||
+        "Save failed";
 
       status.className =
         "status error";
@@ -475,13 +709,46 @@ async function saveResult() {
       "status success";
 
 
+    /*
+      Clear fields after successful save
+    */
+
+    document
+      .getElementById("result2d")
+      .value = "";
+
+
+    document
+      .getElementById("setValue")
+      .value = "";
+
+
+    document
+      .getElementById("valueValue")
+      .value = "";
+
+
+    document
+      .getElementById(
+        "resultPreview"
+      )
+      .textContent = "--";
+
+
   } catch (error) {
+
+    console.error(
+      "Save error:",
+      error
+    );
+
 
     status.textContent =
       "Connection error";
 
     status.className =
       "status error";
+
 
   } finally {
 
@@ -492,44 +759,92 @@ async function saveResult() {
 }
 
 
+/* ================================
+   LOGOUT
+================================ */
 
 function logout() {
 
-  adminPassword = "";
+  adminToken = "";
+
 
   sessionStorage.removeItem(
-    "tartay_admin"
+    "tartay_admin_token"
   );
+
 
   document
     .getElementById("dashboard")
     .classList
     .add("hidden");
 
+
   document
     .getElementById("loginPage")
     .classList
     .remove("hidden");
 
+
+  document
+    .getElementById("password")
+    .value = "";
+
+
+  document
+    .getElementById("loginStatus")
+    .textContent = "";
+
+
+  document
+    .getElementById("saveStatus")
+    .textContent = "";
+
 }
 
 
+/* ================================
+   ENTER KEY LOGIN
+================================ */
 
-const savedPassword =
-  sessionStorage.getItem(
-    "tartay_admin"
+document
+  .getElementById("password")
+  .addEventListener(
+    "keydown",
+    function(event) {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        login();
+
+      }
+
+    }
   );
 
 
-if (savedPassword) {
+/* ================================
+   RESTORE ADMIN SESSION
+================================ */
 
-  adminPassword =
-    savedPassword;
+const savedToken =
+  sessionStorage.getItem(
+    "tartay_admin_token"
+  );
+
+
+if (savedToken) {
+
+  adminToken =
+    savedToken;
+
 
   document
     .getElementById("loginPage")
     .classList
     .add("hidden");
+
 
   document
     .getElementById("dashboard")
@@ -541,4 +856,4 @@ if (savedPassword) {
 </script>
 
 </body>
-</html>
+  </html>
