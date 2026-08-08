@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tartay 2D Admin</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #06172a;
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 520px;
+      margin: auto;
+      padding: 30px 0;
+    }
+
+    .logo-small {
+      color: #7ea9d8;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      margin-bottom: 5px;
+    }
+
+    h1 {
+      font-size: 26px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #0d2947;
+      border: 1px solid #1c4772;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      color: #9db4cb;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 13px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      border: 1px solid #315579;
+      background: #071b30;
+      color: white;
+      outline: none;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 13px;
+      border: 0;
+      border-radius: 10px;
+      background: #1677ff;
+      color: white;
+      font-weight: bold;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+    }
+
+    .secondary {
+      background: #173b5f;
+      margin-top: 10px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .status {
+      margin-top: 12px;
+      text-align: center;
+      font-size: 13px;
+      min-height: 18px;
+    }
+
+    .success {
+      color: #58d69d;
+    }
+
+    .error {
+      color: #ff6b6b;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      background: #123b35;
+      color: #65e2aa;
+      border-radius: 20px;
+      padding: 7px 11px;
+      font-size: 11px;
+    }
+
+    .result-preview {
+      text-align: center;
+      font-size: 38px;
+      font-weight: bold;
+      letter-spacing: 5px;
+      padding: 10px 0 20px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div id="loginPage">
+    <div class="logo-small">TARTAY 2D</div>
+    <h1>Admin Login</h1>
+
+    <div class="card">
+
+      <label>Admin Password</label>
+
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter admin password"
+      >
+
+      <button id="loginBtn" onclick="login()">
+        Login
+      </button>
+
+      <div id="loginStatus" class="status"></div>
+
+    </div>
+  </div>
+
+
+  <div id="dashboard" class="hidden">
+
+    <div class="topbar">
+      <div>
+        <div class="logo-small">TARTAY 2D</div>
+        <h1 style="margin-bottom:0;">Admin</h1>
+      </div>
+
+      <div class="badge">
+        ● ONLINE
+      </div>
+    </div>
+
+
+    <div class="card">
+
+      <div class="section-title">
+        Set 2D Result
+      </div>
+
+      <label>Round</label>
+
+      <select id="round">
+        <option>05:00 PM</option>
+        <option>06:00 PM</option>
+        <option>07:00 PM</option>
+        <option>08:00 PM</option>
+        <option>09:00 PM</option>
+        <option>10:00 PM</option>
+        <option>11:00 PM</option>
+        <option>12:00 AM</option>
+      </select>
+
+
+      <label>2D Result</label>
+
+      <input
+        id="result2d"
+        type="text"
+        inputmode="numeric"
+        maxlength="2"
+        placeholder="Example: 25"
+        oninput="previewResult()"
+      >
+
+
+      <div
+        id="resultPreview"
+        class="result-preview"
+      >
+        --
+      </div>
+
+
+      <label>SET</label>
+
+      <input
+        id="setValue"
+        type="text"
+        placeholder="SET value"
+      >
+
+
+      <label>VALUE</label>
+
+      <input
+        id="valueValue"
+        type="text"
+        placeholder="VALUE"
+      >
+
+
+      <button
+        id="saveBtn"
+        onclick="saveResult()"
+      >
+        Save Result
+      </button>
+
+
+      <div
+        id="saveStatus"
+        class="status"
+      ></div>
+
+    </div>
+
+
+    <button
+      class="secondary"
+      onclick="logout()"
+    >
+      Logout
+    </button>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let adminPassword = "";
+
+
+function previewResult() {
+
+  const value =
+    document
+      .getElementById("result2d")
+      .value
+      .replace(/\D/g, "")
+      .slice(0, 2);
+
+  document.getElementById("result2d").value = value;
+
+  document.getElementById("resultPreview").textContent =
+    value || "--";
+}
+
+
+async function login() {
+
+  const password =
+    document.getElementById("password").value;
+
+  const status =
+    document.getElementById("loginStatus");
+
+  const button =
+    document.getElementById("loginBtn");
+
+  if (!password) {
+    status.textContent = "Please enter password";
+    status.className = "status error";
+    return;
+  }
+
+  button.disabled = true;
+
+  status.textContent = "Checking...";
+  status.className = "status";
+
+  try {
+
+    const response =
+      await fetch("/api/admin/login", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          password: password
+        })
+
+      });
+
+
+    const data = await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      status.textContent =
+        data.error || "Invalid password";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+
+    adminPassword = password;
+
+    sessionStorage.setItem(
+      "tartay_admin",
+      password
+    );
+
+
+    document
+      .getElementById("loginPage")
+      .classList
+      .add("hidden");
+
+
+    document
+      .getElementById("dashboard")
+      .classList
+      .remove("hidden");
+
+
+  } catch (error) {
+
+    status.textContent =
+      "Login connection error";
+
+    status.className =
+      "status error";
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+
+async function saveResult() {
+
+  const round =
+    document.getElementById("round").value;
+
+  const result2d =
+    document.getElementById("result2d").value;
+
+  const setValue =
+    document.getElementById("setValue").value.trim();
+
+  const valueValue =
+    document.getElementById("valueValue").value.trim();
+
+  const status =
+    document.getElementById("saveStatus");
+
+  const button =
+    document.getElementById("saveBtn");
+
+
+  if (!/^\d{2}$/.test(result2d)) {
+
+    status.textContent =
+      "2D result must be exactly 2 digits.";
+
+    status.className =
+      "status error";
+
+    return;
+  }
+
+
+  button.disabled = true;
+
+  status.textContent =
+    "Saving...";
+
+  status.className =
+    "status";
+
+
+  try {
+
+    const response =
+      await fetch("/api/admin/result", {
+
+        method: "POST",
+
+        headers: {
+
+          "Content-Type":
+            "application/json",
+
+          "X-Admin-Password":
+            adminPassword
+
+        },
+
+        body: JSON.stringify({
+
+          round_time: round,
+
+          result_2d: result2d,
+
+          set_value: setValue,
+
+          value_value: valueValue
+
+        })
+
+      });
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok || !data.success) {
+
+      status.textContent =
+        data.error || "Save failed";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+
+    status.textContent =
+      "Result saved successfully ✓";
+
+    status.className =
+      "status success";
+
+
+  } catch (error) {
+
+    status.textContent =
+      "Connection error";
+
+    status.className =
+      "status error";
+
+  } finally {
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+
+function logout() {
+
+  adminPassword = "";
+
+  sessionStorage.removeItem(
+    "tartay_admin"
+  );
+
+  document
+    .getElementById("dashboard")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("loginPage")
+    .classList
+    .remove("hidden");
+
+}
+
+
+
+const savedPassword =
+  sessionStorage.getItem(
+    "tartay_admin"
+  );
+
+
+if (savedPassword) {
+
+  adminPassword =
+    savedPassword;
+
+  document
+    .getElementById("loginPage")
+    .classList
+    .add("hidden");
+
+  document
+    .getElementById("dashboard")
+    .classList
+    .remove("hidden");
+
+}
+
+</script>
+
+</body>
+</html>
