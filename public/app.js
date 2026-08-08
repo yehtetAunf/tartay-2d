@@ -14,13 +14,19 @@ const setEl = document.getElementById("set");
 const valueEl = document.getElementById("value");
 const twoDEl = document.getElementById("twoD");
 const roundEl = document.getElementById("round");
+const onlineEl = document.querySelector(".online");
+
+let loadingResults = false;
+let refreshTimer = null;
 
 
-/* =========================
+/* ========================================
    CREATE ROUND CARDS
-========================= */
+======================================== */
 
 function createRoundCards() {
+  if (!roundsEl) return;
+
   roundsEl.innerHTML = times.map(time => `
     <article data-round="${time}">
       <b>${time}</b>
@@ -30,14 +36,29 @@ function createRoundCards() {
 }
 
 
-/* =========================
+/* ========================================
+   CONNECTION STATUS
+======================================== */
+
+function setOnlineStatus(isOnline) {
+  if (!onlineEl) return;
+
+  if (isOnline) {
+    onlineEl.textContent = "● ONLINE";
+    onlineEl.style.opacity = "1";
+  } else {
+    onlineEl.textContent = "● OFFLINE";
+    onlineEl.style.opacity = "0.65";
+  }
+}
+
+
+/* ========================================
    UPDATE ROUND CARDS
-========================= */
+======================================== */
 
 function updateRoundCards(results) {
-
   times.forEach(time => {
-
     const card = document.querySelector(
       `[data-round="${time}"]`
     );
@@ -50,82 +71,96 @@ function updateRoundCards(results) {
 
     const resultEl = card.querySelector("span");
 
+    if (!resultEl) return;
+
     resultEl.textContent =
-      result?.result_2d || "--";
+      result && result.result_2d
+        ? result.result_2d
+        : "--";
   });
 }
 
 
-/* =========================
-   UPDATE CURRENT RESULT
-========================= */
+/* ========================================
+   CURRENT RESULT
+======================================== */
 
 function updateCurrentResult(results) {
+  if (!Array.isArray(results) || results.length === 0) {
+    if (setEl) setEl.textContent = "--";
+    if (valueEl) valueEl.textContent = "--";
+    if (twoDEl) twoDEl.textContent = "--";
 
-  if (!results || results.length === 0) {
-
-    setEl.textContent = "--";
-    valueEl.textContent = "--";
-    twoDEl.textContent = "--";
-    roundEl.textContent = "Waiting for result";
+    if (roundEl) {
+      roundEl.textContent = "Waiting for result";
+    }
 
     return;
   }
 
-
   /*
-    Backend sends today's results
-    ordered by round time.
-
-    Last saved round = current result.
+    Results come from backend in round order.
+    The latest completed round becomes
+    CURRENT RESULT.
   */
 
   const latest = results[results.length - 1];
 
+  if (twoDEl) {
+    twoDEl.textContent =
+      latest.result_2d || "--";
+  }
 
-  twoDEl.textContent =
-    latest.result_2d || "--";
+  if (roundEl) {
+    roundEl.textContent =
+      latest.round_time || "Waiting for result";
+  }
 
+  if (setEl) {
+    setEl.textContent =
+      latest.set_value || "--";
+  }
 
-  roundEl.textContent =
-    latest.round_time || "Waiting for result";
-
-
-  setEl.textContent =
-    latest.set_value || "--";
-
-
-  valueEl.textContent =
-    latest.value_value || "--";
+  if (valueEl) {
+    valueEl.textContent =
+      latest.value_value || "--";
+  }
 }
 
 
-/* =========================
+/* ========================================
    LOAD TODAY RESULTS
-========================= */
+======================================== */
 
 async function loadTodayResults() {
+  /*
+    Prevent two refresh requests
+    from running at the same time.
+  */
+
+  if (loadingResults) return;
+
+  loadingResults = true;
 
   try {
-
     const response = await fetch(
-      "/api/results/today",
+      `/api/results/today?t=${Date.now()}`,
       {
         method: "GET",
-        cache: "no-store"
+        cache: "no-store",
+        headers: {
+          "Accept": "application/json"
+        }
       }
     );
 
-
     if (!response.ok) {
       throw new Error(
-        `HTTP ${response.status}`
+        `Result API HTTP ${response.status}`
       );
     }
 
-
     const data = await response.json();
-
 
     if (!data.success) {
       throw new Error(
@@ -133,106 +168,161 @@ async function loadTodayResults() {
       );
     }
 
-
     const results =
       Array.isArray(data.results)
         ? data.results
         : [];
 
-
     updateRoundCards(results);
-
     updateCurrentResult(results);
 
+    setOnlineStatus(true);
 
     console.log(
-      "Tartay 2D results loaded:",
+      "Tartay 2D results updated:",
+      data.date,
       results
     );
 
-
   } catch (error) {
-
     console.error(
       "Result loading error:",
       error
     );
 
+    setOnlineStatus(false);
+
+  } finally {
+    loadingResults = false;
   }
 }
 
 
-/* =========================
-   CHECK SERVER STATUS
-========================= */
+/* ========================================
+   SERVER STATUS
+======================================== */
 
 async function checkStatus() {
-
   try {
-
     const response = await fetch(
-      "/api/status",
+      `/api/status?t=${Date.now()}`,
       {
         cache: "no-store"
       }
     );
 
+    if (!response.ok) {
+      throw new Error(
+        `Status HTTP ${response.status}`
+      );
+    }
+
     const data = await response.json();
 
-    console.log(
-      "Tartay 2D status:",
-      data
-    );
+    if (data.status === "Online") {
+      setOnlineStatus(true);
+    }
 
   } catch (error) {
-
     console.error(
-      "Status check failed:",
+      "Server status error:",
       error
     );
 
+    setOnlineStatus(false);
   }
 }
 
 
-/* =========================
-   START APP
-========================= */
-
-createRoundCards();
-
-checkStatus();
-
-loadTodayResults();
-
-
-/* =========================
+/* ========================================
    AUTO REFRESH
-========================= */
+======================================== */
 
-setInterval(() => {
+function startAutoRefresh() {
+  if (refreshTimer) {
+    clearInterval(refreshTimer);
+  }
 
+  /*
+    Check D1 results every 5 seconds.
+
+    Admin saves new result
+        ↓
+    D1
+        ↓
+    User App automatically updates
+  */
+
+  refreshTimer = setInterval(() => {
+    if (
+      document.visibilityState === "visible"
+    ) {
+      loadTodayResults();
+    }
+  }, 5000);
+}
+
+
+/* ========================================
+   INTERNET EVENTS
+======================================== */
+
+window.addEventListener("online", () => {
+  setOnlineStatus(true);
+
+  checkStatus();
   loadTodayResults();
+});
 
-}, 10000);
+
+window.addEventListener("offline", () => {
+  setOnlineStatus(false);
+});
 
 
-/* =========================
-   REFRESH WHEN USER
-   RETURNS TO APP
-========================= */
+/* ========================================
+   APP RETURNS TO FOREGROUND
+======================================== */
 
 document.addEventListener(
   "visibilitychange",
   () => {
-
     if (
       document.visibilityState === "visible"
     ) {
-
+      checkStatus();
       loadTodayResults();
-
     }
-
   }
 );
+
+
+/* ========================================
+   PAGE FOCUS
+======================================== */
+
+window.addEventListener("focus", () => {
+  loadTodayResults();
+});
+
+
+/* ========================================
+   START TARTAY 2D
+======================================== */
+
+function startApp() {
+  createRoundCards();
+
+  setOnlineStatus(
+    navigator.onLine
+  );
+
+  checkStatus();
+
+  loadTodayResults();
+
+  startAutoRefresh();
+}
+
+
+startApp();
