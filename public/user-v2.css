@@ -2,8 +2,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--white);background:#091224}
 body{min-height:100vh;overflow-x:hidden}
-.video-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0b1425 url('/tartay-couple.png') center/cover no-repeat}
-.video-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.34) saturate(.8);transform:scale(1.025)}
+.video-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#0b1425 url('/tartay-background.png') center/cover no-repeat}
 .video-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,15,31,.70),rgba(8,16,31,.82) 42%,rgba(5,9,18,.92))}
 .app-shell{position:relative;z-index:2;width:100%;max-width:720px;margin:0 auto;min-height:100dvh;padding-bottom:max(16px,env(safe-area-inset-bottom));background:rgba(12,22,42,.28)}
 .topbar{height:78px;display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;background:rgba(12,22,42,.86);backdrop-filter:blur(8px)}
@@ -38,4 +37,4 @@ body{min-height:100vh;overflow-x:hidden}
 @media(max-width:360px){
   .brand{font-size:27px}.top-history{font-size:15px;padding:9px 10px}.big-result{font-size:82px}.result-head,.result-body{grid-template-columns:1.12fr .95fr 1.23fr .70fr}.cell-time{font-size:14px}.cell-set,.cell-value{font-size:12px}.cell-2d{font-size:25px}
 }
-@media(prefers-reduced-motion:reduce){.video-bg video{display:none}}
+@media(prefers-reduced-motion:reduce){}
