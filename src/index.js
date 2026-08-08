@@ -1813,45 +1813,84 @@ function appPage() {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#020514">
+<meta name="theme-color" content="#111a2d">
 <title>တာတေ 2D</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#020514;color:#f7f8ff;font-family:Arial,"Noto Sans Myanmar",sans-serif}body{min-height:100vh;background:#020514}button,a{-webkit-tap-highlight-color:transparent}.motion-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#020514 url("/tartay-couple.png") center/cover no-repeat}.motion-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.38) saturate(.82)}.motion-bg:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,4,15,.48),rgba(1,4,15,.58) 45%,rgba(1,4,15,.76))}.page{position:relative;z-index:1;width:100vw!important;max-width:none!important;margin:0!important;padding:26px 14px 46px!important}.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;padding:0 7px}.brand{font-size:34px;font-weight:800;line-height:1;letter-spacing:-1px}.brand b{color:#ffc400}.status{display:flex;align-items:center;gap:8px;border:2px solid #2ccf72;border-radius:999px;padding:9px 17px;font-size:14px;color:#eafff2}.status-dot{width:13px;height:13px;border-radius:50%;background:#64e7a0}.status.offline{border-color:#d84d68;color:#ffe5ea}.status.offline .status-dot{background:#ef667d}.hero{border:2px solid #40588e;border-radius:31px;background:linear-gradient(180deg,rgba(8,17,43,.98),rgba(5,11,31,.98));padding:32px 27px 25px;min-height:418px;box-shadow:inset 0 0 28px rgba(44,72,145,.08)}.hero-title{text-align:center;color:#b9bfd4;font-size:22px;letter-spacing:3px}.big{height:185px;display:flex;align-items:center;justify-content:center;color:#ffc400;font-size:82px;font-weight:900;letter-spacing:5px}.market{display:grid;grid-template-columns:1fr 1fr;gap:14px}.market-box{height:102px;border:2px solid #21345f;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center}.market-box span{color:#9198ad;font-size:15px;margin-bottom:13px}.market-box strong{font-size:28px}.updated{text-align:center;margin-top:8px;color:#b8bfd0;font-size:20px;letter-spacing:2px}.section{margin-top:34px}.section h2{margin:0 0 29px;font-size:31px}.round-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.round-card{height:96px;border:2px solid #20365f;border-radius:19px;overflow:hidden;display:grid;grid-template-columns:1fr 100px;background:#08122d}.round-time{display:flex;align-items:center;padding:0 24px;font-size:21px;font-weight:600;white-space:nowrap}.clock{font-size:13px;margin-right:8px}.round-result{display:flex;align-items:center;justify-content:center;background:#111e3b;font-size:25px;font-weight:700;color:#d8deee}.history-button{margin-top:26px;width:100%;height:88px;border:2px solid #354d87;border-radius:20px;display:flex;align-items:center;justify-content:center;gap:8px;color:#f7f8ff;text-decoration:none;font-size:23px}.hidden{display:none!important}
-@media(max-width:430px){html,body{width:100%;overflow-x:hidden}.page{width:100vw!important;max-width:none!important;margin:0!important;padding:20px 12px 34px!important}.topbar{padding:0 4px;margin-bottom:18px}.brand{font-size:29px}.status{padding:8px 14px;font-size:12px}.hero{width:100%!important;padding:24px 16px 20px;min-height:365px;border-radius:24px}.hero-title{font-size:19px}.big{height:150px;font-size:68px}.market-box{height:82px}.updated{font-size:16px}.section{margin-top:24px}.section h2{font-size:27px;margin-bottom:18px}.round-grid{width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.round-card{width:100%!important;height:76px;grid-template-columns:minmax(0,1fr) 62px;border-radius:14px}.round-time{padding:0 10px;font-size:15px}.round-result{font-size:21px}.history-button{width:100%!important;height:68px;margin-top:16px;font-size:18px;border-radius:16px}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;min-height:100%;font-family:Arial,"Noto Sans Myanmar",sans-serif;background:#10192c;color:#fff}
+body{min-height:100dvh;overflow-x:hidden}
+.motion-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#10192c url("/tartay-couple.png") center/cover no-repeat}
+.motion-bg video{width:100%;height:100%;object-fit:cover;object-position:center;filter:brightness(.17) saturate(.65)}
+.motion-bg:after{content:"";position:absolute;inset:0;background:rgba(10,19,37,.84)}
+.page{position:relative;z-index:1;width:100%;max-width:760px;min-height:100dvh;margin:0 auto;padding:14px 14px calc(18px + env(safe-area-inset-bottom))}
+.topbar{height:70px;display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:10px;margin-bottom:6px}
+.back-btn{width:48px;height:48px;border:0;border-radius:12px;background:rgba(27,39,65,.94);color:#fff;font-size:38px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.brand{font-size:34px;font-weight:900;white-space:nowrap;letter-spacing:-.8px}.brand b{color:#ffc400}
+.top-history{height:48px;padding:0 14px;border-radius:12px;background:rgba(27,39,65,.94);display:flex;align-items:center;gap:7px;color:#ffc400;text-decoration:none;font-size:19px;font-weight:800;white-space:nowrap}
+.hero{position:relative;text-align:center;padding:8px 0 13px}
+.status{position:absolute;right:2px;top:2px;display:flex;align-items:center;gap:6px;border:1.5px solid #32d97a;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;background:rgba(9,25,26,.5)}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#54e895;box-shadow:0 0 8px #54e895}.status.offline{border-color:#e85c70}.status.offline .status-dot{background:#e85c70;box-shadow:none}
+.big{height:185px;display:flex;align-items:center;justify-content:center;color:#ffc000;font-size:126px;font-weight:900;line-height:1;text-shadow:0 4px 10px rgba(0,0,0,.24)}
+.updated{display:flex;justify-content:center;align-items:center;gap:8px;font-size:16px;font-weight:800;margin:0 0 17px;color:#f6f7fb;text-shadow:0 1px 3px #000}
+.round-list{display:flex;flex-direction:column;gap:9px}
+.result-card{overflow:hidden;border-radius:13px;background:#f7f7f8;box-shadow:0 2px 8px rgba(0,0,0,.28)}
+.result-head,.result-body{display:grid;grid-template-columns:1.08fr 1fr 1.25fr .72fr;text-align:center;align-items:center}
+.result-head{height:29px;background:#020202;color:#b9b9bb;font-size:14px;font-weight:800}
+.result-body{height:62px;background:#fafafa;color:#0e1728;font-weight:900}
+.result-body>div{min-width:0;padding:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cell-time{font-size:19px}.cell-set,.cell-value{font-size:17px}.cell-2d{height:54px;margin:4px;border-radius:11px;background:#eeeeef;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:900}
+@media(max-width:520px){
+ .page{padding:8px 10px calc(12px + env(safe-area-inset-bottom))}.topbar{height:58px;grid-template-columns:44px 1fr auto;gap:7px}.back-btn{width:42px;height:42px;font-size:33px;border-radius:10px}.brand{font-size:28px}.top-history{height:42px;padding:0 10px;font-size:16px;border-radius:10px}
+ .hero{padding-top:2px}.status{top:0}.big{height:137px;font-size:92px}.updated{font-size:13px;margin-bottom:10px}
+ .round-list{gap:7px}.result-head{height:23px;font-size:11px}.result-body{height:50px}.cell-time{font-size:15px}.cell-set,.cell-value{font-size:13px}.cell-2d{height:44px;margin:3px;font-size:29px;border-radius:9px}
+}
+@media(max-width:380px){.brand{font-size:25px}.top-history{font-size:14px;padding:0 8px}.big{height:122px;font-size:84px}.result-head,.result-body{grid-template-columns:1.08fr .94fr 1.24fr .74fr}.cell-time{font-size:14px}.cell-set,.cell-value{font-size:12px}.cell-2d{font-size:27px}}
 </style>
 </head>
 <body>
 <div class="motion-bg" aria-hidden="true"><video autoplay muted loop playsinline poster="/tartay-couple.png"><source src="/tartay-couple.mp4" type="video/mp4"></video></div>
 <div class="page">
   <header class="topbar">
+    <button class="back-btn" type="button" onclick="history.back()">‹</button>
     <div class="brand">တာတေ <b>2D</b></div>
-    <div id="statusBadge" class="status"><span class="status-dot"></span><span id="statusText">LIVE</span></div>
+    <a class="top-history" href="/history"><span>▣</span><span>History</span></a>
   </header>
-  <main>
-    <section class="hero">
-      <div class="hero-title">LIVE RESULT</div>
-      <div id="bigResult" class="big">--</div>
-      <div class="market">
-        <div class="market-box"><span>SET</span><strong id="liveSet">--</strong></div>
-        <div class="market-box"><span>VALUE</span><strong id="liveValue">--</strong></div>
-      </div>
-      <div id="updatedText" class="updated">Waiting for result</div>
-    </section>
-    <section class="section">
-      <h2>Today Results</h2>
-      <div id="roundGrid" class="round-grid"></div>
-    </section>
-    <a class="history-button" href="/history"><span>◷</span><span>Result History</span></a>
-  </main>
+  <section class="hero">
+    <div id="statusBadge" class="status"><span class="status-dot"></span><span id="statusText">LIVE</span></div>
+    <div id="bigResult" class="big">--</div>
+    <div class="updated">◷ <span>Updated =</span> <span id="updatedText">Waiting for result</span></div>
+  </section>
+  <section id="roundGrid" class="round-list"></section>
 </div>
 <script>
 (function(){
   var TIMES=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
-  function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
-  function renderRounds(rounds){var safe=Array.isArray(rounds)?rounds:[];document.getElementById('roundGrid').innerHTML=TIMES.map(function(t,i){var r=safe[i]||{};var published=r.status==='published'&&/^\\d{2}$/.test(String(r.result||''));return '<div class="round-card"><div class="round-time"><span class="clock">◷</span>'+esc(t)+'</div><div class="round-result">'+(published?esc(r.result):'--')+'</div></div>'}).join('')}
-  function setStatus(status){var badge=document.getElementById('statusBadge'),txt=document.getElementById('statusText');var offline=status&&status.code==='offline';badge.classList.toggle('offline',offline);txt.textContent=offline?'OFFLINE':((status&&status.label)||'LIVE')}
-  function latestRound(rounds){var p=(Array.isArray(rounds)?rounds:[]).filter(function(r){return r&&r.status==='published'&&/^\\d{2}$/.test(String(r.result||''))});p.sort(function(a,b){return Number(b.publishedAtMs||0)-Number(a.publishedAtMs||0)});return p[0]||null}
-  async function load(){try{var res=await fetch('/api/state?t='+Date.now(),{cache:'no-store'});var data=await res.json();if(!res.ok||!data.success)throw new Error(data.message||'Load failed');setStatus(data.appStatus||{label:'LIVE'});var live=data.live||{};var latest=latestRound(data.rounds);document.getElementById('bigResult').textContent=live.status==='published'?(live.result||'--'):(latest?latest.result:'--');document.getElementById('liveSet').textContent=live.status==='published'?(live.set||'--'):(latest?(latest.set||'--'):'--');document.getElementById('liveValue').textContent=live.status==='published'?(live.value||'--'):(latest?(latest.value||'--'):'--');document.getElementById('updatedText').textContent=(live.status==='published'||latest)?'Latest result':'Waiting for result';renderRounds(data.rounds)}catch(e){setStatus({code:'offline'});document.getElementById('bigResult').textContent='--';document.getElementById('liveSet').textContent='--';document.getElementById('liveValue').textContent='--';document.getElementById('updatedText').textContent='Waiting for result';renderRounds([])}}
+  function esc(v){return String(v==null?"--":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+  function formatUpdated(value){if(!value)return "Waiting for result";var d=new Date(value);if(Number.isNaN(d.getTime()))return String(value);return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit",hour:"numeric",minute:"2-digit",second:"2-digit",hour12:true}).format(d)}
+  function normalizeTime(t){return String(t||"").trim().toUpperCase().replace(/^([1-9]):/,"0$1:")}
+  function renderRounds(rounds){
+    var safe=Array.isArray(rounds)?rounds:[];
+    var map={};safe.forEach(function(r,i){map[normalizeTime(r.time||r.result_time||TIMES[i])]=r||{}});
+    document.getElementById("roundGrid").innerHTML=TIMES.map(function(t,i){
+      var r=map[t]||safe[i]||{};
+      var result=String(r.result||r.result_number||"");
+      var published=(r.status==="published"||r.publishedAt||r.published_at)&&/^\d{2}$/.test(result);
+      var set=published?(r.set||r.set_value||"--"):"--";
+      var value=published?(r.value||r.value_value||"--"):"--";
+      var num=published?result:"--";
+      return '<article class="result-card"><div class="result-head"><div>Time</div><div>Set</div><div>Value</div><div>2D</div></div><div class="result-body"><div class="cell-time">'+esc(t)+'</div><div class="cell-set">'+esc(set)+'</div><div class="cell-value">'+esc(value)+'</div><div class="cell-2d">'+esc(num)+'</div></div></article>';
+    }).join("");
+  }
+  function setStatus(status){var badge=document.getElementById("statusBadge"),txt=document.getElementById("statusText");var offline=status&&status.code==="offline";badge.classList.toggle("offline",offline);txt.textContent=offline?"OFFLINE":((status&&status.label)||"LIVE")}
+  function latestRound(rounds){var p=(Array.isArray(rounds)?rounds:[]).filter(function(r){return r&&(r.status==="published"||r.publishedAt||r.published_at)&&/^\d{2}$/.test(String(r.result||r.result_number||""))});p.sort(function(a,b){return Number(b.publishedAtMs||b.published_at_ms||0)-Number(a.publishedAtMs||a.published_at_ms||0)});return p[0]||null}
+  async function load(){try{
+    var res=await fetch("/api/state?t="+Date.now(),{cache:"no-store"}),data=await res.json();if(!res.ok||!data.success)throw new Error("Load failed");
+    setStatus(data.appStatus||{label:"LIVE"});var live=data.live||{},latest=latestRound(data.rounds);
+    var liveResult=String(live.result||live.result_number||"");var livePublished=(live.status==="published"||live.publishedAt||live.published_at)&&/^\d{2}$/.test(liveResult);
+    document.getElementById("bigResult").textContent=livePublished?liveResult:(latest?String(latest.result||latest.result_number):"--");
+    document.getElementById("updatedText").textContent=livePublished?formatUpdated(live.updatedAt||live.updated_at||live.publishedAt||live.published_at):(latest?formatUpdated(latest.updatedAt||latest.updated_at||latest.publishedAt||latest.published_at):"Waiting for result");
+    renderRounds(data.rounds);
+  }catch(e){setStatus({code:"offline"});document.getElementById("bigResult").textContent="--";document.getElementById("updatedText").textContent="Waiting for result";renderRounds([])}}
   renderRounds([]);load();setInterval(load,10000);
 })();
 </script>
