@@ -1,1 +1,618 @@
-<!doctype html><html lang="my"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>2D History</title><link rel="stylesheet" href="/app.css"></head><body><main class="app"><header><div><small>TARTAY 2D</small><h1>2D History</h1></div><a class="back" href="/">← Home</a></header><section class="empty"><strong>No results yet</strong><p>Admin results will appear here.</p></section></main></body></html>
+<!doctype html>
+<html lang="my">
+
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  >
+
+  <title>2D History</title>
+
+  <link
+    rel="stylesheet"
+    href="/app.css"
+  >
+
+  <style>
+
+    .history-header {
+      margin-bottom: 22px;
+    }
+
+    .history-date {
+      font-size: 14px;
+      color: #8fb0d2;
+      margin-bottom: 10px;
+      padding-left: 3px;
+    }
+
+    .history-group {
+      margin-bottom: 25px;
+    }
+
+    .history-card {
+      background: #0d2947;
+      border: 1px solid #1c4772;
+      border-radius: 15px;
+      overflow: hidden;
+    }
+
+    .history-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 15px;
+
+      padding: 15px 16px;
+
+      border-bottom:
+        1px solid rgba(255,255,255,0.07);
+    }
+
+    .history-row:last-child {
+      border-bottom: 0;
+    }
+
+    .history-time {
+      font-size: 13px;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .history-result {
+      font-size: 23px;
+      font-weight: bold;
+      color: #78b7ff;
+      letter-spacing: 2px;
+    }
+
+    .history-details {
+      grid-column: 1 / -1;
+
+      display: flex;
+      gap: 18px;
+
+      font-size: 11px;
+      color: #819bb5;
+
+      margin-top: -5px;
+    }
+
+    .history-details strong {
+      color: #b9cee2;
+      font-weight: 500;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 45px 10px;
+      color: #8fa9c3;
+      font-size: 14px;
+    }
+
+    .history-empty {
+      text-align: center;
+
+      background: #0d2947;
+
+      border:
+        1px solid #1c4772;
+
+      border-radius: 15px;
+
+      padding: 35px 20px;
+
+      margin-top: 20px;
+    }
+
+    .history-empty strong {
+      display: block;
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .history-empty p {
+      font-size: 13px;
+      color: #8fa9c3;
+    }
+
+    .history-error {
+      text-align: center;
+      padding: 30px 15px;
+      color: #ff7676;
+      font-size: 13px;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<main class="app">
+
+
+  <!-- HEADER -->
+
+  <header class="history-header">
+
+    <div>
+
+      <small>
+        TARTAY 2D
+      </small>
+
+      <h1>
+        2D History
+      </h1>
+
+    </div>
+
+
+    <a
+      class="back"
+      href="/"
+    >
+      ← Home
+    </a>
+
+  </header>
+
+
+
+  <!-- HISTORY CONTENT -->
+
+  <section id="historyContent">
+
+    <div class="loading">
+      Loading history...
+    </div>
+
+  </section>
+
+
+</main>
+
+
+
+<script>
+
+const times = [
+
+  "05:00 PM",
+  "06:00 PM",
+  "07:00 PM",
+  "08:00 PM",
+  "09:00 PM",
+  "10:00 PM",
+  "11:00 PM",
+  "12:00 AM"
+
+];
+
+
+const historyContent =
+  document.getElementById(
+    "historyContent"
+  );
+
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
+
+
+
+/* =========================
+   FORMAT DATE
+========================= */
+
+function formatDate(dateString) {
+
+  try {
+
+    const parts =
+      dateString.split("-");
+
+    if (parts.length !== 3) {
+      return dateString;
+    }
+
+
+    const year =
+      Number(parts[0]);
+
+    const month =
+      Number(parts[1]);
+
+    const day =
+      Number(parts[2]);
+
+
+    const date =
+      new Date(
+        year,
+        month - 1,
+        day
+      );
+
+
+    return new Intl.DateTimeFormat(
+      "en-US",
+      {
+        weekday: "short",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      }
+    ).format(date);
+
+
+  } catch {
+
+    return dateString;
+
+  }
+
+}
+
+
+
+/* =========================
+   GROUP BY DATE
+========================= */
+
+function groupResultsByDate(results) {
+
+  const groups = {};
+
+
+  results.forEach(result => {
+
+    const date =
+      result.result_date;
+
+
+    if (!groups[date]) {
+
+      groups[date] = [];
+
+    }
+
+
+    groups[date].push(result);
+
+  });
+
+
+  return groups;
+
+}
+
+
+
+/* =========================
+   SORT ROUNDS
+========================= */
+
+function sortRounds(results) {
+
+  return [...results].sort(
+    (a, b) => {
+
+      return (
+        times.indexOf(a.round_time) -
+        times.indexOf(b.round_time)
+      );
+
+    }
+  );
+
+}
+
+
+
+/* =========================
+   CREATE HISTORY ROW
+========================= */
+
+function createResultRow(result) {
+
+  const round =
+    escapeHtml(
+      result.round_time || "--"
+    );
+
+
+  const result2d =
+    escapeHtml(
+      result.result_2d || "--"
+    );
+
+
+  const setValue =
+    escapeHtml(
+      result.set_value || "--"
+    );
+
+
+  const valueValue =
+    escapeHtml(
+      result.value_value || "--"
+    );
+
+
+  return `
+
+    <div class="history-row">
+
+      <div class="history-time">
+        ${round}
+      </div>
+
+
+      <div class="history-result">
+        ${result2d}
+      </div>
+
+
+      <div class="history-details">
+
+        <span>
+          SET:
+          <strong>
+            ${setValue}
+          </strong>
+        </span>
+
+
+        <span>
+          VALUE:
+          <strong>
+            ${valueValue}
+          </strong>
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+
+/* =========================
+   DISPLAY HISTORY
+========================= */
+
+function displayHistory(results) {
+
+
+  if (
+    !Array.isArray(results) ||
+    results.length === 0
+  ) {
+
+    historyContent.innerHTML = `
+
+      <div class="history-empty">
+
+        <strong>
+          No results yet
+        </strong>
+
+        <p>
+          Admin results will appear here.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+
+  const groups =
+    groupResultsByDate(results);
+
+
+  const dates =
+    Object
+      .keys(groups)
+      .sort()
+      .reverse();
+
+
+
+  historyContent.innerHTML =
+    dates
+      .map(date => {
+
+
+        const resultsForDate =
+          sortRounds(
+            groups[date]
+          );
+
+
+        const rows =
+          resultsForDate
+            .map(createResultRow)
+            .join("");
+
+
+        return `
+
+          <section
+            class="history-group"
+          >
+
+            <div
+              class="history-date"
+            >
+              ${escapeHtml(
+                formatDate(date)
+              )}
+            </div>
+
+
+            <div
+              class="history-card"
+            >
+
+              ${rows}
+
+            </div>
+
+          </section>
+
+        `;
+
+      })
+      .join("");
+
+}
+
+
+
+/* =========================
+   LOAD HISTORY
+========================= */
+
+async function loadHistory() {
+
+  try {
+
+
+    const response =
+      await fetch(
+        "/api/results/history?limit=500",
+        {
+          method: "GET",
+          cache: "no-store"
+        }
+      );
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        `HTTP ${response.status}`
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    if (!data.success) {
+
+      throw new Error(
+        data.error ||
+        "Unable to load history"
+      );
+
+    }
+
+
+    displayHistory(
+      data.results || []
+    );
+
+
+  } catch (error) {
+
+
+    console.error(
+      "History error:",
+      error
+    );
+
+
+    historyContent.innerHTML = `
+
+      <div class="history-error">
+
+        Unable to load history.
+
+        <br><br>
+
+        Please refresh the page.
+
+      </div>
+
+    `;
+
+  }
+
+}
+
+
+
+/* =========================
+   START
+========================= */
+
+loadHistory();
+
+
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+setInterval(
+  loadHistory,
+  15000
+);
+
+
+
+/* =========================
+   REFRESH WHEN RETURNING
+========================= */
+
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if (
+      document.visibilityState
+      === "visible"
+    ) {
+
+      loadHistory();
+
+    }
+
+  }
+);
+
+</script>
+
+
+</body>
+  </html>
