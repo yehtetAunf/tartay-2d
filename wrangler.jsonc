@@ -2,8 +2,17 @@
   "name": "tartay-2d",
   "main": "src/index.js",
   "compatibility_date": "2026-08-01",
+
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
-  }
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "tartay-db",
+      "database_id": "4b3d799c-9fd9-4919-ba49-b84c2af27c3e"
+    }
+  ]
 }
