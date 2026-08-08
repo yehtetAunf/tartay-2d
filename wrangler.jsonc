@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "nz-six-times-2d-2026",
+  "name": "tartay-2d",
   "main": "src/index.js",
   "compatibility_date": "2026-07-18",
   "keep_vars": true,
@@ -13,7 +13,7 @@
   "kv_namespaces": [
     {
       "binding": "DATA",
-      "id": "fb1216ee50624ea79f74f71157e7666d"
+      "id": "f30fcd06d7434b1c8f820052ba06b4bf"
     }
   ],
 
