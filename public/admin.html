@@ -67,6 +67,11 @@ select{
   font-size:15px;
 }
 
+input:focus,
+select:focus{
+  border-color:#1677ff;
+}
+
 button{
   width:100%;
   padding:14px;
@@ -80,6 +85,7 @@ button{
 
 button:disabled{
   opacity:.6;
+  cursor:not-allowed;
 }
 
 .login-btn{
@@ -102,7 +108,7 @@ button:disabled{
 }
 
 .hidden{
-  display:none;
+  display:none !important;
 }
 
 .status{
@@ -187,17 +193,21 @@ button:disabled{
 
   <div class="card">
 
-    <label>Admin Password</label>
+    <label for="password">
+      Admin Password
+    </label>
 
     <input
       id="password"
       type="password"
       placeholder="Enter admin password"
+      autocomplete="current-password"
     >
 
     <button
       id="loginBtn"
       class="login-btn"
+      type="button"
       onclick="login()"
     >
       Login
@@ -242,21 +252,25 @@ button:disabled{
     </div>
 
 
-    <label>Round</label>
+    <label for="round">
+      Round
+    </label>
 
     <select id="round">
-      <option>05:00 PM</option>
-      <option>06:00 PM</option>
-      <option>07:00 PM</option>
-      <option>08:00 PM</option>
-      <option>09:00 PM</option>
-      <option>10:00 PM</option>
-      <option>11:00 PM</option>
-      <option>12:00 AM</option>
+      <option value="05:00 PM">05:00 PM</option>
+      <option value="06:00 PM">06:00 PM</option>
+      <option value="07:00 PM">07:00 PM</option>
+      <option value="08:00 PM">08:00 PM</option>
+      <option value="09:00 PM">09:00 PM</option>
+      <option value="10:00 PM">10:00 PM</option>
+      <option value="11:00 PM">11:00 PM</option>
+      <option value="12:00 AM">12:00 AM</option>
     </select>
 
 
-    <label>2D Result</label>
+    <label for="result2d">
+      2D Result
+    </label>
 
     <input
       id="result2d"
@@ -276,7 +290,9 @@ button:disabled{
     </div>
 
 
-    <label>SET</label>
+    <label for="setValue">
+      SET
+    </label>
 
     <input
       id="setValue"
@@ -285,7 +301,9 @@ button:disabled{
     >
 
 
-    <label>VALUE</label>
+    <label for="valueValue">
+      VALUE
+    </label>
 
     <input
       id="valueValue"
@@ -312,6 +330,7 @@ button:disabled{
     <button
       id="scheduleBtn"
       class="schedule-btn"
+      type="button"
       onclick="saveSchedule()"
     >
       Save Schedule
@@ -321,6 +340,7 @@ button:disabled{
     <button
       id="publishBtn"
       class="publish-btn"
+      type="button"
       onclick="publishNow()"
     >
       Publish Now
@@ -337,6 +357,7 @@ button:disabled{
 
   <button
     class="secondary"
+    type="button"
     onclick="logout()"
   >
     Logout
@@ -352,7 +373,9 @@ button:disabled{
 let adminToken = "";
 
 
-/* RESULT PREVIEW */
+/* ========================================
+   RESULT PREVIEW
+======================================== */
 
 function previewResult(){
 
@@ -368,21 +391,28 @@ function previewResult(){
 
   input.value = value;
 
-  document.getElementById(
-    "resultPreview"
-  ).textContent =
-    value || "--";
+  document
+    .getElementById(
+      "resultPreview"
+    )
+    .textContent =
+      value || "--";
 }
 
 
-/* LOGIN */
+/* ========================================
+   LOGIN
+======================================== */
 
 async function login(){
 
-  const password =
+  const passwordInput =
     document.getElementById(
       "password"
-    ).value;
+    );
+
+  const password =
+    passwordInput.value.trim();
 
   const status =
     document.getElementById(
@@ -429,9 +459,10 @@ async function login(){
               "application/json"
           },
 
-          body:JSON.stringify({
-            password
-          })
+          body:
+            JSON.stringify({
+              password
+            })
         }
       );
 
@@ -456,6 +487,18 @@ async function login(){
     }
 
 
+    if(!data.token){
+
+      status.textContent =
+        "Login token missing";
+
+      status.className =
+        "status error";
+
+      return;
+    }
+
+
     adminToken =
       data.token;
 
@@ -466,10 +509,18 @@ async function login(){
     );
 
 
+    passwordInput.value = "";
+
+
     showDashboard();
 
 
   }catch(error){
+
+    console.error(
+      "Login error:",
+      error
+    );
 
     status.textContent =
       "Login connection error";
@@ -485,7 +536,9 @@ async function login(){
 }
 
 
-/* SHOW DASHBOARD */
+/* ========================================
+   SHOW DASHBOARD
+======================================== */
 
 function showDashboard(){
 
@@ -506,7 +559,9 @@ function showDashboard(){
 }
 
 
-/* GET FORM DATA */
+/* ========================================
+   GET FORM DATA
+======================================== */
 
 function getResultData(){
 
@@ -522,7 +577,7 @@ function getResultData(){
       document
         .getElementById(
           "result2d"
-        ).value,
+        ).value.trim(),
 
     set_value:
       document
@@ -546,7 +601,9 @@ function getResultData(){
 }
 
 
-/* VALIDATE */
+/* ========================================
+   VALIDATE
+======================================== */
 
 function validateResult(data){
 
@@ -576,7 +633,9 @@ function validateResult(data){
 }
 
 
-/* SAVE SCHEDULE */
+/* ========================================
+   SAVE SCHEDULE
+======================================== */
 
 async function saveSchedule(){
 
@@ -598,7 +657,9 @@ async function saveSchedule(){
 }
 
 
-/* PUBLISH NOW */
+/* ========================================
+   PUBLISH NOW
+======================================== */
 
 async function publishNow(){
 
@@ -613,14 +674,21 @@ async function publishNow(){
   }
 
 
+  /*
+    IMPORTANT:
+    Worker v2.4.0 expects "now"
+  */
+
   await sendResult(
     data,
-    "publish"
+    "now"
   );
 }
 
 
-/* SEND RESULT */
+/* ========================================
+   SEND RESULT
+======================================== */
 
 async function sendResult(
   data,
@@ -641,6 +709,20 @@ async function sendResult(
     document.getElementById(
       "publishBtn"
     );
+
+
+  if(!adminToken){
+
+    status.textContent =
+      "Session expired. Please login again.";
+
+    status.className =
+      "status error";
+
+    logout();
+
+    return;
+  }
 
 
   scheduleBtn.disabled = true;
@@ -681,8 +763,14 @@ async function sendResult(
       );
 
 
-    const result =
-      await response.json();
+    let result = {};
+
+    try{
+      result =
+        await response.json();
+    }catch{
+      result = {};
+    }
 
 
     if(
@@ -762,6 +850,11 @@ async function sendResult(
 
   }catch(error){
 
+    console.error(
+      "Save error:",
+      error
+    );
+
     status.textContent =
       "Connection error";
 
@@ -777,7 +870,9 @@ async function sendResult(
 }
 
 
-/* LOGOUT */
+/* ========================================
+   LOGOUT
+======================================== */
 
 function logout(){
 
@@ -802,10 +897,52 @@ function logout(){
     )
     .classList
     .remove("hidden");
+
+
+  document
+    .getElementById(
+      "loginStatus"
+    )
+    .textContent = "";
+
+
+  document
+    .getElementById(
+      "saveStatus"
+    )
+    .textContent = "";
 }
 
 
-/* RESTORE SESSION */
+/* ========================================
+   ENTER KEY LOGIN
+======================================== */
+
+document
+  .getElementById(
+    "password"
+  )
+  .addEventListener(
+    "keydown",
+    function(event){
+
+      if(
+        event.key === "Enter"
+      ){
+
+        event.preventDefault();
+
+        login();
+
+      }
+
+    }
+  );
+
+
+/* ========================================
+   RESTORE SESSION
+======================================== */
 
 const savedToken =
   sessionStorage.getItem(
@@ -825,4 +962,4 @@ if(savedToken){
 </script>
 
 </body>
-  </html>
+</html>
