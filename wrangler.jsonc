@@ -2,17 +2,23 @@
   "name": "tartay-2d",
   "main": "src/index.js",
   "compatibility_date": "2026-08-01",
-
+  "minify": true,
   "assets": {
     "directory": "./public",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*"]
   },
-
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "tartay-db",
       "database_id": "4b3d799c-9fd9-4919-ba49-b84c2af27c3e"
     }
-  ]
+  ],
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "observability": {
+    "enabled": true
+  }
 }
