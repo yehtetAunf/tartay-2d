@@ -1,96 +1,35 @@
 <!doctype html>
 <html lang="my">
 <head>
-  <meta charset="utf-8">
-  <meta
-    name="viewport"
-    content="width=device-width,initial-scale=1"
-  >
-
-  <title>Tartay 2D</title>
-
-  <link
-    rel="stylesheet"
-    href="/app.css"
-  >
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#071426">
+<title>Tartay 2D</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="/app.css">
 </head>
-
 <body>
-
-<main class="app">
-
-  <!-- TOP HEADER -->
+<main class="app public-app">
   <header class="top-header">
-
-    <a
-      class="back-btn"
-      href="/"
-      aria-label="Back"
-    >
-      ‹
-    </a>
-
-    <h1>
-      Tartay <span>2D</span>
-    </h1>
-
-    <a
-      class="history-btn"
-      href="/history.html"
-    >
-      ▣ History
-    </a>
-
+    <div class="brand"><small>LIVE 2D</small><h1>Tartay <span>2D</span></h1></div>
+    <a class="history-btn" href="/history.html">History</a>
   </header>
 
-
-  <!-- LIVE STATUS -->
-  <div class="live-row">
-
-    <span class="online">
-      ● LIVE
-    </span>
-
-  </div>
-
-
-  <!-- CURRENT RESULT -->
-  <section class="current">
-
-    <div
-      id="twoD"
-      class="current-number"
-    >
-      --
-    </div>
-
-    <div class="updated">
-
-      ◷ Updated =
-      <span id="round">
-        Waiting for result
-      </span>
-
-    </div>
-
+  <section class="hero">
+    <div class="status-line"><span class="online">● LIVE</span><span id="serverClock">--</span></div>
+    <div id="twoD" class="big-result">--</div>
+    <div class="update-label">LAST UPDATED</div>
+    <div id="updatedText" class="updated-text">Waiting for result</div>
+    <div id="preSpinLabel" class="pre-spin-label" hidden>Next round preparing… <strong id="preSpinNumber">--</strong></div>
   </section>
 
+  <section class="round-table" aria-label="Today rounds">
+    <div class="round-head"><span>Time</span><span>Set</span><span>Value</span><span>2D</span></div>
+    <div id="rounds"></div>
+  </section>
 
-  <!-- ROUND LIST -->
-  <section
-    id="rounds"
-    class="rounds"
-  ></section>
-
-
-  <!-- Hidden compatibility fields -->
-  <span id="set" hidden>--</span>
-  <span id="value" hidden>--</span>
-
+  <nav><a class="active" href="/">Home</a><a href="/history.html">History</a></nav>
 </main>
-
-
 <script src="/app.js"></script>
-
 </body>
 </html>
