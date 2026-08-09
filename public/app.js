@@ -9,313 +9,512 @@ const times = [
   "12:00 AM"
 ];
 
-const roundsEl = document.getElementById("rounds");
-const setEl = document.getElementById("set");
-const valueEl = document.getElementById("value");
-const twoDEl = document.getElementById("twoD");
-const roundEl = document.getElementById("round");
-const onlineEl = document.querySelector(".online");
+
+const roundsEl =
+  document.getElementById("rounds");
+
+const twoDEl =
+  document.getElementById("twoD");
+
+const roundEl =
+  document.getElementById("round");
+
+const setEl =
+  document.getElementById("set");
+
+const valueEl =
+  document.getElementById("value");
+
+const onlineEl =
+  document.querySelector(".online");
+
 
 let loadingResults = false;
 let refreshTimer = null;
 
 
-/* ========================================
-   CREATE ROUND CARDS
-======================================== */
+/* =========================
+   ESCAPE
+========================= */
 
-function createRoundCards() {
-  if (!roundsEl) return;
+function escapeHtml(value){
 
-  roundsEl.innerHTML = times.map(time => `
-    <article data-round="${time}">
-      <b>${time}</b>
-      <span>--</span>
-    </article>
-  `).join("");
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 
-/* ========================================
-   CONNECTION STATUS
-======================================== */
+/* =========================
+   CREATE 8 ROUND CARDS
+========================= */
 
-function setOnlineStatus(isOnline) {
-  if (!onlineEl) return;
+function createRoundCards(){
 
-  if (isOnline) {
-    onlineEl.textContent = "● ONLINE";
-    onlineEl.style.opacity = "1";
-  } else {
-    onlineEl.textContent = "● OFFLINE";
-    onlineEl.style.opacity = "0.65";
+  if(!roundsEl){
+    return;
+  }
+
+
+  roundsEl.innerHTML =
+    times.map(time => `
+
+      <article
+        class="round-card"
+        data-round="${time}"
+      >
+
+        <div class="round-head">
+
+          <span>Time</span>
+
+          <span>Set</span>
+
+          <span>Value</span>
+
+          <span>2D</span>
+
+        </div>
+
+
+        <div class="round-body">
+
+          <span class="round-time">
+            ${time}
+          </span>
+
+          <span class="round-set">
+            --
+          </span>
+
+          <span class="round-value">
+            --
+          </span>
+
+          <span class="round-result">
+            --
+          </span>
+
+        </div>
+
+      </article>
+
+    `).join("");
+}
+
+
+/* =========================
+   ONLINE STATUS
+========================= */
+
+function setOnlineStatus(isOnline){
+
+  if(!onlineEl){
+    return;
+  }
+
+
+  if(isOnline){
+
+    onlineEl.textContent =
+      "● LIVE";
+
+    onlineEl.style.opacity =
+      "1";
+
+  }else{
+
+    onlineEl.textContent =
+      "● OFFLINE";
+
+    onlineEl.style.opacity =
+      ".65";
   }
 }
 
 
-/* ========================================
+/* =========================
    UPDATE ROUND CARDS
-======================================== */
+========================= */
 
-function updateRoundCards(results) {
+function updateRoundCards(results){
+
   times.forEach(time => {
-    const card = document.querySelector(
-      `[data-round="${time}"]`
-    );
 
-    if (!card) return;
+    const card =
+      document.querySelector(
+        `[data-round="${time}"]`
+      );
 
-    const result = results.find(
-      item => item.round_time === time
-    );
 
-    const resultEl = card.querySelector("span");
+    if(!card){
+      return;
+    }
 
-    if (!resultEl) return;
 
-    resultEl.textContent =
-      result && result.result_2d
-        ? result.result_2d
-        : "--";
+    const result =
+      results.find(
+        item =>
+          item.round_time === time
+      );
+
+
+    const set =
+      card.querySelector(
+        ".round-set"
+      );
+
+    const value =
+      card.querySelector(
+        ".round-value"
+      );
+
+    const twoD =
+      card.querySelector(
+        ".round-result"
+      );
+
+
+    if(!result){
+
+      set.textContent = "--";
+      value.textContent = "--";
+      twoD.textContent = "--";
+
+      return;
+    }
+
+
+    set.textContent =
+      result.set_value || "--";
+
+
+    value.textContent =
+      result.value_value || "--";
+
+
+    twoD.textContent =
+      result.result_2d || "--";
+
   });
 }
 
 
-/* ========================================
+/* =========================
    CURRENT RESULT
-======================================== */
+========================= */
 
-function updateCurrentResult(results) {
-  if (!Array.isArray(results) || results.length === 0) {
-    if (setEl) setEl.textContent = "--";
-    if (valueEl) valueEl.textContent = "--";
-    if (twoDEl) twoDEl.textContent = "--";
+function updateCurrentResult(results){
 
-    if (roundEl) {
-      roundEl.textContent = "Waiting for result";
+  if(
+    !Array.isArray(results) ||
+    results.length === 0
+  ){
+
+    if(twoDEl){
+      twoDEl.textContent = "--";
+    }
+
+    if(roundEl){
+      roundEl.textContent =
+        "Waiting for result";
+    }
+
+    if(setEl){
+      setEl.textContent = "--";
+    }
+
+    if(valueEl){
+      valueEl.textContent = "--";
     }
 
     return;
   }
 
+
   /*
-    Results come from backend in round order.
-    The latest completed round becomes
-    CURRENT RESULT.
+    Backend already sends
+    released/public results.
+
+    Last result = latest result.
   */
 
-  const latest = results[results.length - 1];
+  const latest =
+    results[
+      results.length - 1
+    ];
 
-  if (twoDEl) {
+
+  if(twoDEl){
+
     twoDEl.textContent =
       latest.result_2d || "--";
   }
 
-  if (roundEl) {
+
+  if(roundEl){
+
     roundEl.textContent =
-      latest.round_time || "Waiting for result";
+      latest.round_time ||
+      "Waiting for result";
   }
 
-  if (setEl) {
+
+  if(setEl){
+
     setEl.textContent =
       latest.set_value || "--";
   }
 
-  if (valueEl) {
+
+  if(valueEl){
+
     valueEl.textContent =
       latest.value_value || "--";
   }
 }
 
 
-/* ========================================
-   LOAD TODAY RESULTS
-======================================== */
+/* =========================
+   LOAD RESULTS
+========================= */
 
-async function loadTodayResults() {
-  /*
-    Prevent two refresh requests
-    from running at the same time.
-  */
+async function loadTodayResults(){
 
-  if (loadingResults) return;
+  if(loadingResults){
+    return;
+  }
+
 
   loadingResults = true;
 
-  try {
-    const response = await fetch(
-      `/api/results/today?t=${Date.now()}`,
-      {
-        method: "GET",
-        cache: "no-store",
-        headers: {
-          "Accept": "application/json"
+
+  try{
+
+    const response =
+      await fetch(
+        `/api/results/today?t=${Date.now()}`,
+        {
+          method:"GET",
+          cache:"no-store",
+
+          headers:{
+            "Accept":
+              "application/json"
+          }
         }
-      }
-    );
+      );
 
-    if (!response.ok) {
+
+    if(!response.ok){
+
       throw new Error(
-        `Result API HTTP ${response.status}`
+        `HTTP ${response.status}`
       );
     }
 
-    const data = await response.json();
 
-    if (!data.success) {
+    const data =
+      await response.json();
+
+
+    if(!data.success){
+
       throw new Error(
-        data.error || "Unable to load results"
+        data.error ||
+        "Unable to load results"
       );
     }
+
 
     const results =
-      Array.isArray(data.results)
+      Array.isArray(
+        data.results
+      )
         ? data.results
         : [];
 
-    updateRoundCards(results);
-    updateCurrentResult(results);
 
-    setOnlineStatus(true);
-
-    console.log(
-      "Tartay 2D results updated:",
-      data.date,
+    updateRoundCards(
       results
     );
 
-  } catch (error) {
+
+    updateCurrentResult(
+      results
+    );
+
+
+    setOnlineStatus(true);
+
+
+  }catch(error){
+
     console.error(
-      "Result loading error:",
+      "Tartay result error:",
       error
     );
 
+
     setOnlineStatus(false);
 
-  } finally {
+
+  }finally{
+
     loadingResults = false;
   }
 }
 
 
-/* ========================================
+/* =========================
    SERVER STATUS
-======================================== */
+========================= */
 
-async function checkStatus() {
-  try {
-    const response = await fetch(
-      `/api/status?t=${Date.now()}`,
-      {
-        cache: "no-store"
-      }
-    );
+async function checkStatus(){
 
-    if (!response.ok) {
+  try{
+
+    const response =
+      await fetch(
+        `/api/status?t=${Date.now()}`,
+        {
+          cache:"no-store"
+        }
+      );
+
+
+    if(!response.ok){
+
       throw new Error(
-        `Status HTTP ${response.status}`
+        `HTTP ${response.status}`
       );
     }
 
-    const data = await response.json();
 
-    if (data.status === "Online") {
-      setOnlineStatus(true);
-    }
+    const data =
+      await response.json();
 
-  } catch (error) {
-    console.error(
-      "Server status error:",
-      error
+
+    setOnlineStatus(
+      data.status === "Online"
     );
+
+
+  }catch(error){
 
     setOnlineStatus(false);
   }
 }
 
 
-/* ========================================
+/* =========================
    AUTO REFRESH
-======================================== */
+========================= */
 
-function startAutoRefresh() {
-  if (refreshTimer) {
-    clearInterval(refreshTimer);
+function startAutoRefresh(){
+
+  if(refreshTimer){
+
+    clearInterval(
+      refreshTimer
+    );
   }
 
-  /*
-    Check D1 results every 5 seconds.
 
-    Admin saves new result
-        ↓
-    D1
-        ↓
-    User App automatically updates
-  */
+  refreshTimer =
+    setInterval(
+      () => {
 
-  refreshTimer = setInterval(() => {
-    if (
-      document.visibilityState === "visible"
-    ) {
-      loadTodayResults();
-    }
-  }, 5000);
+        if(
+          document.visibilityState
+          === "visible"
+        ){
+
+          loadTodayResults();
+        }
+
+      },
+      5000
+    );
 }
 
 
-/* ========================================
-   INTERNET EVENTS
-======================================== */
+/* =========================
+   INTERNET
+========================= */
 
-window.addEventListener("online", () => {
-  setOnlineStatus(true);
-
-  checkStatus();
-  loadTodayResults();
-});
-
-
-window.addEventListener("offline", () => {
-  setOnlineStatus(false);
-});
-
-
-/* ========================================
-   APP RETURNS TO FOREGROUND
-======================================== */
-
-document.addEventListener(
-  "visibilitychange",
+window.addEventListener(
+  "online",
   () => {
-    if (
-      document.visibilityState === "visible"
-    ) {
-      checkStatus();
-      loadTodayResults();
-    }
+
+    checkStatus();
+    loadTodayResults();
+
   }
 );
 
 
-/* ========================================
-   PAGE FOCUS
-======================================== */
+window.addEventListener(
+  "offline",
+  () => {
 
-window.addEventListener("focus", () => {
-  loadTodayResults();
-});
+    setOnlineStatus(false);
+
+  }
+);
 
 
-/* ========================================
-   START TARTAY 2D
-======================================== */
+/* =========================
+   RETURN TO PAGE
+========================= */
 
-function startApp() {
+document.addEventListener(
+  "visibilitychange",
+  () => {
+
+    if(
+      document.visibilityState
+      === "visible"
+    ){
+
+      checkStatus();
+      loadTodayResults();
+    }
+
+  }
+);
+
+
+window.addEventListener(
+  "focus",
+  () => {
+
+    loadTodayResults();
+
+  }
+);
+
+
+/* =========================
+   START
+========================= */
+
+function startApp(){
+
+  /*
+    First create ALL 8 rounds.
+  */
+
   createRoundCards();
+
 
   setOnlineStatus(
     navigator.onLine
   );
+
 
   checkStatus();
 
