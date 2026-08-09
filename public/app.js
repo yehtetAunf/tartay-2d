@@ -1,4 +1,4 @@
-const times = [
+const ROUNDS = [
   "05:00 PM",
   "06:00 PM",
   "07:00 PM",
@@ -10,225 +10,231 @@ const times = [
 ];
 
 
-const roundsEl =
-  document.getElementById("rounds");
+/* ========================================
+   FORMAT UPDATED TIME
+   Database UTC -> Myanmar Time
+======================================== */
 
-const twoDEl =
-  document.getElementById("twoD");
+function formatUpdatedTime(value) {
 
-const roundEl =
-  document.getElementById("round");
+  if (!value) {
+    return "Waiting for result";
+  }
 
-const setEl =
-  document.getElementById("set");
+  /*
+    Cloudflare D1 CURRENT_TIMESTAMP usually returns:
+    2026-08-09 15:08:13
 
-const valueEl =
-  document.getElementById("value");
+    Add Z so JavaScript treats it as UTC.
+  */
 
-const onlineEl =
-  document.querySelector(".online");
+  let normalized = String(value).trim();
+
+  if (
+    /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/
+      .test(normalized)
+  ) {
+    normalized =
+      normalized.replace(" ", "T") + "Z";
+  }
+
+  const date = new Date(normalized);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
 
 
-let loadingResults = false;
-let refreshTimer = null;
+  const parts =
+    new Intl.DateTimeFormat(
+      "en-GB",
+      {
+        timeZone: "Asia/Yangon",
+
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+
+        hour12: true
+      }
+    ).formatToParts(date);
 
 
-/* =========================
-   ESCAPE
-========================= */
+  const get =
+    type =>
+      parts.find(
+        item => item.type === type
+      )?.value || "";
 
-function escapeHtml(value){
 
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  const day =
+    get("day");
+
+  const month =
+    get("month");
+
+  const year =
+    get("year");
+
+  const hour =
+    get("hour");
+
+  const minute =
+    get("minute");
+
+  const second =
+    get("second");
+
+  const period =
+    get("dayPeriod")
+      .toUpperCase();
+
+
+  return (
+    `${day}/${month}/${year}, ` +
+    `${hour}:${minute}:${second} ${period}`
+  );
 }
 
 
-/* =========================
-   CREATE 8 ROUND CARDS
-========================= */
+/* ========================================
+   SAFE TEXT
+======================================== */
 
-function createRoundCards(){
+function safeText(value) {
 
-  if(!roundsEl){
+  if (
+    value === null ||
+    value === undefined ||
+    value === ""
+  ) {
+    return "--";
+  }
+
+  return String(value);
+}
+
+
+/* ========================================
+   CREATE ROUND CARDS
+======================================== */
+
+function renderRounds(results) {
+
+  const container =
+    document.getElementById("rounds");
+
+  if (!container) {
     return;
   }
 
 
-  roundsEl.innerHTML =
-    times.map(time => `
-
-      <article
-        class="round-card"
-        data-round="${time}"
-      >
-
-        <div class="round-head">
-
-          <span>Time</span>
-
-          <span>Set</span>
-
-          <span>Value</span>
-
-          <span>2D</span>
-
-        </div>
+  container.innerHTML = "";
 
 
-        <div class="round-body">
+  ROUNDS.forEach(roundTime => {
 
-          <span class="round-time">
-            ${time}
-          </span>
+    const item =
+      results.find(
+        result =>
+          result.round_time === roundTime
+      );
 
-          <span class="round-set">
-            --
-          </span>
-
-          <span class="round-value">
-            --
-          </span>
-
-          <span class="round-result">
-            --
-          </span>
-
-        </div>
-
-      </article>
-
-    `).join("");
-}
-
-
-/* =========================
-   ONLINE STATUS
-========================= */
-
-function setOnlineStatus(isOnline){
-
-  if(!onlineEl){
-    return;
-  }
-
-
-  if(isOnline){
-
-    onlineEl.textContent =
-      "● LIVE";
-
-    onlineEl.style.opacity =
-      "1";
-
-  }else{
-
-    onlineEl.textContent =
-      "● OFFLINE";
-
-    onlineEl.style.opacity =
-      ".65";
-  }
-}
-
-
-/* =========================
-   UPDATE ROUND CARDS
-========================= */
-
-function updateRoundCards(results){
-
-  times.forEach(time => {
 
     const card =
-      document.querySelector(
-        `[data-round="${time}"]`
-      );
+      document.createElement("div");
+
+    card.className =
+      "round-card";
 
 
-    if(!card){
-      return;
-    }
+    const time =
+      document.createElement("span");
+
+    time.className =
+      "round-time";
+
+    time.textContent =
+      roundTime;
 
 
-    const result =
-      results.find(
-        item =>
-          item.round_time === time
-      );
+    const number =
+      document.createElement("strong");
+
+    number.className =
+      item
+        ? "round-number"
+        : "round-number waiting";
 
 
-    const set =
-      card.querySelector(
-        ".round-set"
-      );
-
-    const value =
-      card.querySelector(
-        ".round-value"
-      );
-
-    const twoD =
-      card.querySelector(
-        ".round-result"
-      );
+    number.textContent =
+      item
+        ? safeText(item.result_2d)
+        : "--";
 
 
-    if(!result){
+    card.appendChild(time);
+    card.appendChild(number);
 
-      set.textContent = "--";
-      value.textContent = "--";
-      twoD.textContent = "--";
-
-      return;
-    }
-
-
-    set.textContent =
-      result.set_value || "--";
-
-
-    value.textContent =
-      result.value_value || "--";
-
-
-    twoD.textContent =
-      result.result_2d || "--";
+    container.appendChild(card);
 
   });
 }
 
 
-/* =========================
-   CURRENT RESULT
-========================= */
+/* ========================================
+   UPDATE HOME SCREEN
+======================================== */
 
-function updateCurrentResult(results){
+function updateHome(results) {
 
-  if(
-    !Array.isArray(results) ||
-    results.length === 0
-  ){
+  const twoD =
+    document.getElementById("twoD");
 
-    if(twoDEl){
-      twoDEl.textContent = "--";
+  const round =
+    document.getElementById("round");
+
+  const set =
+    document.getElementById("set");
+
+  const value =
+    document.getElementById("value");
+
+
+  /*
+    API results are ordered
+    05 PM -> 12 AM.
+
+    Last public result = current result.
+  */
+
+  const latest =
+    results.length
+      ? results[results.length - 1]
+      : null;
+
+
+  if (!latest) {
+
+    if (twoD) {
+      twoD.textContent = "--";
     }
 
-    if(roundEl){
-      roundEl.textContent =
-        "Waiting for result";
+    if (round) {
+      round.textContent =
+        "Updated = Waiting for result";
     }
 
-    if(setEl){
-      setEl.textContent = "--";
+    if (set) {
+      set.textContent = "--";
     }
 
-    if(valueEl){
-      valueEl.textContent = "--";
+    if (value) {
+      value.textContent = "--";
     }
 
     return;
@@ -236,292 +242,137 @@ function updateCurrentResult(results){
 
 
   /*
-    Backend already sends
-    released/public results.
-
-    Last result = latest result.
+    CURRENT 2D
   */
 
-  const latest =
-    results[
-      results.length - 1
-    ];
-
-
-  if(twoDEl){
-
-    twoDEl.textContent =
-      latest.result_2d || "--";
+  if (twoD) {
+    twoD.textContent =
+      safeText(latest.result_2d);
   }
 
 
-  if(roundEl){
+  /*
+    UPDATED EXACT DATE + TIME
 
-    roundEl.textContent =
-      latest.round_time ||
-      "Waiting for result";
+    Example:
+    Updated = 09/08/2026, 09:38:13 PM
+  */
+
+  if (round) {
+
+    round.textContent =
+      "Updated = " +
+      formatUpdatedTime(
+        latest.updated_at
+      );
+
   }
 
 
-  if(setEl){
+  /*
+    SET / VALUE
+  */
 
-    setEl.textContent =
-      latest.set_value || "--";
+  if (set) {
+    set.textContent =
+      safeText(latest.set_value);
   }
 
 
-  if(valueEl){
-
-    valueEl.textContent =
-      latest.value_value || "--";
+  if (value) {
+    value.textContent =
+      safeText(latest.value_value);
   }
 }
 
 
-/* =========================
-   LOAD RESULTS
-========================= */
+/* ========================================
+   LOAD TODAY RESULTS
+======================================== */
 
-async function loadTodayResults(){
+async function loadToday() {
 
-  if(loadingResults){
-    return;
-  }
-
-
-  loadingResults = true;
-
-
-  try{
+  try {
 
     const response =
       await fetch(
-        `/api/results/today?t=${Date.now()}`,
+        "/api/results/today",
         {
-          method:"GET",
-          cache:"no-store",
-
-          headers:{
-            "Accept":
-              "application/json"
-          }
+          cache: "no-store"
         }
       );
-
-
-    if(!response.ok){
-
-      throw new Error(
-        `HTTP ${response.status}`
-      );
-    }
 
 
     const data =
       await response.json();
 
 
-    if(!data.success){
+    if (
+      !response.ok ||
+      !data.success
+    ) {
 
       throw new Error(
         data.error ||
         "Unable to load results"
       );
+
     }
 
 
     const results =
-      Array.isArray(
-        data.results
-      )
+      Array.isArray(data.results)
         ? data.results
         : [];
 
 
-    updateRoundCards(
-      results
-    );
+    updateHome(results);
+
+    renderRounds(results);
 
 
-    updateCurrentResult(
-      results
-    );
-
-
-    setOnlineStatus(true);
-
-
-  }catch(error){
+  } catch (error) {
 
     console.error(
-      "Tartay result error:",
+      "Tartay load error:",
       error
     );
 
 
-    setOnlineStatus(false);
+    const round =
+      document.getElementById("round");
 
 
-  }finally{
+    if (round) {
 
-    loadingResults = false;
-  }
-}
+      round.textContent =
+        "Updated = Connection error";
 
-
-/* =========================
-   SERVER STATUS
-========================= */
-
-async function checkStatus(){
-
-  try{
-
-    const response =
-      await fetch(
-        `/api/status?t=${Date.now()}`,
-        {
-          cache:"no-store"
-        }
-      );
-
-
-    if(!response.ok){
-
-      throw new Error(
-        `HTTP ${response.status}`
-      );
     }
 
 
-    const data =
-      await response.json();
+    renderRounds([]);
 
-
-    setOnlineStatus(
-      data.status === "Online"
-    );
-
-
-  }catch(error){
-
-    setOnlineStatus(false);
   }
 }
 
 
-/* =========================
+/* ========================================
+   FIRST LOAD
+======================================== */
+
+loadToday();
+
+
+/* ========================================
    AUTO REFRESH
-========================= */
 
-function startAutoRefresh(){
+   Refresh every 10 seconds so newly
+   released scheduled rounds appear
+   automatically.
+======================================== */
 
-  if(refreshTimer){
-
-    clearInterval(
-      refreshTimer
-    );
-  }
-
-
-  refreshTimer =
-    setInterval(
-      () => {
-
-        if(
-          document.visibilityState
-          === "visible"
-        ){
-
-          loadTodayResults();
-        }
-
-      },
-      5000
-    );
-}
-
-
-/* =========================
-   INTERNET
-========================= */
-
-window.addEventListener(
-  "online",
-  () => {
-
-    checkStatus();
-    loadTodayResults();
-
-  }
+setInterval(
+  loadToday,
+  10000
 );
-
-
-window.addEventListener(
-  "offline",
-  () => {
-
-    setOnlineStatus(false);
-
-  }
-);
-
-
-/* =========================
-   RETURN TO PAGE
-========================= */
-
-document.addEventListener(
-  "visibilitychange",
-  () => {
-
-    if(
-      document.visibilityState
-      === "visible"
-    ){
-
-      checkStatus();
-      loadTodayResults();
-    }
-
-  }
-);
-
-
-window.addEventListener(
-  "focus",
-  () => {
-
-    loadTodayResults();
-
-  }
-);
-
-
-/* =========================
-   START
-========================= */
-
-function startApp(){
-
-  /*
-    First create ALL 8 rounds.
-  */
-
-  createRoundCards();
-
-
-  setOnlineStatus(
-    navigator.onLine
-  );
-
-
-  checkStatus();
-
-  loadTodayResults();
-
-  startAutoRefresh();
-}
-
-
-startApp();
