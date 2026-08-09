@@ -13,198 +13,62 @@
     rel="stylesheet"
     href="/app.css"
   >
-
-  <style>
-
-    /* =========================
-       NEW HOME TOP DESIGN
-    ========================= */
-
-    .new-header{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      margin-bottom:24px;
-    }
-
-    .back-btn{
-      width:42px;
-      height:42px;
-      min-width:42px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border-radius:50%;
-      background:#142b46;
-      color:#ffffff;
-      text-decoration:none;
-      font-size:22px;
-      font-weight:bold;
-    }
-
-    .brand-title{
-      margin:0;
-      font-size:26px;
-      font-weight:800;
-      color:#ffffff;
-    }
-
-    .brand-title .yellow{
-      color:#ffc928;
-    }
-
-
-    /* =========================
-       CURRENT RESULT
-    ========================= */
-
-    .result{
-      text-align:center;
-      margin-bottom:18px;
-    }
-
-    .live-status{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      color:#45df8d;
-      font-size:13px;
-      font-weight:bold;
-      margin-bottom:12px;
-    }
-
-    .live-dot{
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      background:#45df8d;
-      display:inline-block;
-    }
-
-    .result p{
-      margin:0 0 8px;
-      font-size:12px;
-      letter-spacing:1.2px;
-      color:#9db4cb;
-      font-weight:bold;
-    }
-
-    #twoD{
-      color:#ffc928;
-      font-size:64px;
-      line-height:1;
-      font-weight:900;
-      letter-spacing:5px;
-      margin:7px 0 15px;
-    }
-
-    .updated-row{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:6px;
-      color:#9db4cb;
-      font-size:13px;
-      margin-bottom:5px;
-    }
-
-    .clock-icon{
-      font-size:15px;
-    }
-
-
-    /* =========================
-       SET / VALUE
-    ========================= */
-
-    .market{
-      margin-top:0;
-      margin-bottom:25px;
-    }
-
-
-    /* =========================
-       TODAY ROUNDS
-    ========================= */
-
-    .rounds article span{
-      color:#ffc928 !important;
-      font-weight:800;
-    }
-
-    .rounds article b{
-      font-weight:700;
-    }
-
-
-    /* =========================
-       BOTTOM NAV
-    ========================= */
-
-    nav{
-      margin-top:20px;
-    }
-
-  </style>
 </head>
-
 
 <body>
 
 <main class="app">
 
-
-  <!-- ======================
-       HEADER
-  ======================= -->
-
-  <div class="new-header">
+  <!-- TOP HEADER -->
+  <header class="top-header">
 
     <a
       class="back-btn"
-      href="javascript:history.back()"
+      href="/"
       aria-label="Back"
     >
-      ←
+      ‹
     </a>
 
-    <h1 class="brand-title">
-      Tartay <span class="yellow">2D</span>
+    <h1>
+      Tartay <span>2D</span>
     </h1>
+
+    <a
+      class="history-btn"
+      href="/history.html"
+    >
+      ▣ History
+    </a>
+
+  </header>
+
+
+  <!-- LIVE STATUS -->
+  <div class="live-row">
+
+    <span class="online">
+      ● LIVE
+    </span>
 
   </div>
 
 
-  <!-- ======================
-       CURRENT RESULT
-  ======================= -->
+  <!-- CURRENT RESULT -->
+  <section class="current">
 
-  <section class="result">
-
-    <div class="live-status">
-      <span class="live-dot"></span>
-      LIVE
-    </div>
-
-    <p>
-      CURRENT RESULT
-    </p>
-
-    <div id="twoD">
+    <div
+      id="twoD"
+      class="current-number"
+    >
       --
     </div>
 
-    <div class="updated-row">
+    <div class="updated">
 
-      <span class="clock-icon">
-        ◷
-      </span>
-
-      <span>
-        Updated =
-        <span id="round">
-          Waiting for result
-        </span>
+      ◷ Updated =
+      <span id="round">
+        Waiting for result
       </span>
 
     </div>
@@ -212,83 +76,16 @@
   </section>
 
 
-  <!-- ======================
-       SET / VALUE
-  ======================= -->
-
-  <section class="market">
-
-    <div>
-
-      <span>
-        SET
-      </span>
-
-      <strong id="set">
-        --
-      </strong>
-
-      <small>
-        BTC Live Price
-      </small>
-
-    </div>
-
-
-    <div>
-
-      <span>
-        VALUE
-      </span>
-
-      <strong id="value">
-        --
-      </strong>
-
-      <small>
-        BTC 24H Volume
-      </small>
-
-    </div>
-
-  </section>
-
-
-  <!-- ======================
-       TODAY ROUNDS
-  ======================= -->
-
-  <h2>
-    Today Rounds
-  </h2>
-
+  <!-- ROUND LIST -->
   <section
-    class="rounds"
     id="rounds"
+    class="rounds"
   ></section>
 
 
-  <!-- ======================
-       BOTTOM NAVIGATION
-  ======================= -->
-
-  <nav>
-
-    <a
-      class="active"
-      href="/"
-    >
-      Home
-    </a>
-
-    <a
-      href="/history.html"
-    >
-      History
-    </a>
-
-  </nav>
-
+  <!-- Hidden compatibility fields -->
+  <span id="set" hidden>--</span>
+  <span id="value" hidden>--</span>
 
 </main>
 
