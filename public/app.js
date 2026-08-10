@@ -45,7 +45,7 @@ function renderRows(results){
   const latest=results.length?results[results.length-1]:null;
   roundsEl.innerHTML=ROUNDS.map(t=>{
     const x=map.get(t),current=latest&&latest.round_time===t;
-    return `<div class="round-row ${x?'released':''} ${current?'current':''}" data-round="${t}"><span class="time">${t}</span><span class="set">${x?.set_value||'--'}</span><span class="value">${x?.value_value||'--'}</span><span class="result">${x?.result_2d||'--'}</span></div>`;
+    return `<div class="round-row ${x?'released':''} ${current?'current':''}" data-round="${t}"><span class="time">${t}</span><span class="set">${x?.set_value||'--'}</span><span class="value">${x?.value_value||'--'}</span><span class="bell">🔔</span><span class="result">${x?.result_2d||'--'}</span></div>`;
   }).join("");
 }
 
