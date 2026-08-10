@@ -200,3 +200,71 @@ header{
     padding:5px 8px;
   }
 }
+
+
+/* ===== User requested cleanup v2 ===== */
+
+/* Hide LIVE badge completely */
+.online,
+.status-line,
+.live-badge,
+.live-status{
+  display:none !important;
+}
+
+/* Pull the 8-round table upward */
+.round-table{
+  margin-top:-28px !important;
+}
+#rounds{
+  margin-top:0 !important;
+}
+
+/* Remove active/current red border or special outline */
+.round-row.current,
+.round-row.active,
+.round-row[data-current="true"]{
+  border-color:rgba(255,255,255,.95) !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.28) !important;
+  background:rgba(0,0,0,.22) !important;
+}
+
+/* Neutralize any pseudo-element used for current-row highlight */
+.round-row.current::before,
+.round-row.active::before{
+  display:none !important;
+  content:none !important;
+}
+
+/* Keep text normal on current row */
+.round-row.current .time,
+.round-row.current .set,
+.round-row.current .value,
+.round-row.current .result{
+  color:inherit;
+}
+
+/* Restore result color specifically */
+.round-row.current .result{
+  color:#ffc928 !important;
+}
+
+/* Make mobile spacing tighter so all 8 rounds sit higher */
+@media(max-width:520px){
+  .hero{
+    min-height:210px !important;
+    padding-bottom:8px !important;
+  }
+  .updated-text{
+    margin-top:10px !important;
+  }
+  .round-table{
+    margin-top:-42px !important;
+  }
+  #rounds{
+    gap:8px !important;
+  }
+  .round-row{
+    min-height:68px !important;
+  }
+}
