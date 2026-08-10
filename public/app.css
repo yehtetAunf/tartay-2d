@@ -5,141 +5,240 @@
 
 .live-market{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 2px;text-align:left}.live-market>div{background:#0b1c32;border:1px solid #203d60;border-radius:13px;padding:10px 12px}.live-market span{display:block;color:#7f9ab6;font-size:10px;font-weight:800;letter-spacing:.6px;margin-bottom:4px}.live-market strong{display:block;color:#eef6ff;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
+
 /* =========================================================
-   v4.0 — EXACT REFERENCE COMPOSITION
-   Header + moon/castle + big 2D + Updated are one compact scene.
+   v4.1 — EXACT REFERENCE SCENE SHELL
+   One shared haunted scene behind Header + LIVE + 2D + Updated.
    ========================================================= */
-html,body{background:#010812!important}
-.public-app{
-  position:relative!important;
-  isolation:isolate!important;
-  overflow:hidden!important;
-  background:#010812!important;
-  padding-top:18px!important;
-}
-.public-app>*{position:relative;z-index:5}
 
-/* Header remains visually inside the haunted upper panel. */
-.top-header{
-  z-index:20!important;
-  height:58px!important;
-  margin:0!important;
-  padding:0 8px!important;
-  background:transparent!important;
+html, body {
+  background:#020812 !important;
 }
-.brand h1{font-size:27px!important}
-.history-btn{position:relative;z-index:21}
 
-/* Exact compact scene. No oversized hero / no empty vertical gap. */
-.hero{
-  position:relative!important;
-  z-index:2!important;
-  height:330px!important;
-  min-height:330px!important;
-  margin:-58px -14px 8px!important;
-  padding:0!important;
-  overflow:hidden!important;
-  border-radius:0!important;
-  text-align:center!important;
+.app.public-app{
+  width:min(100%,560px);
+  margin:auto;
+  min-height:100vh;
+  padding:14px 14px 24px !important;
+  background:#020812 !important;
+}
+
+/* The reference top panel is about 1.5:1 width-to-height.
+   This keeps the same visual proportion on phones. */
+.haunted-scene{
+  position:relative;
+  height:350px;
+  overflow:hidden;
+  border-radius:16px 16px 0 0;
+  isolation:isolate;
   background:
-    linear-gradient(180deg,rgba(1,7,17,.03) 0%,rgba(1,7,17,.02) 55%,rgba(1,7,17,.26) 80%,rgba(1,7,17,.78) 100%),
-    url("/ghost-bg.svg?v=4.0") center 23% / 100% auto no-repeat!important;
+    linear-gradient(
+      180deg,
+      rgba(1,6,14,.03) 0%,
+      rgba(1,6,14,.02) 58%,
+      rgba(1,6,14,.28) 82%,
+      rgba(1,6,14,.82) 100%
+    ),
+    url("/ghost-bg.svg?v=4.1") center top / cover no-repeat;
 }
 
-/* subtle live effect without moving the actual alignment */
-.hero::before{
+/* Subtle animation: the scene stays aligned, only light/fog moves. */
+.haunted-scene::before{
   content:"";
-  position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:radial-gradient(circle at 50% 27%,rgba(225,238,251,.10),transparent 26%);
-  animation:refGlow40 6s ease-in-out infinite alternate;
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at 50% 24%,rgba(225,238,252,.10),transparent 24%),
+    linear-gradient(90deg,rgba(0,4,10,.10),transparent 18% 82%,rgba(0,4,10,.10));
+  animation:sceneGlow41 7s ease-in-out infinite alternate;
 }
+
+.haunted-scene::after{
+  content:"";
+  position:absolute;
+  z-index:1;
+  pointer-events:none;
+  left:-24%;
+  top:265px;
+  width:148%;
+  height:72px;
+  opacity:.30;
+  filter:blur(18px);
+  background:radial-gradient(ellipse,rgba(184,210,235,.28),transparent 65%);
+  animation:fog41 20s linear infinite alternate;
+}
+
+.top-header{
+  position:relative !important;
+  z-index:5 !important;
+  height:66px;
+  margin:0 !important;
+  padding:10px 10px 0;
+  background:transparent !important;
+}
+
+.brand h1{
+  margin:0 !important;
+  font-size:28px !important;
+  font-weight:800;
+}
+
+.history-btn{
+  padding:11px 14px !important;
+  border-radius:14px !important;
+  background:rgba(8,20,37,.68) !important;
+  color:#ffc928 !important;
+}
+
+/* Hero is only the remaining area inside the shared scene. */
+.hero{
+  position:relative !important;
+  z-index:4 !important;
+  height:284px !important;
+  min-height:284px !important;
+  margin:0 !important;
+  padding:0 !important;
+  overflow:visible !important;
+  background:transparent !important;
+  text-align:center !important;
+}
+
+.hero::before,
 .hero::after{
-  content:"";
-  position:absolute;z-index:2;pointer-events:none;
-  left:-20%;top:260px;width:140%;height:54px;
-  opacity:.22;filter:blur(15px);
-  background:radial-gradient(ellipse,rgba(180,207,232,.32),transparent 65%);
-  animation:refFog40 18s linear infinite alternate;
+  display:none !important;
 }
-.hero>*{position:absolute!important;z-index:4!important}
 
-/* LIVE: reference top-right position */
 .status-line{
-  top:68px!important;
-  right:10px!important;
-  left:auto!important;
-  width:auto!important;
-  min-height:0!important;
-  margin:0!important;
+  position:absolute !important;
+  top:2px !important;
+  right:10px !important;
+  left:auto !important;
+  width:auto !important;
+  min-height:0 !important;
+  margin:0 !important;
 }
+
 .online{
-  font-size:12px!important;
-  padding:5px 9px!important;
+  font-size:12px !important;
+  padding:5px 10px !important;
+  background:rgba(3,28,27,.70) !important;
 }
 
-/* Castle center is behind this number. */
 #twoD{
-  top:142px!important;
-  left:50%!important;
-  width:100%!important;
-  min-height:0!important;
-  transform:translateX(-50%)!important;
-  margin:0!important;
-  font-size:106px!important;
-  line-height:1!important;
-  color:#ffc928!important;
-  text-shadow:0 6px 12px rgba(0,0,0,.95)!important;
+  position:absolute !important;
+  top:83px !important;
+  left:50% !important;
+  width:100% !important;
+  min-height:0 !important;
+  transform:translateX(-50%) !important;
+  margin:0 !important;
+  font-size:106px !important;
+  line-height:.95 !important;
+  letter-spacing:1px !important;
+  color:#ffc928 !important;
+  text-shadow:
+    0 6px 13px rgba(0,0,0,.95),
+    0 0 18px rgba(255,201,40,.13) !important;
 }
 
-/* Updated directly under number */
 .updated-text{
-  top:258px!important;
-  left:50%!important;
-  width:100%!important;
-  transform:translateX(-50%)!important;
-  margin:0!important;
-  padding:0 8px!important;
-  font-size:14px!important;
-  line-height:20px!important;
-  color:#fff!important;
-  text-align:center!important;
-  text-shadow:0 2px 6px #000!important;
-}
-.pre-spin-label{
-  top:286px!important;
-  left:50%!important;
-  transform:translateX(-50%)!important;
+  position:absolute !important;
+  top:205px !important;
+  left:50% !important;
+  width:100% !important;
+  transform:translateX(-50%) !important;
+  margin:0 !important;
+  padding:0 10px !important;
+  color:#fff !important;
+  font-size:14px !important;
+  line-height:20px !important;
+  font-weight:700 !important;
+  text-align:center !important;
+  text-shadow:0 2px 6px rgba(0,0,0,.98) !important;
 }
 
-/* Table starts immediately below the haunted scene. */
+.pre-spin-label{
+  position:absolute !important;
+  top:236px !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  margin:0 !important;
+}
+
+/* Table begins immediately after the scene, like the reference. */
 .round-table{
-  position:relative!important;
-  z-index:10!important;
-  margin-top:0!important;
-  border:1px solid #284c76!important;
-  background:rgba(3,15,28,.94)!important;
+  margin-top:0 !important;
+  border:1px solid #284c76 !important;
+  border-radius:0 0 16px 16px !important;
+  background:rgba(3,15,28,.95) !important;
+  overflow:hidden !important;
   backdrop-filter:blur(3px);
   -webkit-backdrop-filter:blur(3px);
 }
-.round-row{background:rgba(8,31,54,.72)!important}
-.round-row.current{background:rgba(20,71,113,.84)!important}
 
-@keyframes refGlow40{from{opacity:.55}to{opacity:1}}
-@keyframes refFog40{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
+.round-head{
+  min-height:34px !important;
+  background:#02060b !important;
+  color:#8098b4 !important;
+  font-size:11px !important;
+}
+
+.round-row{
+  min-height:57px !important;
+  background:rgba(8,31,54,.74) !important;
+}
+
+.round-row.current{
+  background:rgba(22,74,116,.86) !important;
+}
+
+.round-row .time{
+  font-size:13px !important;
+}
+
+.round-row .set,
+.round-row .value{
+  font-size:12px !important;
+}
+
+.round-row .result{
+  font-size:27px !important;
+}
+
+@keyframes sceneGlow41{
+  from{opacity:.62}
+  to{opacity:1}
+}
+
+@keyframes fog41{
+  from{transform:translateX(-4%)}
+  to{transform:translateX(4%)}
+}
 
 @media(max-width:520px){
-  .hero{
-    height:330px!important;
-    min-height:330px!important;
-    background-position:center 23%!important;
-    background-size:100% auto!important;
+  .haunted-scene{
+    height:350px;
+    background-position:center top;
+    background-size:cover;
   }
 }
+
 @media(max-width:380px){
-  .hero{height:315px!important;min-height:315px!important}
-  #twoD{top:137px!important;font-size:96px!important}
-  .updated-text{top:245px!important;font-size:13px!important}
+  .haunted-scene{height:332px}
+  .top-header{height:62px}
+  .hero{height:270px !important;min-height:270px !important}
+  .brand h1{font-size:25px !important}
+  #twoD{top:78px !important;font-size:96px !important}
+  .updated-text{top:190px !important;font-size:13px !important}
+  .pre-spin-label{top:218px !important}
+  .round-row{min-height:53px !important}
 }
+
 @media(prefers-reduced-motion:reduce){
-  .hero::before,.hero::after{animation:none!important}
+  .haunted-scene::before,
+  .haunted-scene::after{
+    animation:none !important;
+  }
 }
