@@ -97,14 +97,37 @@ function isResultPublic(item) {
   return isRoundReleased(item.result_date, item.round_time);
 }
 
+function stableHash(text) {
+  let h = 2166136261;
+  for (const ch of String(text)) {
+    h ^= ch.charCodeAt(0);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+// Tartay-generated display values. These are simulated app values, not market data.
+// They are deterministic per date + round, so a released row never changes on refresh.
+function generatedRoundValues(resultDate, roundTime) {
+  const h1 = stableHash(`${resultDate}|${roundTime}|SET`);
+  const h2 = stableHash(`${resultDate}|${roundTime}|VALUE`);
+  const set = 10000 + (h1 % 900000) / 100;       // 10000.00 - 18999.99
+  const value = 100000 + (h2 % 9000000);         // 100000 - 9099999
+  return {
+    set: set.toFixed(2),
+    value: String(value)
+  };
+}
+
 function publicResult(item) {
+  const generated = generatedRoundValues(item.result_date, item.round_time);
   return {
     id: item.id,
     result_date: item.result_date,
     round_time: item.round_time,
     result_2d: item.result_2d,
-    set_value: item.set_value,
-    value_value: item.value_value,
+    set_value: item.set_value || generated.set,
+    value_value: item.value_value || generated.value,
     updated_at: item.updated_at,
     published_at: item.published_at || (isRoundReleased(item.result_date, item.round_time) ? item.updated_at : null)
   };
@@ -395,7 +418,7 @@ async function handleState(env) {
   return json({
     success: true,
     app: "Tartay 2D",
-    version: "3.2.0",
+    version: "3.4.0",
     operational_date: date,
     serverNow: Date.now(),
     myanmarNow: getMyanmarNow(),
