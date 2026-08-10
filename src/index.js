@@ -8,7 +8,7 @@ const ROUND_RELEASE_HOURS = {
   "09:00 PM": 21, "10:00 PM": 22, "11:00 PM": 23, "12:00 AM": 24
 };
 
-const PRE_SPIN_SECONDS = 20;
+const RESULT_HOLD_SECONDS = 120;
 const TOKEN_TTL_SECONDS = 12 * 60 * 60;
 const MAX_BACKUP_ROWS = 5000;
 
@@ -216,11 +216,32 @@ function clean2D(value) {
 
 function getNextRoundInfo(date = getOperationalDate()) {
   const nowMs = myanmarPseudoEpoch();
+
+  // First look for the next round in the current Tartay operational day.
   for (const round of ROUNDS) {
     const releaseMs = roundReleasePseudoEpoch(date, round);
-    if (releaseMs > nowMs) return { round_time: round, release_ms: releaseMs, seconds_until: Math.ceil((releaseMs-nowMs)/1000) };
+    if (releaseMs > nowMs) {
+      return {
+        result_date: date,
+        round_time: round,
+        release_ms: releaseMs,
+        seconds_until: Math.ceil((releaseMs - nowMs) / 1000)
+      };
+    }
   }
-  return null;
+
+  // After the 12:00 AM final round, keep the big 2D playing
+  // toward the next operational day's 05:00 PM round.
+  const nextDate = shiftDateText(date, 1);
+  const round = ROUNDS[0];
+  const releaseMs = roundReleasePseudoEpoch(nextDate, round);
+
+  return {
+    result_date: nextDate,
+    round_time: round,
+    release_ms: releaseMs,
+    seconds_until: Math.max(0, Math.ceil((releaseMs - nowMs) / 1000))
+  };
 }
 
 function buildPreSpinFrame(seed) {
@@ -295,14 +316,64 @@ async function handleToday(url, env) {
 
 async function handleState(env) {
   const date = getOperationalDate();
-  const results = await queryResultsForDate(env,date,false);
+  const results = await queryResultsForDate(env, date, false);
+  const nowMs = myanmarPseudoEpoch();
+
+  // For exactly 2 minutes after a round's scheduled release time,
+  // freeze the big 2D on that round's real result and show the check mark.
+  let resultHold = null;
+
+  for (let i = ROUNDS.length - 1; i >= 0; i--) {
+    const roundTime = ROUNDS[i];
+    const releaseMs = roundReleasePseudoEpoch(date, roundTime);
+    const elapsedSeconds = Math.floor((nowMs - releaseMs) / 1000);
+
+    if (elapsedSeconds >= 0 && elapsedSeconds < RESULT_HOLD_SECONDS) {
+      const row = results.find(item => item.round_time === roundTime);
+
+      if (row) {
+        resultHold = {
+          active: true,
+          round_time: roundTime,
+          result_2d: row.result_2d,
+          elapsed_seconds: elapsedSeconds,
+          seconds_remaining: RESULT_HOLD_SECONDS - elapsedSeconds,
+          hold_until_ms: releaseMs + (RESULT_HOLD_SECONDS * 1000)
+        };
+      }
+      break;
+    }
+  }
+
   const nextRound = getNextRoundInfo(date);
   let preSpin = null;
-  if (nextRound && nextRound.seconds_until <= PRE_SPIN_SECONDS && nextRound.seconds_until > 0) {
-    const tick = Math.floor(Date.now()/550);
-    preSpin = { active:true, round_time:nextRound.round_time, seconds_until:nextRound.seconds_until, frame:buildPreSpinFrame(`${date}|${nextRound.round_time}|${tick}`) };
+
+  // Outside the 2-minute result hold, the big 2D keeps playing
+  // continuously until the next scheduled round time.
+  if (!resultHold && nextRound && nextRound.seconds_until > 0) {
+    const tick = Math.floor(Date.now() / 550);
+    preSpin = {
+      active: true,
+      result_date: nextRound.result_date,
+      round_time: nextRound.round_time,
+      seconds_until: nextRound.seconds_until,
+      frame: buildPreSpinFrame(`${nextRound.result_date}|${nextRound.round_time}|${tick}`)
+    };
   }
-  return json({success:true,app:"Tartay 2D",version:"3.0.0",operational_date:date,serverNow:Date.now(),myanmarNow:getMyanmarNow(),nextRound,preSpin,rounds:ROUNDS,results});
+
+  return json({
+    success: true,
+    app: "Tartay 2D",
+    version: "3.1.0",
+    operational_date: date,
+    serverNow: Date.now(),
+    myanmarNow: getMyanmarNow(),
+    nextRound,
+    resultHold,
+    preSpin,
+    rounds: ROUNDS,
+    results
+  });
 }
 
 async function handleHistory(url, env) {
