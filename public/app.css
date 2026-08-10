@@ -7,8 +7,9 @@
 
 
 /* =========================================================
-   v3.7 USER APP — CLEAR CLASSIC HAUNTED BACKGROUND
+   v3.8 USER APP — HAUNTED SCENE LOCKED BEHIND BIG 2D RESULT
    ========================================================= */
+
 html,body{
   background:#010711 !important;
 }
@@ -17,100 +18,166 @@ html,body{
   position:relative;
   isolation:isolate;
   background:
-    linear-gradient(180deg,rgba(1,7,17,.06) 0%,rgba(1,7,17,.12) 36%,rgba(1,7,17,.46) 72%,rgba(1,7,17,.84) 100%),
-    url("/ghost-bg.svg?v=3.7") center top / cover no-repeat fixed !important;
+    linear-gradient(180deg,#03101f 0%,#041323 42%,#020b17 100%) !important;
   overflow:hidden;
 }
 
-/* Keep UI clean and readable while clearly showing the scene. */
 .public-app > *{
   position:relative;
   z-index:5;
 }
 
-.top-header,
+.top-header{
+  background:rgba(1,7,17,.58) !important;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+}
+
+/*
+  IMPORTANT:
+  The haunted picture is attached to the HERO itself,
+  so it cannot slide down behind the table.
+*/
 .hero{
+  position:relative !important;
+  z-index:3;
+  overflow:hidden;
+  min-height:390px;
   background:transparent !important;
+  border-radius:0 0 22px 22px;
 }
 
-/* Moving translucent fog over the visible castle background. */
-.public-app::before,
-.public-app::after{
+/* Exact scene layer: moon + castle centered behind the large 2D number. */
+.hero::before{
   content:"";
-  position:fixed;
+  position:absolute;
+  z-index:0;
   pointer-events:none;
-  z-index:2;
-  left:-30vw;
-  width:160vw;
-  height:220px;
-  border-radius:50%;
-  filter:blur(25px);
+
+  /* extend a little past the hero edges to avoid visible seams */
+  left:-7%;
+  right:-7%;
+  top:-165px;
+  height:650px;
+
   background:
-    radial-gradient(ellipse at 25% 50%,rgba(180,207,232,.22),transparent 34%),
-    radial-gradient(ellipse at 60% 50%,rgba(157,190,222,.18),transparent 38%),
-    radial-gradient(ellipse at 90% 50%,rgba(184,211,235,.16),transparent 31%);
-  opacity:.58;
-}
-.public-app::before{
-  top:380px;
-  animation:ghostFogA 24s linear infinite alternate;
-}
-.public-app::after{
-  top:610px;
-  opacity:.40;
-  animation:ghostFogB 31s linear infinite alternate;
+    linear-gradient(
+      180deg,
+      rgba(1,7,17,.06) 0%,
+      rgba(1,7,17,.04) 38%,
+      rgba(1,7,17,.25) 74%,
+      rgba(1,7,17,.72) 100%
+    ),
+    url("/ghost-bg.svg?v=3.8") center 0 / 100% auto no-repeat;
+
+  filter:saturate(.92) contrast(1.08) brightness(1.10);
+  transform:scale(1.06);
+  transform-origin:center top;
+  animation:hauntedSceneBreath 14s ease-in-out infinite alternate;
 }
 
-@keyframes ghostFogA{
-  from{transform:translate3d(-9vw,0,0)}
-  to{transform:translate3d(12vw,-12px,0)}
-}
-@keyframes ghostFogB{
-  from{transform:translate3d(10vw,4px,0)}
-  to{transform:translate3d(-12vw,-8px,0)}
+/* Fog stays inside the hero, behind the number. */
+.hero::after{
+  content:"";
+  position:absolute;
+  z-index:1;
+  pointer-events:none;
+  left:-35%;
+  top:190px;
+  width:170%;
+  height:155px;
+  border-radius:50%;
+  opacity:.48;
+  filter:blur(24px);
+  background:
+    radial-gradient(ellipse at 18% 50%,rgba(185,210,235,.20),transparent 31%),
+    radial-gradient(ellipse at 50% 50%,rgba(180,205,230,.16),transparent 34%),
+    radial-gradient(ellipse at 82% 50%,rgba(185,210,235,.18),transparent 30%);
+  animation:heroFogMove 24s linear infinite alternate;
 }
 
-/* Main result stays highly legible against the moon/castle. */
+/* Everything in hero appears above the haunted scene. */
+.hero > *{
+  position:relative;
+  z-index:3;
+}
+
 #twoD{
   position:relative;
-  z-index:7;
+  z-index:4;
   text-shadow:
-    0 4px 8px rgba(0,0,0,.82),
+    0 5px 10px rgba(0,0,0,.88),
     0 0 24px rgba(255,193,28,.20);
 }
+
 .updated-text{
   position:relative;
-  z-index:7;
-  text-shadow:0 2px 5px rgba(0,0,0,.95);
+  z-index:4;
+  text-shadow:0 2px 6px rgba(0,0,0,.95);
 }
 
-/* Table is darker glass so the haunted scene remains visible around it. */
+/* Table starts after the hero and no longer covers the castle. */
 .round-table{
   position:relative;
   z-index:6;
-  background:rgba(3,14,27,.78) !important;
-  backdrop-filter:blur(5px);
-  -webkit-backdrop-filter:blur(5px);
-  box-shadow:0 12px 38px rgba(0,0,0,.42);
+  margin-top:12px;
+  background:rgba(3,14,27,.90) !important;
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+  box-shadow:0 12px 36px rgba(0,0,0,.40);
 }
 
 .round-row{
-  background:rgba(8,31,54,.55) !important;
-}
-.round-row.current{
-  background:rgba(18,66,108,.72) !important;
+  background:rgba(8,31,54,.62) !important;
 }
 
+.round-row.current{
+  background:rgba(18,66,108,.78) !important;
+}
+
+@keyframes hauntedSceneBreath{
+  0%{
+    transform:scale(1.055) translate3d(-.6%,0,0);
+    filter:saturate(.90) contrast(1.06) brightness(1.04);
+  }
+  100%{
+    transform:scale(1.075) translate3d(.6%,-5px,0);
+    filter:saturate(.98) contrast(1.10) brightness(1.13);
+  }
+}
+
+@keyframes heroFogMove{
+  from{transform:translate3d(-7%,0,0)}
+  to{transform:translate3d(9%,-8px,0)}
+}
+
+/*
+  Mobile alignment:
+  Moon centered above the result;
+  castle body directly behind the result number.
+*/
 @media (max-width:520px){
-  .public-app{
-    background-position:center 42px !important;
-    background-size:auto 1180px !important;
+  .hero{
+    min-height:405px;
+  }
+
+  .hero::before{
+    left:-18%;
+    right:-18%;
+    top:-126px;
+    height:610px;
+    background-size:136% auto;
+    background-position:center top;
+  }
+
+  .hero::after{
+    top:205px;
   }
 }
 
 @media (prefers-reduced-motion:reduce){
-  .public-app::before,
-  .public-app::after{
+  .hero::before,
+  .hero::after{
     animation:none !important;
   }
 }
