@@ -6,100 +6,140 @@
 .live-market{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 2px;text-align:left}.live-market>div{background:#0b1c32;border:1px solid #203d60;border-radius:13px;padding:10px 12px}.live-market span{display:block;color:#7f9ab6;font-size:10px;font-weight:800;letter-spacing:.6px;margin-bottom:4px}.live-market strong{display:block;color:#eef6ff;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* =========================================================
-   v3.9 — REFERENCE-LOCKED CLASSIC HAUNTED LAYOUT
+   v4.0 — EXACT REFERENCE COMPOSITION
+   Header + moon/castle + big 2D + Updated are one compact scene.
    ========================================================= */
 html,body{background:#010812!important}
 .public-app{
-  position:relative; isolation:isolate; overflow:hidden;
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
   background:#010812!important;
+  padding-top:18px!important;
 }
 .public-app>*{position:relative;z-index:5}
+
+/* Header remains visually inside the haunted upper panel. */
 .top-header{
-  z-index:10!important;
-  margin-bottom:0!important;
+  z-index:20!important;
+  height:58px!important;
+  margin:0!important;
+  padding:0 8px!important;
   background:transparent!important;
 }
+.brand h1{font-size:27px!important}
+.history-btn{position:relative;z-index:21}
+
+/* Exact compact scene. No oversized hero / no empty vertical gap. */
 .hero{
   position:relative!important;
   z-index:2!important;
-  height:500px!important;
-  min-height:500px!important;
-  margin:-72px -14px 0!important;
+  height:330px!important;
+  min-height:330px!important;
+  margin:-58px -14px 8px!important;
   padding:0!important;
   overflow:hidden!important;
-  background:
-    linear-gradient(180deg,rgba(0,5,12,.02) 0%,rgba(0,5,12,.03) 58%,rgba(0,5,12,.56) 100%),
-    url("/ghost-bg.svg?v=3.9") center 7% / cover no-repeat!important;
   border-radius:0!important;
-}
-.hero::before{
-  content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+  text-align:center!important;
   background:
-    radial-gradient(circle at 50% 29%,rgba(215,231,248,.10),transparent 25%),
-    linear-gradient(90deg,rgba(0,5,12,.12),transparent 18% 82%,rgba(0,5,12,.12));
-  animation:sceneBreath39 12s ease-in-out infinite alternate;
+    linear-gradient(180deg,rgba(1,7,17,.03) 0%,rgba(1,7,17,.02) 55%,rgba(1,7,17,.26) 80%,rgba(1,7,17,.78) 100%),
+    url("/ghost-bg.svg?v=4.0") center 23% / 100% auto no-repeat!important;
+}
+
+/* subtle live effect without moving the actual alignment */
+.hero::before{
+  content:"";
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(circle at 50% 27%,rgba(225,238,251,.10),transparent 26%);
+  animation:refGlow40 6s ease-in-out infinite alternate;
 }
 .hero::after{
-  content:"";position:absolute;left:-30%;top:345px;width:160%;height:115px;
-  z-index:2;pointer-events:none;filter:blur(22px);opacity:.32;
-  background:radial-gradient(ellipse,rgba(178,204,230,.28),transparent 62%);
-  animation:fog39 20s linear infinite alternate;
+  content:"";
+  position:absolute;z-index:2;pointer-events:none;
+  left:-20%;top:260px;width:140%;height:54px;
+  opacity:.22;filter:blur(15px);
+  background:radial-gradient(ellipse,rgba(180,207,232,.32),transparent 65%);
+  animation:refFog40 18s linear infinite alternate;
 }
 .hero>*{position:absolute!important;z-index:4!important}
+
+/* LIVE: reference top-right position */
 .status-line{
-  top:76px!important;right:18px!important;left:auto!important;
-  width:auto!important;min-height:0!important;
+  top:68px!important;
+  right:10px!important;
+  left:auto!important;
+  width:auto!important;
+  min-height:0!important;
+  margin:0!important;
 }
-.online{font-size:12px!important}
+.online{
+  font-size:12px!important;
+  padding:5px 9px!important;
+}
+
+/* Castle center is behind this number. */
 #twoD{
-  top:210px!important;left:50%!important;
-  width:100%!important;min-height:0!important;
+  top:142px!important;
+  left:50%!important;
+  width:100%!important;
+  min-height:0!important;
   transform:translateX(-50%)!important;
-  font-size:112px!important;line-height:1!important;
+  margin:0!important;
+  font-size:106px!important;
+  line-height:1!important;
   color:#ffc928!important;
-  text-shadow:0 7px 13px rgba(0,0,0,.9),0 0 18px rgba(255,201,40,.12)!important;
+  text-shadow:0 6px 12px rgba(0,0,0,.95)!important;
 }
+
+/* Updated directly under number */
 .updated-text{
-  top:342px!important;left:50%!important;width:100%!important;
+  top:258px!important;
+  left:50%!important;
+  width:100%!important;
   transform:translateX(-50%)!important;
-  margin:0!important;padding:0 16px!important;
-  font-size:15px!important;color:#fff!important;
-  text-shadow:0 3px 7px #000!important;
+  margin:0!important;
+  padding:0 8px!important;
+  font-size:14px!important;
+  line-height:20px!important;
+  color:#fff!important;
+  text-align:center!important;
+  text-shadow:0 2px 6px #000!important;
 }
 .pre-spin-label{
-  top:382px!important;left:50%!important;transform:translateX(-50%)!important;
+  top:286px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
 }
-.round-table{
-  z-index:7!important;
-  margin-top:-8px!important;
-  background:rgba(3,15,28,.92)!important;
-  border-color:#24476d!important;
-}
-.round-row{background:rgba(8,31,54,.68)!important}
-.round-row.current{background:rgba(20,71,113,.82)!important}
 
-@keyframes sceneBreath39{
- from{filter:brightness(.96);transform:scale(1)}
- to{filter:brightness(1.08);transform:scale(1.015)}
+/* Table starts immediately below the haunted scene. */
+.round-table{
+  position:relative!important;
+  z-index:10!important;
+  margin-top:0!important;
+  border:1px solid #284c76!important;
+  background:rgba(3,15,28,.94)!important;
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
 }
-@keyframes fog39{
- from{transform:translateX(-7%)}
- to{transform:translateX(7%)}
-}
+.round-row{background:rgba(8,31,54,.72)!important}
+.round-row.current{background:rgba(20,71,113,.84)!important}
+
+@keyframes refGlow40{from{opacity:.55}to{opacity:1}}
+@keyframes refFog40{from{transform:translateX(-4%)}to{transform:translateX(4%)}}
+
 @media(max-width:520px){
- .hero{
-   height:500px!important;min-height:500px!important;
-   background-position:center 4%!important;
-   background-size:auto 690px!important;
- }
- #twoD{top:205px!important;font-size:108px!important}
- .updated-text{top:337px!important}
+  .hero{
+    height:330px!important;
+    min-height:330px!important;
+    background-position:center 23%!important;
+    background-size:100% auto!important;
+  }
 }
 @media(max-width:380px){
- .hero{height:470px!important;min-height:470px!important;background-size:auto 650px!important}
- #twoD{top:195px!important;font-size:98px!important}
- .updated-text{top:315px!important;font-size:13px!important}
+  .hero{height:315px!important;min-height:315px!important}
+  #twoD{top:137px!important;font-size:96px!important}
+  .updated-text{top:245px!important;font-size:13px!important}
 }
 @media(prefers-reduced-motion:reduce){
- .hero::before,.hero::after{animation:none!important}
+  .hero::before,.hero::after{animation:none!important}
 }
