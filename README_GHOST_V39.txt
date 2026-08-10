@@ -1,0 +1,1 @@
+v3.9 reference-locked layout: moon/castle directly behind large 2D; Updated directly below; 8-round table immediately below scene. App logic unchanged.
