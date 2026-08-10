@@ -8,8 +8,6 @@ const updatedEl=document.getElementById("updatedText");
 const onlineEl=document.querySelector(".online");
 const preSpinLabel=document.getElementById("preSpinLabel");
 const preSpinNumber=document.getElementById("preSpinNumber");
-const liveSetEl=document.getElementById("liveSet");
-const liveValueEl=document.getElementById("liveValue");
 
 let loading=false;
 let timer=null;
@@ -96,8 +94,6 @@ function stopBigSpin(result){
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   renderRows(results);
-  if(liveSetEl) liveSetEl.textContent=data.market?.set ?? "--";
-  if(liveValueEl) liveValueEl.textContent=data.market?.value ?? "--";
   const latest=results.length?results[results.length-1]:null;
   holdActive=Boolean(data.resultHold?.active);
 
