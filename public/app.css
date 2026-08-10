@@ -4,3 +4,20 @@
 @keyframes preSpinBigChange{0%{opacity:.28;transform:translateY(8px) scale(.94);filter:blur(1.2px)}58%{opacity:1;transform:translateY(-4px) scale(1.025);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
 
 .live-market{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 2px;text-align:left}.live-market>div{background:#0b1c32;border:1px solid #203d60;border-radius:13px;padding:10px 12px}.live-market span{display:block;color:#7f9ab6;font-size:10px;font-weight:800;letter-spacing:.6px;margin-bottom:4px}.live-market strong{display:block;color:#eef6ff;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Ghost 1 – Classic Haunted animated User App background */
+.public-app{position:relative;isolation:isolate;background:transparent;overflow:hidden}
+.public-app::before{content:"";position:fixed;z-index:-3;inset:-8%;background:
+ radial-gradient(circle at 50% 18%,rgba(190,215,255,.28) 0 7%,rgba(90,125,170,.12) 8% 16%,transparent 27%),
+ radial-gradient(ellipse at 50% 58%,rgba(18,43,68,.9),rgba(3,12,24,.98) 65%),
+ linear-gradient(180deg,#06111f 0%,#071426 52%,#030914 100%);animation:ghostSky 18s ease-in-out infinite alternate}
+.public-app::after{content:"";position:fixed;z-index:-2;left:-35%;right:-35%;bottom:20%;height:42vh;background:radial-gradient(ellipse at center,rgba(205,225,245,.12),rgba(115,150,185,.05) 42%,transparent 70%);filter:blur(18px);opacity:.72;animation:ghostFog 16s ease-in-out infinite alternate}
+body::before{content:"";position:fixed;z-index:-4;inset:0;background:#071426}
+.hero{position:relative}
+.hero::before{content:"";position:absolute;z-index:-1;left:50%;top:8px;width:250px;height:250px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(circle,rgba(215,230,248,.18),rgba(115,150,190,.06) 45%,transparent 70%);filter:blur(3px);animation:moonGlow 5.5s ease-in-out infinite alternate}
+.round-table{background:rgba(5,18,33,.84);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.top-header,.hero,.round-table{position:relative;z-index:2}
+@keyframes ghostSky{0%{transform:scale(1.02) translate3d(-1%,0,0)}100%{transform:scale(1.08) translate3d(1.5%,-1%,0)}}
+@keyframes ghostFog{0%{transform:translate3d(-8%,2%,0) scale(1)}100%{transform:translate3d(9%,-2%,0) scale(1.12)}}
+@keyframes moonGlow{0%{opacity:.5;transform:translateX(-50%) scale(.96)}100%{opacity:1;transform:translateX(-50%) scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.public-app::before,.public-app::after,.hero::before{animation:none}}
