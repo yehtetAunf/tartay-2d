@@ -1,0 +1,1 @@
+v4.0: UI-only exact compact haunted composition based on the supplied project. Backend/API, SET/VALUE, 2D, rounds, admin and history logic are unchanged.
