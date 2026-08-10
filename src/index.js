@@ -351,7 +351,7 @@ async function handleState(env) {
   // Outside the 2-minute result hold, the big 2D keeps playing
   // continuously until the next scheduled round time.
   if (!resultHold && nextRound && nextRound.seconds_until > 0) {
-    const tick = Math.floor(Date.now() / 550);
+    const tick = Math.floor(Date.now() / 5000);
     preSpin = {
       active: true,
       result_date: nextRound.result_date,
@@ -364,7 +364,7 @@ async function handleState(env) {
   return json({
     success: true,
     app: "Tartay 2D",
-    version: "3.1.0",
+    version: "3.2.0",
     operational_date: date,
     serverNow: Date.now(),
     myanmarNow: getMyanmarNow(),
