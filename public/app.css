@@ -242,3 +242,47 @@ html, body {
     animation:none !important;
   }
 }
+
+/* =========================================================
+   v4.2 STATIC REFERENCE IMAGE — no video / no SVG cartoon
+   Uses the user's supplied haunted reference artwork directly.
+   ========================================================= */
+.haunted-scene{
+  height:360px !important;
+  border-radius:16px 16px 0 0 !important;
+  background:
+    linear-gradient(180deg,rgba(1,6,14,.00) 0%,rgba(1,6,14,.00) 55%,rgba(1,6,14,.22) 76%,#020812 100%),
+    url('/haunted-static.png?v=4.2') center top / auto 360px no-repeat !important;
+  background-color:#020812 !important;
+}
+.haunted-scene::before,.haunted-scene::after{display:none !important;animation:none !important}
+.top-header{
+  height:70px !important;
+  padding:12px 12px 0 !important;
+}
+.brand h1{font-size:29px !important}
+.history-btn{padding:11px 15px !important}
+.hero{height:290px !important;min-height:290px !important}
+.status-line{top:0 !important;right:12px !important}
+#twoD{
+  top:94px !important;
+  font-size:108px !important;
+  line-height:.95 !important;
+}
+.updated-text{
+  top:214px !important;
+  font-size:14px !important;
+  line-height:20px !important;
+}
+.pre-spin-label{top:244px !important}
+.round-table{
+  margin-top:0 !important;
+  border-radius:0 0 16px 16px !important;
+}
+@media(max-width:380px){
+  .haunted-scene{height:344px !important;background-size:auto 344px !important}
+  .top-header{height:66px !important}
+  .hero{height:278px !important;min-height:278px !important}
+  #twoD{top:90px !important;font-size:98px !important}
+  .updated-text{top:202px !important;font-size:13px !important}
+}
