@@ -106,24 +106,43 @@ header{
   overflow:visible;
 }
 .round-head{
-  display:none;
+  min-height:46px;
+  display:grid;
+  grid-template-columns:30% 23% 27% 20%;
+  align-items:center;
+  text-align:center;
+  padding:0 10px;
+  border:2px solid rgba(74,129,255,.85);
+  border-bottom:1px solid rgba(74,129,255,.55);
+  border-radius:18px 18px 0 0;
+  background:rgba(0,5,12,.78);
+  color:#7ea7ff;
+  font-size:clamp(14px,3.2vw,21px);
+  font-weight:900;
+  text-shadow:0 2px 5px #000;
 }
+
 #rounds{
   display:flex;
   flex-direction:column;
-  gap:16px;
+  gap:0;
+  border:2px solid rgba(74,129,255,.85);
+  border-top:0;
+  border-radius:0 0 18px 18px;
+  overflow:hidden;
 }
 .round-row{
   position:relative;
-  min-height:96px;
+  min-height:76px;
   display:grid;
-  grid-template-columns:28% 20% 20% 12% 20%;
+  grid-template-columns:30% 23% 27% 20%;
   align-items:center;
   text-align:center;
-  padding:8px 14px;
-  border:3px solid rgba(255,255,255,.95);
-  border-radius:7px;
-  background:rgba(0,0,0,.22);
+  padding:6px 10px;
+  border:0;
+  border-bottom:1px solid rgba(74,129,255,.30);
+  border-radius:0;
+  background:rgba(0,8,18,.62);
   box-shadow:0 3px 10px rgba(0,0,0,.28);
   backdrop-filter:blur(1px);
   -webkit-backdrop-filter:blur(1px);
@@ -138,10 +157,6 @@ header{
 .round-row .set,.round-row .value{
   font-size:clamp(11px,2.6vw,18px);
 }
-.round-row .bell{
-  font-size:clamp(25px,5vw,36px);
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.6));
-}
 .round-row .result{
   color:#ffc928;
   font-size:clamp(25px,5.5vw,40px);
@@ -150,12 +165,10 @@ header{
 
 /* Current active round = red outline like the sample */
 .round-row.current{
-  border-color:#f60000;
-  box-shadow:0 0 0 1px rgba(255,0,0,.2),0 3px 10px rgba(0,0,0,.35);
+  box-shadow:inset 0 0 0 2px #f60000;
   background:rgba(45,0,0,.18);
 }
 .round-row.current .time{color:#fff}
-.round-row.current .bell{animation:bellPulse 1.25s ease-in-out infinite}
 
 #preSpinLabel{display:none!important}
 .big-result.pre-spin-change{
@@ -180,10 +193,10 @@ header{
   .online{top:68px}
   .hero{min-height:250px;padding-top:8px}
   .updated-text{margin-top:20px}
-  #rounds{gap:12px}
+  .round-head{min-height:40px;grid-template-columns:30% 23% 27% 20%;}
   .round-row{
-    min-height:82px;
-    grid-template-columns:30% 19% 19% 12% 20%;
-    padding:7px 10px;
+    min-height:68px;
+    grid-template-columns:30% 23% 27% 20%;
+    padding:5px 8px;
   }
 }
