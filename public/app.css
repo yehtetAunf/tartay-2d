@@ -1,265 +1,256 @@
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#071426;color:#eef6ff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.app{width:min(100%,560px);margin:auto;min-height:100vh;padding:18px 14px 24px}.top-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.brand small{color:#73aee8;letter-spacing:1.6px;font-size:11px}.brand h1{margin:2px 0;font-size:27px}.brand h1 span{color:#ffc928}.history-btn{padding:11px 14px;border:1px solid #284c76;border-radius:13px;background:#10233e;color:#ffc928;text-decoration:none;font-weight:750}.hero{text-align:center;padding:5px 4px 13px}.status-line{display:flex;align-items:center;justify-content:space-between;color:#8da8c3;font-size:12px;min-height:28px}.online{color:#56dea2;border:1px solid #2c8f69;border-radius:18px;padding:5px 9px;background:#0c2a2b}.big-result{font-size:88px;line-height:1.08;font-weight:900;letter-spacing:4px;color:#ffc928;min-height:100px;display:flex;align-items:center;justify-content:center;text-shadow:0 0 16px rgba(255,201,40,.12)}.big-result.spin{animation:none}.big-result.pre-spin-change{animation:preSpinBigChange .58s cubic-bezier(.22,.72,.25,1) 1}.update-label{font-size:9px;letter-spacing:2px;color:#6e8aa7;margin-top:2px}.updated-text{font-size:13px;font-weight:700;margin-top:4px;color:#f0f5fb}.pre-spin-label{margin-top:8px;color:#9fb7cf;font-size:12px}.pre-spin-label strong{color:#ffc928;font-size:18px;margin-left:5px}.round-table{border:1px solid #203d60;border-radius:15px;overflow:hidden;background:#0b1c32}.round-head,.round-row{display:grid;grid-template-columns:1.08fr 1fr 1.15fr .68fr;align-items:center;text-align:center}.round-head{min-height:28px;background:#03070d;color:#778da5;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px}.round-row{min-height:54px;border-top:1px solid #173350;padding:3px 6px}.round-row .time{font-size:13px;font-weight:800;color:#dce9f7}.round-row .set,.round-row .value{font-size:12px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#d6e5f5}.round-row .result{font-size:25px;font-weight:900;color:#ffc928;letter-spacing:1px}.round-row.current{background:#102b4a}.round-row.current .time{color:#8fc6ff}.round-row.released .result{filter:drop-shadow(0 0 6px rgba(255,201,40,.2))}.app nav{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);width:min(520px,calc(100% - 28px));display:flex;background:#0d213b;border:1px solid #183b62;border-radius:15px;overflow:hidden;z-index:20}.app nav a{flex:1;text-align:center;padding:13px;color:#7892ad;text-decoration:none;font-weight:700}.app nav .active{color:#fff;background:#14345a}@keyframes pulse{from{transform:scale(.96);opacity:.72}to{transform:scale(1.02);opacity:1}}@media(max-width:380px){.app{padding-left:9px;padding-right:9px}.brand h1{font-size:24px}.history-btn{padding:9px 11px;font-size:13px}.big-result{font-size:76px}.round-head,.round-row{grid-template-columns:1.08fr .95fr 1.12fr .7fr}.round-row{min-height:50px}.round-row .time{font-size:12px}.round-row .set,.round-row .value{font-size:11px}.round-row .result{font-size:23px}}
 
-.status-line{justify-content:flex-end}.updated-text{margin-top:10px}
-@keyframes preSpinBigChange{0%{opacity:.28;transform:translateY(8px) scale(.94);filter:blur(1.2px)}58%{opacity:1;transform:translateY(-4px) scale(1.025);filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
-
-.live-market{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0 2px;text-align:left}.live-market>div{background:#0b1c32;border:1px solid #203d60;border-radius:13px;padding:10px 12px}.live-market span{display:block;color:#7f9ab6;font-size:10px;font-weight:800;letter-spacing:.6px;margin-bottom:4px}.live-market strong{display:block;color:#eef6ff;font-size:18px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-
-/* =========================================================
-   v4.1 — EXACT REFERENCE SCENE SHELL
-   One shared haunted scene behind Header + LIVE + 2D + Updated.
-   ========================================================= */
-
-html, body {
-  background:#020812 !important;
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  background:#00060c;
+  color:#eef6ff;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
 }
-
-.app.public-app{
-  width:min(100%,560px);
-  margin:auto;
-  min-height:100vh;
-  padding:14px 14px 24px !important;
-  background:#020812 !important;
-}
-
-/* The reference top panel is about 1.5:1 width-to-height.
-   This keeps the same visual proportion on phones. */
-.haunted-scene{
-  position:relative;
-  height:350px;
-  overflow:hidden;
-  border-radius:16px 16px 0 0;
-  isolation:isolate;
+body{
+  display:flex;
+  justify-content:center;
   background:
-    linear-gradient(
-      180deg,
-      rgba(1,6,14,.03) 0%,
-      rgba(1,6,14,.02) 58%,
-      rgba(1,6,14,.28) 82%,
-      rgba(1,6,14,.82) 100%
-    ),
-    url("/ghost-bg.svg?v=4.1") center top / cover no-repeat;
+    radial-gradient(circle at 50% 0,#071524 0,#01060c 54%,#000 100%);
 }
 
-/* Subtle animation: the scene stays aligned, only light/fog moves. */
-.haunted-scene::before{
-  content:"";
+/* Exact 690×1536 reference composition */
+.reference-shell{
+  position:relative;
+  width:min(100vw,690px);
+  aspect-ratio:690/1536;
+  min-height:0;
+  margin:0 auto;
+  padding:0;
+  overflow:hidden;
+  background:
+    url("/userapp-reference.png?v=4.4")
+    center top / 100% 100% no-repeat;
+}
+
+/* Clickable History overlay on top of the History button already in the picture */
+.history-hotspot{
+  position:absolute;
+  z-index:40;
+  left:70.8%;
+  top:3.05%;
+  width:22.3%;
+  height:5.45%;
+  border-radius:18px;
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+/* The reference picture already contains the visual LIVE badge.
+   Keep the real DOM status invisible so the layout is exact. */
+.hero{
   position:absolute;
   inset:0;
-  z-index:0;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 24%,rgba(225,238,252,.10),transparent 24%),
-    linear-gradient(90deg,rgba(0,4,10,.10),transparent 18% 82%,rgba(0,4,10,.10));
-  animation:sceneGlow41 7s ease-in-out infinite alternate;
 }
-
-.haunted-scene::after{
-  content:"";
-  position:absolute;
-  z-index:1;
-  pointer-events:none;
-  left:-24%;
-  top:265px;
-  width:148%;
-  height:72px;
-  opacity:.30;
-  filter:blur(18px);
-  background:radial-gradient(ellipse,rgba(184,210,235,.28),transparent 65%);
-  animation:fog41 20s linear infinite alternate;
-}
-
-.top-header{
-  position:relative !important;
-  z-index:5 !important;
-  height:66px;
-  margin:0 !important;
-  padding:10px 10px 0;
-  background:transparent !important;
-}
-
-.brand h1{
-  margin:0 !important;
-  font-size:28px !important;
-  font-weight:800;
-}
-
-.history-btn{
-  padding:11px 14px !important;
-  border-radius:14px !important;
-  background:rgba(8,20,37,.68) !important;
-  color:#ffc928 !important;
-}
-
-/* Hero is only the remaining area inside the shared scene. */
-.hero{
-  position:relative !important;
-  z-index:4 !important;
-  height:284px !important;
-  min-height:284px !important;
-  margin:0 !important;
-  padding:0 !important;
-  overflow:visible !important;
-  background:transparent !important;
-  text-align:center !important;
-}
-
-.hero::before,
-.hero::after{
-  display:none !important;
-}
-
-.status-line{
-  position:absolute !important;
-  top:2px !important;
-  right:10px !important;
-  left:auto !important;
-  width:auto !important;
-  min-height:0 !important;
-  margin:0 !important;
-}
-
 .online{
-  font-size:12px !important;
-  padding:5px 10px !important;
-  background:rgba(3,28,27,.70) !important;
+  position:absolute;
+  left:73.3%;
+  top:10.1%;
+  width:19%;
+  height:4.4%;
+  opacity:0;
 }
 
-#twoD{
-  position:absolute !important;
-  top:83px !important;
-  left:50% !important;
-  width:100% !important;
-  min-height:0 !important;
-  transform:translateX(-50%) !important;
-  margin:0 !important;
-  font-size:106px !important;
-  line-height:.95 !important;
-  letter-spacing:1px !important;
-  color:#ffc928 !important;
+/* Cover the static 27 in the supplied reference, then place the real 2D above it. */
+.result-mask{
+  position:absolute;
+  z-index:4;
+  left:31%;
+  top:22.0%;
+  width:38%;
+  height:12.5%;
+  border-radius:42%;
+  background:rgba(5,20,34,.84);
+  box-shadow:
+    0 0 42px 22px rgba(5,20,34,.80),
+    inset 0 0 34px rgba(9,31,48,.56);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+
+.big-result{
+  position:absolute;
+  z-index:8;
+  left:50%;
+  top:23.2%;
+  transform:translateX(-50%);
+  width:40%;
+  height:9.6%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  margin:0;
+  color:#ffc928;
+  font-size:clamp(72px,18.2vw,126px);
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-3px;
+  text-align:center;
   text-shadow:
-    0 6px 13px rgba(0,0,0,.95),
-    0 0 18px rgba(255,201,40,.13) !important;
+    0 5px 10px rgba(0,0,0,.92),
+    0 0 8px rgba(255,201,40,.20);
+}
+.big-result.spin{animation:none}
+.big-result.pre-spin-change{
+  animation:preSpinBigChange .58s cubic-bezier(.22,.72,.25,1) 1;
 }
 
+/* Cover the static Updated line and show the actual live date/time in the same spot. */
+.updated-mask{
+  position:absolute;
+  z-index:5;
+  left:15.7%;
+  top:34.7%;
+  width:68.6%;
+  height:4.1%;
+  border-radius:16px;
+  background:rgba(3,16,28,.88);
+  box-shadow:0 0 18px 8px rgba(3,16,28,.78);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+}
 .updated-text{
-  position:absolute !important;
-  top:205px !important;
-  left:50% !important;
-  width:100% !important;
-  transform:translateX(-50%) !important;
-  margin:0 !important;
-  padding:0 10px !important;
-  color:#fff !important;
-  font-size:14px !important;
-  line-height:20px !important;
-  font-weight:700 !important;
-  text-align:center !important;
-  text-shadow:0 2px 6px rgba(0,0,0,.98) !important;
+  position:absolute;
+  z-index:9;
+  left:8%;
+  top:35.0%;
+  width:84%;
+  margin:0;
+  color:#f7f9fc;
+  font-size:clamp(12px,2.55vw,18px);
+  line-height:1.35;
+  font-weight:700;
+  text-align:center;
+  white-space:nowrap;
+  text-shadow:0 2px 5px #000;
 }
+.pre-spin-label{display:none!important}
 
-.pre-spin-label{
-  position:absolute !important;
-  top:236px !important;
-  left:50% !important;
-  transform:translateX(-50%) !important;
-  margin:0 !important;
-}
-
-/* Table begins immediately after the scene, like the reference. */
+/* Dynamic rows sit exactly over the table already drawn in the picture. */
 .round-table{
-  margin-top:0 !important;
-  border:1px solid #284c76 !important;
-  border-radius:0 0 16px 16px !important;
-  background:rgba(3,15,28,.95) !important;
-  overflow:hidden !important;
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
+  position:absolute;
+  z-index:20;
+  left:5.05%;
+  top:39.7%;
+  width:89.9%;
+  height:54.3%;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:18px;
+  overflow:hidden;
+  background:transparent;
+  pointer-events:none;
 }
-
 .round-head{
-  min-height:34px !important;
-  background:#02060b !important;
-  color:#8098b4 !important;
-  font-size:11px !important;
+  height:7.55%;
+  min-height:0;
+  background:transparent;
 }
-
+#rounds{
+  height:92.45%;
+  display:grid;
+  grid-template-rows:repeat(8,1fr);
+}
 .round-row{
-  min-height:57px !important;
-  background:rgba(8,31,54,.74) !important;
+  position:relative;
+  display:grid;
+  grid-template-columns:34% 25% 25% 16%;
+  align-items:center;
+  min-height:0;
+  padding:0;
+  border:0;
+  background:transparent;
+  text-align:center;
 }
-
-.round-row.current{
-  background:rgba(22,74,116,.86) !important;
+.round-row .time,
+.round-row .set,
+.round-row .value,
+.round-row .result{
+  position:relative;
+  z-index:3;
+  font-weight:800;
+  white-space:nowrap;
 }
-
 .round-row .time{
-  font-size:13px !important;
+  color:transparent;
+  font-size:clamp(11px,2.7vw,18px);
 }
-
 .round-row .set,
 .round-row .value{
-  font-size:12px !important;
+  color:transparent;
+  font-size:clamp(10px,2.35vw,16px);
 }
-
 .round-row .result{
-  font-size:27px !important;
+  color:transparent;
+  font-size:clamp(18px,4.5vw,31px);
+  font-weight:900;
 }
 
-@keyframes sceneGlow41{
-  from{opacity:.62}
-  to{opacity:1}
+/* Released rows: hide the reference dashes with small patches, then show real values. */
+.round-row.released .set,
+.round-row.released .value,
+.round-row.released .result{
+  color:#eef6ff;
+}
+.round-row.released .result{color:#ffc928}
+
+.round-row.released .set::before,
+.round-row.released .value::before,
+.round-row.released .result::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  width:90%;
+  height:68%;
+  border-radius:8px;
+  background:#061522;
 }
 
-@keyframes fog41{
-  from{transform:translateX(-4%)}
-  to{transform:translateX(4%)}
+/* Current round highlight exactly like the requested design */
+.round-row.current::before{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:0;
+  background:rgba(19,68,106,.82);
+  border-top:1px solid rgba(74,136,191,.28);
+  border-bottom:1px solid rgba(74,136,191,.28);
+}
+.round-row.current .time{
+  color:#8fc6ff;
+}
+.round-row.current .set,
+.round-row.current .value{
+  color:#eaf3ff;
+}
+.round-row.current .result{
+  color:#ffc928;
+}
+.round-row.current .time::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:-18% -6%;
+  background:rgba(19,68,106,.82);
 }
 
-@media(max-width:520px){
-  .haunted-scene{
-    height:350px;
-    background-position:center top;
-    background-size:cover;
-  }
+/* Small-screen typography stays proportional to the supplied image. */
+@media(max-width:420px){
+  .big-result{letter-spacing:-2px}
+  .updated-text{font-weight:650}
 }
-
-@media(max-width:380px){
-  .haunted-scene{height:332px}
-  .top-header{height:62px}
-  .hero{height:270px !important;min-height:270px !important}
-  .brand h1{font-size:25px !important}
-  #twoD{top:78px !important;font-size:96px !important}
-  .updated-text{top:190px !important;font-size:13px !important}
-  .pre-spin-label{top:218px !important}
-  .round-row{min-height:53px !important}
+@keyframes preSpinBigChange{
+  0%{opacity:.30;transform:translateX(-50%) translateY(7px) scale(.95)}
+  58%{opacity:1;transform:translateX(-50%) translateY(-3px) scale(1.02)}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
 }
-
-@media(prefers-reduced-motion:reduce){
-  .haunted-scene::before,
-  .haunted-scene::after{
-    animation:none !important;
-  }
-}
-
-/* v4.3 STATIC FULL-IMAGE — show the entire haunted artwork without cropping */
-.haunted-scene{
-  height:auto !important;
-  aspect-ratio:1024 / 675 !important;
-  background-color:#020812 !important;
-  background-image:url("/ghost-bg.svg?v=4.3") !important;
-  background-repeat:no-repeat !important;
-  background-position:center top !important;
-  background-size:contain !important;
-}
-.top-header{height:19% !important;min-height:62px !important;}
-.hero{position:absolute !important;inset:0 !important;height:100% !important;min-height:0 !important;z-index:4 !important;pointer-events:none;}
-.top-header{position:relative !important;z-index:8 !important;}
-.status-line{top:13% !important;right:3% !important;pointer-events:auto;}
-#twoD{top:42% !important;font-size:clamp(88px,20vw,122px) !important;}
-.updated-text{top:77% !important;font-size:clamp(13px,3.2vw,17px) !important;}
-.pre-spin-label{top:84% !important;}
-.round-table{margin-top:0 !important;border-radius:0 0 16px 16px !important;}
-@media(max-width:520px){.haunted-scene{height:auto !important;aspect-ratio:1024/675 !important;background-size:contain !important;background-position:center top !important;}}
-@media(max-width:380px){.haunted-scene{height:auto !important;aspect-ratio:1024/675 !important}.top-header{height:19% !important}.hero{height:100% !important;min-height:0 !important}#twoD{top:42% !important}.updated-text{top:77% !important}}
