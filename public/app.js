@@ -40,76 +40,91 @@ function setOnline(ok){
   onlineEl.style.opacity=ok?"1":".65";
 }
 
+
+let activeSpinTimer=null;
+let activeRoundKey=null;
+
+function randomSet(){
+  const whole=Math.floor(1000+Math.random()*13900);
+  const dec=Math.floor(Math.random()*100);
+  return `${whole}.${String(dec).padStart(2,"0")}`;
+}
+function randomValue(){
+  const whole=Math.floor(10000+Math.random()*890000);
+  const dec=Math.floor(Math.random()*100);
+  return `${whole}.${String(dec).padStart(2,"0")}`;
+}
+function stopActiveRowSpin(){
+  if(activeSpinTimer){clearInterval(activeSpinTimer);activeSpinTimer=null}
+  activeRoundKey=null;
+}
+function startActiveRowSpin(roundTime){
+  if(!roundTime){stopActiveRowSpin();return}
+  if(activeRoundKey===roundTime && activeSpinTimer)return;
+  stopActiveRowSpin();
+  activeRoundKey=roundTime;
+
+  const tick=()=>{
+    const row=roundsEl.querySelector(`[data-round="${roundTime}"]`);
+    if(!row || row.classList.contains("released"))return;
+    const s=row.querySelector(".set");
+    const v=row.querySelector(".value");
+    if(s)s.textContent=randomSet();
+    if(v)v.textContent=randomValue();
+    // IMPORTANT: row 2D must stay "--" until official result is released.
+    const r=row.querySelector(".result");
+    if(r)r.textContent="--";
+  };
+  tick();
+  activeSpinTimer=setInterval(tick,700);
+}
+
+function getNextRound(results){
+  const released=new Set(results.map(x=>x.round_time));
+  return ROUNDS.find(t=>!released.has(t))||null;
+}
+
 function renderRows(results){
   const map=new Map(results.map(x=>[x.round_time,x]));
-  const latest=results.length?results[results.length-1]:null;
+  const nextRound=getNextRound(results);
+
   roundsEl.innerHTML=ROUNDS.map(t=>{
-    const x=map.get(t),current=latest&&latest.round_time===t;
-    return `<div class="round-row ${x?'released':''} ${current?'current':''}" data-round="${t}"><span class="time">${t}</span><span class="set">${x?.set_value||'--'}</span><span class="value">${x?.value_value||'--'}</span><span class="result">${x?.result_2d||'--'}</span></div>`;
+    const x=map.get(t);
+    const active=!x && t===nextRound;
+    return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
+      <span class="time">${t}</span>
+      <span class="set">${x?.set_value||'--'}</span>
+      <span class="value">${x?.value_value||'--'}</span>
+      <span class="result">${x?.result_2d||'--'}</span>
+    </div>`;
   }).join("");
-}
 
-function random2D(){
-  let next="";
-  do{next=String(Math.floor(Math.random()*100)).padStart(2,"0")}while(next===lastSpinResult);
-  lastSpinResult=next;
-  return next;
-}
-
-function animateSpinChange(value){
-  if(!twoDEl)return;
-  twoDEl.textContent=String(value??"--").padStart(2,"0");
-  twoDEl.classList.remove("pre-spin-change");
-  void twoDEl.offsetWidth;
-  twoDEl.classList.add("pre-spin-change");
-  window.setTimeout(()=>twoDEl.classList.remove("pre-spin-change"),PRE_SPIN_CHANGE_ANIMATION_MS+40);
-}
-
-function showNextSpinFrame(){
-  if(!spinning||holdActive)return;
-  animateSpinChange(random2D());
-}
-
-function startBigSpin(initialFrame){
-  if(initialFrame!=null&&/^\d{1,2}$/.test(String(initialFrame))){
-    const initial=String(initialFrame).padStart(2,"0");
-    lastSpinResult=initial;
-    animateSpinChange(initial);
-  }
-  if(spinning)return;
-  spinning=true;
-  twoDEl.classList.add("spin");
-  if(spinTimer){clearInterval(spinTimer)}
-  spinTimer=setInterval(showNextSpinFrame,PRE_SPIN_STEP_MS);
-}
-
-function stopBigSpin(result){
-  spinning=false;
-  if(spinTimer){clearInterval(spinTimer);spinTimer=null}
-  twoDEl.classList.remove("spin","pre-spin-change");
-  twoDEl.textContent=result||"--";
-  lastSpinResult=String(result||"");
+  if(nextRound)startActiveRowSpin(nextRound);
+  else stopActiveRowSpin();
 }
 
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   renderRows(results);
   const latest=results.length?results[results.length-1]:null;
-  holdActive=Boolean(data.resultHold?.active);
 
-  if(holdActive){
-    stopBigSpin(data.resultHold.result_2d||latest?.result_2d||"--");
-  }else if(data.preSpin?.active){
-    startBigSpin(data.preSpin.frame);
+  /*
+    Big 2D:
+    - official latest result is shown when server preSpin is inactive
+    - while server preSpin is active, use its changing frame
+    Existing server timing remains authoritative.
+  */
+  if(data.preSpin?.active){
+    preSpinLabel.hidden=true;
+    twoDEl.textContent=String(data.preSpin.frame ?? "--").padStart(2,"0");
+    twoDEl.classList.add("spin");
   }else{
-    stopBigSpin(latest?.result_2d||"--");
+    preSpinLabel.hidden=true;
+    twoDEl.textContent=latest?.result_2d||"--";
+    twoDEl.classList.remove("spin");
   }
 
-  if(preSpinLabel)preSpinLabel.hidden=true;
-  if(preSpinNumber)preSpinNumber.textContent=data.preSpin?.frame||"--";
-
   startClock(data.serverNow);
-  updateClock();
   setOnline(true);
 }
 
