@@ -120,14 +120,13 @@ function generatedRoundValues(resultDate, roundTime) {
 }
 
 function publicResult(item) {
-  const generated = generatedRoundValues(item.result_date, item.round_time);
   return {
     id: item.id,
     result_date: item.result_date,
     round_time: item.round_time,
     result_2d: item.result_2d,
-    set_value: item.set_value || generated.set,
-    value_value: item.value_value || generated.value,
+    set_value: item.set_value || "--",
+    value_value: item.value_value || "--",
     updated_at: item.updated_at,
     published_at: item.published_at || (isRoundReleased(item.result_date, item.round_time) ? item.updated_at : null)
   };
@@ -367,9 +366,34 @@ async function fetchLiveMarket() {
   }
 }
 
+
+async function lockReleasedMarketValues(env, date, market) {
+  if (!market?.ok) return;
+  try {
+    const rows = await queryResultsForDate(env, date, true);
+    for (const item of rows) {
+      if (!isRoundReleased(item)) continue;
+      if (item.set_value && item.value_value) continue;
+      await env.DB.prepare(`
+        UPDATE app_results
+        SET set_value = COALESCE(NULLIF(set_value,''), ?),
+            value_value = COALESCE(NULLIF(value_value,''), ?),
+            updated_at = COALESCE(updated_at, ?)
+        WHERE id = ?
+      `).bind(market.set, market.value, new Date().toISOString(), item.id).run();
+    }
+  } catch (error) {
+    console.error("Market lock error", error);
+  }
+}
+
 async function handleState(env) {
   const date = getOperationalDate();
   const market = await fetchLiveMarket();
+
+  // As soon as a round is released, freeze the current Coinbase SET/VALUE
+  // into that round so refreshes/history never change it afterward.
+  await lockReleasedMarketValues(env, date, market);
   const results = await queryResultsForDate(env, date, false);
   const nowMs = myanmarPseudoEpoch();
 
@@ -418,7 +442,7 @@ async function handleState(env) {
   return json({
     success: true,
     app: "Tartay 2D",
-    version: "3.4.0",
+    version: "5.2.0",
     operational_date: date,
     serverNow: Date.now(),
     myanmarNow: getMyanmarNow(),
