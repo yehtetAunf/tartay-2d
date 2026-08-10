@@ -1,5 +1,5 @@
 const ROUNDS=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
-const PRE_SPIN_STEP_MS=5000;
+const PRE_SPIN_STEP_MS=10000;
 const PRE_SPIN_CHANGE_ANIMATION_MS=580;
 
 const roundsEl=document.getElementById("rounds");
@@ -8,6 +8,8 @@ const updatedEl=document.getElementById("updatedText");
 const onlineEl=document.querySelector(".online");
 const preSpinLabel=document.getElementById("preSpinLabel");
 const preSpinNumber=document.getElementById("preSpinNumber");
+const liveSetEl=document.getElementById("liveSet");
+const liveValueEl=document.getElementById("liveValue");
 
 let loading=false;
 let timer=null;
@@ -94,6 +96,8 @@ function stopBigSpin(result){
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   renderRows(results);
+  if(liveSetEl) liveSetEl.textContent=data.market?.set ?? "--";
+  if(liveValueEl) liveValueEl.textContent=data.market?.value ?? "--";
   const latest=results.length?results[results.length-1]:null;
   holdActive=Boolean(data.resultHold?.active);
 
