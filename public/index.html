@@ -11,15 +11,15 @@
 <body>
 <main class="app public-app">
   <header class="top-header">
-    <div class="brand"><small>LIVE 2D</small><h1>Tartay <span>2D</span></h1></div>
+    <div class="brand"><h1>Tartay <span>2D</span></h1></div>
     <a class="history-btn" href="/history.html">History</a>
   </header>
 
   <section class="hero">
-    <div class="status-line"><span class="online">● LIVE</span><span id="serverClock">--</span></div>
+    <div class="status-line"><span class="online">● LIVE</span></div>
     <div id="twoD" class="big-result">--</div>
-    <div class="update-label">LAST UPDATED</div>
-    <div id="updatedText" class="updated-text">Waiting for result</div>
+    
+    <div id="updatedText" class="updated-text">Updated --</div>
     <div id="preSpinLabel" class="pre-spin-label" hidden>Next round preparing… <strong id="preSpinNumber">--</strong></div>
   </section>
 
@@ -28,7 +28,6 @@
     <div id="rounds"></div>
   </section>
 
-  <nav><a class="active" href="/">Home</a><a href="/history.html">History</a></nav>
 </main>
 <script src="/app.js"></script>
 </body>
