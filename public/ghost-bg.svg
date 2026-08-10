@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1920">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#061426"/>
+    <stop offset=".52" stop-color="#07192a"/>
+    <stop offset="1" stop-color="#010712"/>
+  </linearGradient>
+  <radialGradient id="moonGlow">
+    <stop offset="0" stop-color="#f5f8ff"/>
+    <stop offset=".55" stop-color="#dce8f6"/>
+    <stop offset=".75" stop-color="#9bb5d3" stop-opacity=".55"/>
+    <stop offset="1" stop-color="#7592b4" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+
+<rect width="1080" height="1920" fill="url(#sky)"/>
+
+<!-- moon glow -->
+<circle cx="545" cy="385" r="270" fill="url(#moonGlow)" opacity=".62"/>
+<circle cx="545" cy="385" r="150" fill="#eaf1fb" opacity=".93"/>
+<g opacity=".14" fill="#637b99">
+  <ellipse cx="500" cy="345" rx="38" ry="24"/>
+  <ellipse cx="595" cy="420" rx="52" ry="31"/>
+  <ellipse cx="545" cy="315" rx="30" ry="18"/>
+  <ellipse cx="460" cy="425" rx="26" ry="19"/>
+</g>
+
+<!-- distant mist -->
+<g filter="url(#soft)" fill="#98b7d6" opacity=".10">
+  <ellipse cx="270" cy="650" rx="300" ry="80"/>
+  <ellipse cx="800" cy="690" rx="360" ry="95"/>
+  <ellipse cx="540" cy="830" rx="500" ry="100"/>
+</g>
+
+<!-- bats -->
+<g fill="#00060c" opacity=".95">
+  <path d="M150 330 q38-32 70 0 q-15-4-27 17 q-9-19-43-17z"/>
+  <path d="M765 295 q35-30 69 2 q-16-5-28 16 q-12-19-41-18z"/>
+  <path d="M860 425 q26-24 54 0 q-12-4-22 13 q-10-15-32-13z"/>
+  <path d="M280 450 q30-25 58 0 q-13-4-24 14 q-9-16-34-14z"/>
+  <path d="M650 505 q22-20 46 0 q-10-3-18 12 q-9-14-28-12z"/>
+</g>
+
+<!-- trees -->
+<g fill="#01050a">
+  <path d="M0 420 L70 500 50 390 118 470 92 345 150 420 139 280 180 410 230 350 200 500 260 445 220 610 0 610z"/>
+  <path d="M1080 390 L1005 480 1020 360 955 455 982 330 920 410 936 270 892 405 840 350 880 510 815 450 860 620 1080 620z"/>
+</g>
+
+<!-- haunted castle silhouette -->
+<g fill="#010409" stroke="#0f2439" stroke-width="3">
+  <!-- main body -->
+  <rect x="280" y="690" width="520" height="390" rx="4"/>
+  <!-- left wing -->
+  <rect x="180" y="760" width="190" height="320"/>
+  <!-- right wing -->
+  <rect x="710" y="750" width="190" height="330"/>
+
+  <!-- central tower -->
+  <rect x="455" y="510" width="170" height="410"/>
+  <polygon points="435,520 540,360 645,520"/>
+  <rect x="515" y="320" width="50" height="100"/>
+  <polygon points="505,330 540,260 575,330"/>
+
+  <!-- left tower -->
+  <rect x="220" y="620" width="130" height="350"/>
+  <polygon points="205,630 285,510 365,630"/>
+  <rect x="270" y="490" width="30" height="70"/>
+  <polygon points="262,495 285,445 308,495"/>
+
+  <!-- right tower -->
+  <rect x="730" y="610" width="130" height="360"/>
+  <polygon points="715,620 795,500 875,620"/>
+  <rect x="780" y="480" width="30" height="70"/>
+  <polygon points="772,485 795,435 818,485"/>
+
+  <!-- side spires -->
+  <polygon points="150,760 205,650 260,760"/>
+  <rect x="170" y="750" width="70" height="260"/>
+  <polygon points="820,760 875,650 930,760"/>
+  <rect x="840" y="750" width="70" height="260"/>
+</g>
+
+<!-- windows -->
+<g fill="#78b9ef" opacity=".62">
+  <rect x="500" y="585" width="28" height="52" rx="13"/>
+  <rect x="553" y="585" width="28" height="52" rx="13"/>
+  <rect x="260" y="700" width="24" height="46" rx="11"/>
+  <rect x="299" y="700" width="24" height="46" rx="11"/>
+  <rect x="760" y="690" width="24" height="46" rx="11"/>
+  <rect x="800" y="690" width="24" height="46" rx="11"/>
+  <rect x="350" y="785" width="24" height="46" rx="11"/>
+  <rect x="405" y="785" width="24" height="46" rx="11"/>
+  <rect x="650" y="785" width="24" height="46" rx="11"/>
+  <rect x="705" y="785" width="24" height="46" rx="11"/>
+</g>
+
+<!-- foreground ground/fog -->
+<path d="M0 1060 Q230 980 430 1065 T1080 1050 V1920 H0z" fill="#01050b"/>
+<g fill="#839fbd" opacity=".08" filter="url(#soft)">
+  <ellipse cx="260" cy="1100" rx="320" ry="65"/>
+  <ellipse cx="760" cy="1120" rx="390" ry="75"/>
+</g>
+</svg>

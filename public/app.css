@@ -7,132 +7,110 @@
 
 
 /* =========================================================
-   v3.6 USER APP — VISIBLE CLASSIC HAUNTED ANIMATED BACKGROUND
+   v3.7 USER APP — CLEAR CLASSIC HAUNTED BACKGROUND
    ========================================================= */
 html,body{
-  background:#020914 !important;
+  background:#010711 !important;
 }
 
 .public-app{
   position:relative;
   isolation:isolate;
-  background:transparent !important;
+  background:
+    linear-gradient(180deg,rgba(1,7,17,.06) 0%,rgba(1,7,17,.12) 36%,rgba(1,7,17,.46) 72%,rgba(1,7,17,.84) 100%),
+    url("/ghost-bg.svg?v=3.7") center top / cover no-repeat fixed !important;
   overflow:hidden;
 }
 
-/* Put all real UI above the animated scene. */
+/* Keep UI clean and readable while clearly showing the scene. */
 .public-app > *{
   position:relative;
-  z-index:4;
+  z-index:5;
 }
 
-/* Moon + haunted castle silhouette + moving cloud glow */
-.public-app::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  z-index:1;
-  pointer-events:none;
-  background:
-    linear-gradient(180deg,rgba(2,8,18,.22) 0%,rgba(2,9,20,.38) 55%,rgba(1,5,12,.82) 100%),
-    radial-gradient(circle at 49% 18%,rgba(229,240,255,.98) 0 7.5%,rgba(165,194,226,.52) 8%,rgba(78,112,151,.16) 17%,transparent 27%),
-    radial-gradient(ellipse at 18% 35%,rgba(112,144,176,.22),transparent 38%),
-    radial-gradient(ellipse at 84% 31%,rgba(89,121,157,.20),transparent 42%),
-    linear-gradient(180deg,#061426 0%,#07192d 44%,#03101d 75%,#010711 100%);
-  animation:hauntedSkyMove 20s ease-in-out infinite alternate;
-}
-
-/* Castle silhouette assembled from gradients; stays subtle enough for numbers. */
-body::before{
-  content:"";
-  position:fixed;
-  z-index:2;
-  pointer-events:none;
-  left:50%;
-  top:125px;
-  width:min(96vw,620px);
-  height:390px;
-  transform:translateX(-50%);
-  opacity:.72;
-  background:
-    /* central tower roof */
-    conic-gradient(from 225deg at 50% 10%,transparent 0 25%,#01050b 0 50%,transparent 0) 50% 2%/118px 115px no-repeat,
-    /* left roof */
-    conic-gradient(from 225deg at 24% 22%,transparent 0 25%,#01050b 0 50%,transparent 0) 18% 13%/90px 90px no-repeat,
-    /* right roof */
-    conic-gradient(from 225deg at 76% 22%,transparent 0 25%,#01050b 0 50%,transparent 0) 82% 13%/90px 90px no-repeat,
-    /* towers */
-    linear-gradient(#01050b,#01050b) 50% 26%/104px 185px no-repeat,
-    linear-gradient(#01050b,#01050b) 23% 42%/82px 150px no-repeat,
-    linear-gradient(#01050b,#01050b) 77% 42%/82px 150px no-repeat,
-    /* main house */
-    linear-gradient(#01050b,#01050b) 50% 75%/350px 145px no-repeat,
-    /* blue window glow */
-    radial-gradient(ellipse,rgba(116,190,255,.60) 0 22%,transparent 27%) 47% 50%/18px 32px no-repeat,
-    radial-gradient(ellipse,rgba(116,190,255,.48) 0 22%,transparent 27%) 53% 50%/18px 32px no-repeat,
-    radial-gradient(ellipse,rgba(116,190,255,.40) 0 22%,transparent 27%) 22% 57%/16px 29px no-repeat,
-    radial-gradient(ellipse,rgba(116,190,255,.40) 0 22%,transparent 27%) 78% 57%/16px 29px no-repeat;
-  filter:drop-shadow(0 16px 18px rgba(0,0,0,.72));
-  animation:castleBreath 7s ease-in-out infinite alternate;
-}
-
-/* Moving fog and bats */
-body::after{
-  content:"🦇       🦇             🦇      🦇";
-  position:fixed;
-  z-index:3;
-  pointer-events:none;
-  left:-32%;
-  top:145px;
-  width:150%;
-  height:54vh;
-  color:#000;
-  font-size:24px;
-  letter-spacing:20px;
-  white-space:pre;
-  opacity:.55;
-  background:
-    radial-gradient(ellipse at 20% 70%,rgba(184,210,235,.12),transparent 28%),
-    radial-gradient(ellipse at 56% 74%,rgba(184,210,235,.10),transparent 31%),
-    radial-gradient(ellipse at 88% 68%,rgba(184,210,235,.11),transparent 30%);
-  filter:blur(.15px);
-  animation:batsAndFog 18s linear infinite;
-}
-
-@keyframes hauntedSkyMove{
-  0%{transform:scale(1.02) translate3d(-1.2%,0,0);filter:brightness(.92)}
-  50%{filter:brightness(1.04)}
-  100%{transform:scale(1.07) translate3d(1.2%,-.7%,0);filter:brightness(.96)}
-}
-
-@keyframes castleBreath{
-  0%{opacity:.62;filter:drop-shadow(0 16px 18px rgba(0,0,0,.72)) brightness(.88)}
-  100%{opacity:.78;filter:drop-shadow(0 16px 22px rgba(0,0,0,.82)) brightness(1.04)}
-}
-
-@keyframes batsAndFog{
-  0%{transform:translate3d(-3%,1%,0)}
-  50%{transform:translate3d(8%,-1.2%,0)}
-  100%{transform:translate3d(18%,1%,0)}
-}
-
-/* Let the background show through without reducing readability. */
 .top-header,
 .hero{
   background:transparent !important;
 }
-.round-table{
-  position:relative;
-  z-index:5;
-  background:rgba(4,17,31,.86) !important;
-  backdrop-filter:blur(4px);
-  -webkit-backdrop-filter:blur(4px);
-  box-shadow:0 10px 34px rgba(0,0,0,.34);
+
+/* Moving translucent fog over the visible castle background. */
+.public-app::before,
+.public-app::after{
+  content:"";
+  position:fixed;
+  pointer-events:none;
+  z-index:2;
+  left:-30vw;
+  width:160vw;
+  height:220px;
+  border-radius:50%;
+  filter:blur(25px);
+  background:
+    radial-gradient(ellipse at 25% 50%,rgba(180,207,232,.22),transparent 34%),
+    radial-gradient(ellipse at 60% 50%,rgba(157,190,222,.18),transparent 38%),
+    radial-gradient(ellipse at 90% 50%,rgba(184,211,235,.16),transparent 31%);
+  opacity:.58;
+}
+.public-app::before{
+  top:380px;
+  animation:ghostFogA 24s linear infinite alternate;
+}
+.public-app::after{
+  top:610px;
+  opacity:.40;
+  animation:ghostFogB 31s linear infinite alternate;
 }
 
-/* Accessibility / lower-power devices */
+@keyframes ghostFogA{
+  from{transform:translate3d(-9vw,0,0)}
+  to{transform:translate3d(12vw,-12px,0)}
+}
+@keyframes ghostFogB{
+  from{transform:translate3d(10vw,4px,0)}
+  to{transform:translate3d(-12vw,-8px,0)}
+}
+
+/* Main result stays highly legible against the moon/castle. */
+#twoD{
+  position:relative;
+  z-index:7;
+  text-shadow:
+    0 4px 8px rgba(0,0,0,.82),
+    0 0 24px rgba(255,193,28,.20);
+}
+.updated-text{
+  position:relative;
+  z-index:7;
+  text-shadow:0 2px 5px rgba(0,0,0,.95);
+}
+
+/* Table is darker glass so the haunted scene remains visible around it. */
+.round-table{
+  position:relative;
+  z-index:6;
+  background:rgba(3,14,27,.78) !important;
+  backdrop-filter:blur(5px);
+  -webkit-backdrop-filter:blur(5px);
+  box-shadow:0 12px 38px rgba(0,0,0,.42);
+}
+
+.round-row{
+  background:rgba(8,31,54,.55) !important;
+}
+.round-row.current{
+  background:rgba(18,66,108,.72) !important;
+}
+
+@media (max-width:520px){
+  .public-app{
+    background-position:center 42px !important;
+    background-size:auto 1180px !important;
+  }
+}
+
 @media (prefers-reduced-motion:reduce){
   .public-app::before,
-  body::before,
-  body::after{animation:none !important}
+  .public-app::after{
+    animation:none !important;
+  }
 }
