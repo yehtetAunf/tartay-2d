@@ -270,58 +270,89 @@ header{
 }
 
 
-/* ===== v4.9 requested spacing / border alignment ===== */
+/* ===== v5.0 precise layout correction ===== */
 
-/* Move big 2D + Updated + all 8 rounds upward as one block */
+/* Keep LIVE hidden as requested */
+.online,.status-line,.live-badge,.live-status{display:none!important;}
+
+/* Move the result / Updated / rounds upward WITHOUT overlapping them */
 .hero{
-  transform:translateY(-42px) !important;
-  margin-bottom:-42px !important;
+  min-height:190px !important;
+  padding-top:0 !important;
+  padding-bottom:0 !important;
+  margin-bottom:0 !important;
+}
+#twoD{
+  margin-top:0 !important;
+  margin-bottom:2px !important;
+}
+.updated-text,
+#updatedText{
+  position:relative !important;
+  z-index:3 !important;
+  margin-top:2px !important;
+  margin-bottom:10px !important;
+  transform:none !important;
 }
 
+/* Table sits immediately below Updated, with safe spacing */
 .round-table{
-  transform:translateY(-42px) !important;
-  margin-bottom:-42px !important;
+  margin-top:0 !important;
+  transform:none !important;
 }
 
-/* Keep the 8 rows tighter and higher on mobile */
+/* IMPORTANT: restore original row look.
+   No individual thick white boxes. */
+.round-row{
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  outline:0 !important;
+  background:rgba(0,0,0,.22) !important;
+  border-bottom:1px solid rgba(105,145,185,.34) !important;
+}
+
+/* Current 09:00 row must use exactly the same edge/divider style */
+.round-row.current,
+.round-row.active,
+.round-row[data-current="true"]{
+  border:0 !important;
+  border-radius:0 !important;
+  outline:0 !important;
+  box-shadow:none !important;
+  background:rgba(0,0,0,.22) !important;
+  border-bottom:1px solid rgba(105,145,185,.34) !important;
+}
+.round-row.current::before,.round-row.current::after,
+.round-row.active::before,.round-row.active::after{
+  display:none!important;
+  content:none!important;
+}
+
+/* Preserve yellow 2D result */
+.round-row .result{color:#ffc928!important;}
+
+/* Compact all eight rounds so the full block is higher */
+#rounds{gap:0!important;}
+.round-row{min-height:62px!important;}
+
 @media(max-width:520px){
   .hero{
-    transform:translateY(-54px) !important;
-    margin-bottom:-54px !important;
+    min-height:176px !important;
+    transform:translateY(-22px) !important;
+    margin-bottom:-22px !important;
   }
-
+  #twoD{
+    line-height:.95 !important;
+  }
+  .updated-text,#updatedText{
+    margin-top:4px !important;
+    margin-bottom:8px !important;
+  }
   .round-table{
-    transform:translateY(-54px) !important;
-    margin-bottom:-54px !important;
+    margin-top:0 !important;
   }
-}
-
-/*
-  Remove any special current-row edge/border treatment so
-  the divider between 09:00 PM and 10:00 PM matches the
-  normal divider used around 08:00 PM.
-*/
-.round-row.current,
-.round-row.current:hover,
-.round-row.current:focus{
-  border-color:rgba(255,255,255,.95) !important;
-  border-width:3px !important;
-  box-shadow:0 3px 10px rgba(0,0,0,.28) !important;
-  background:rgba(0,0,0,.22) !important;
-}
-
-.round-row.current::before,
-.round-row.current::after{
-  content:none !important;
-  display:none !important;
-}
-
-/* Force all round-card borders to use the same white line */
-.round-row{
-  border:3px solid rgba(255,255,255,.95) !important;
-}
-
-/* Preserve current result color only, without special border */
-.round-row.current .result{
-  color:#ffc928 !important;
+  .round-row{
+    min-height:58px!important;
+  }
 }
