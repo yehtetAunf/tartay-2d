@@ -1,4 +1,7 @@
 const ROUNDS=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
+const PRE_SPIN_STEP_MS=5000;
+const PRE_SPIN_CHANGE_ANIMATION_MS=580;
+
 const roundsEl=document.getElementById("rounds");
 const twoDEl=document.getElementById("twoD");
 const updatedEl=document.getElementById("updatedText");
@@ -13,6 +16,7 @@ let perfBase=performance.now();
 let holdActive=false;
 let spinTimer=null;
 let spinning=false;
+let lastSpinResult="";
 
 function estimatedServerNow(){return serverBase+(performance.now()-perfBase)}
 
@@ -45,35 +49,57 @@ function renderRows(results){
   }).join("");
 }
 
-function random2D(){return String(Math.floor(Math.random()*100)).padStart(2,"0")}
+function random2D(){
+  let next="";
+  do{next=String(Math.floor(Math.random()*100)).padStart(2,"0")}while(next===lastSpinResult);
+  lastSpinResult=next;
+  return next;
+}
+
+function animateSpinChange(value){
+  if(!twoDEl)return;
+  twoDEl.textContent=String(value??"--").padStart(2,"0");
+  twoDEl.classList.remove("pre-spin-change");
+  void twoDEl.offsetWidth;
+  twoDEl.classList.add("pre-spin-change");
+  window.setTimeout(()=>twoDEl.classList.remove("pre-spin-change"),PRE_SPIN_CHANGE_ANIMATION_MS+40);
+}
+
+function showNextSpinFrame(){
+  if(!spinning||holdActive)return;
+  animateSpinChange(random2D());
+}
 
 function startBigSpin(initialFrame){
-  if(initialFrame!=null)twoDEl.textContent=String(initialFrame).padStart(2,"0");
+  if(initialFrame!=null&&/^\d{1,2}$/.test(String(initialFrame))){
+    const initial=String(initialFrame).padStart(2,"0");
+    lastSpinResult=initial;
+    animateSpinChange(initial);
+  }
   if(spinning)return;
   spinning=true;
   twoDEl.classList.add("spin");
-  spinTimer=setInterval(()=>{twoDEl.textContent=random2D()},140);
+  if(spinTimer){clearInterval(spinTimer)}
+  spinTimer=setInterval(showNextSpinFrame,PRE_SPIN_STEP_MS);
 }
 
 function stopBigSpin(result){
   spinning=false;
   if(spinTimer){clearInterval(spinTimer);spinTimer=null}
-  twoDEl.classList.remove("spin");
+  twoDEl.classList.remove("spin","pre-spin-change");
   twoDEl.textContent=result||"--";
+  lastSpinResult=String(result||"");
 }
 
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   renderRows(results);
   const latest=results.length?results[results.length-1]:null;
-
   holdActive=Boolean(data.resultHold?.active);
 
   if(holdActive){
-    // Scheduled round time reached: freeze the real result for exactly 2 minutes.
     stopBigSpin(data.resultHold.result_2d||latest?.result_2d||"--");
   }else if(data.preSpin?.active){
-    // After the 2-minute hold: remove ✓ and play continuously until next round.
     startBigSpin(data.preSpin.frame);
   }else{
     stopBigSpin(latest?.result_2d||"--");
@@ -100,7 +126,7 @@ async function load(){
 
 function start(){
   load();
-  timer=setInterval(()=>{if(document.visibilityState==="visible")load()},1000);
+  timer=setInterval(()=>{if(document.visibilityState==="visible")load()},2000);
 }
 
 window.addEventListener("online",load);
