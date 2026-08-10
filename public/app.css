@@ -268,3 +268,60 @@ header{
     min-height:68px !important;
   }
 }
+
+
+/* ===== v4.9 requested spacing / border alignment ===== */
+
+/* Move big 2D + Updated + all 8 rounds upward as one block */
+.hero{
+  transform:translateY(-42px) !important;
+  margin-bottom:-42px !important;
+}
+
+.round-table{
+  transform:translateY(-42px) !important;
+  margin-bottom:-42px !important;
+}
+
+/* Keep the 8 rows tighter and higher on mobile */
+@media(max-width:520px){
+  .hero{
+    transform:translateY(-54px) !important;
+    margin-bottom:-54px !important;
+  }
+
+  .round-table{
+    transform:translateY(-54px) !important;
+    margin-bottom:-54px !important;
+  }
+}
+
+/*
+  Remove any special current-row edge/border treatment so
+  the divider between 09:00 PM and 10:00 PM matches the
+  normal divider used around 08:00 PM.
+*/
+.round-row.current,
+.round-row.current:hover,
+.round-row.current:focus{
+  border-color:rgba(255,255,255,.95) !important;
+  border-width:3px !important;
+  box-shadow:0 3px 10px rgba(0,0,0,.28) !important;
+  background:rgba(0,0,0,.22) !important;
+}
+
+.round-row.current::before,
+.round-row.current::after{
+  content:none !important;
+  display:none !important;
+}
+
+/* Force all round-card borders to use the same white line */
+.round-row{
+  border:3px solid rgba(255,255,255,.95) !important;
+}
+
+/* Preserve current result color only, without special border */
+.round-row.current .result{
+  color:#ffc928 !important;
+}
