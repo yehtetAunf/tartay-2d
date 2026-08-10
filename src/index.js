@@ -314,8 +314,39 @@ async function handleToday(url, env) {
   return json({success:true,date,rounds:ROUNDS,serverNow:Date.now(),myanmarNow:getMyanmarNow(),nextRound:getNextRoundInfo(date),results});
 }
 
+
+async function fetchLiveMarket() {
+  const endpoint = "https://api.exchange.coinbase.com/products/BTC-USD/ticker";
+  try {
+    const cache = caches.default;
+    const cacheKey = new Request("https://tartay.local/cache/btc-usd-ticker");
+    let response = await cache.match(cacheKey);
+    if (!response) {
+      const upstream = await fetch(endpoint, { headers: { "Accept": "application/json", "User-Agent": "Tartay-2D/3.3" } });
+      if (!upstream.ok) throw new Error(`Market API HTTP ${upstream.status}`);
+      const data = await upstream.json();
+      response = new Response(JSON.stringify(data), { headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=10" } });
+      await cache.put(cacheKey, response.clone());
+    }
+    const data = await response.json();
+    const price = Number(data.price);
+    const volume = Number(data.volume);
+    return {
+      ok: Number.isFinite(price) && Number.isFinite(volume),
+      set: Number.isFinite(price) ? price.toFixed(2) : "--",
+      value: Number.isFinite(volume) ? volume.toFixed(2) : "--",
+      source: "Coinbase BTC-USD",
+      fetched_at: new Date().toISOString()
+    };
+  } catch (error) {
+    console.error("Market API error", error);
+    return { ok:false, set:"--", value:"--", source:"Coinbase BTC-USD" };
+  }
+}
+
 async function handleState(env) {
   const date = getOperationalDate();
+  const market = await fetchLiveMarket();
   const results = await queryResultsForDate(env, date, false);
   const nowMs = myanmarPseudoEpoch();
 
@@ -371,6 +402,7 @@ async function handleState(env) {
     nextRound,
     resultHold,
     preSpin,
+    market,
     rounds: ROUNDS,
     results
   });
@@ -475,8 +507,9 @@ export default {
   async fetch(request, env) {
     try {
       const url = new URL(request.url);
-      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"3.0.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
+      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"3.3.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
       if (request.method === "GET" && (url.pathname === "/api/state" || url.pathname === "/api/results/state")) return handleState(env);
+      if (request.method === "GET" && url.pathname === "/api/market") return json({success:true, market:await fetchLiveMarket(), serverNow:Date.now()});
       if (request.method === "GET" && url.pathname === "/api/results/today") return handleToday(url,env);
       if (request.method === "GET" && url.pathname === "/api/results/history") return handleHistory(url,env);
       if (request.method === "POST" && url.pathname === "/api/admin/login") return handleLogin(request,env);
