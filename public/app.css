@@ -512,3 +512,13 @@ header{
  .admin-round b{font-size:18px}
  .admin-round input{width:62px;height:54px;font-size:22px}
 }
+
+/* v6.11 Today SET/VALUE -> automatic 2D admin */
+.today-result-panel{border:1px solid #315f8f;border-radius:20px;background:#0d2745;padding:20px;margin-bottom:30px}
+.today-result-panel h2{margin:0 0 6px}.today-help{opacity:.8;margin:0 0 18px}
+.today-result-panel label{display:grid;gap:7px;font-weight:700}
+.today-result-panel select,.today-result-panel input{box-sizing:border-box;width:100%;min-height:52px;border:1px solid #47729d;border-radius:14px;background:#f5f5f5;color:#111;padding:10px 13px;font-size:20px}
+.today-fields{display:grid;grid-template-columns:1fr 1fr 90px;gap:12px;margin:16px 0}
+#today2D{text-align:center;font-weight:900;font-size:26px;color:#0b5fc6}
+#publishToday{width:100%}.history-admin-title{margin:30px 0 18px}
+@media(max-width:520px){.today-fields{grid-template-columns:1fr 1fr}.today-fields label:last-child{grid-column:1/-1}}

@@ -36,7 +36,7 @@ async function loadDate(){
   draw([]); // eight rounds are always visible
   try{
     const date=$("resultDate").value;
-    const r=await fetch(`/api/today?date=${encodeURIComponent(date)}&t=${Date.now()}`,{cache:"no-store"});
+    const r=await fetch(`/api/admin/state?date=${encodeURIComponent(date)}&t=${Date.now()}`,{cache:"no-store",headers:{"authorization":`Bearer ${token}`}});
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||"Load failed");
     draw(Array.isArray(d.results)?d.results:[]);
@@ -54,10 +54,10 @@ async function saveAll(){
       const v=el.value.trim();
       if(!v) continue;
       if(!/^\d{2}$/.test(v)) throw new Error(`${el.dataset.time}: enter exactly 2 digits`);
-      const r=await fetch("/api/admin/save",{
+      const r=await fetch("/api/admin/result",{
         method:"POST",
         headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
-        body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v})
+        body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v,publish_mode:"schedule",auto_publish:true})
       });
       const d=await r.json();
       if(!r.ok) throw new Error(d.error||`Save failed: ${el.dataset.time}`);
@@ -66,6 +66,53 @@ async function saveAll(){
     await loadDate();
   }catch(e){$("saveMsg").textContent=e.message}
 }
+
+function calc2DFromSetValue(setValue,valueValue){
+  const s=String(setValue??"").trim();
+  const v=String(valueValue??"").trim();
+  const sd=s.replace(/\D/g,"");
+  const integer=v.split(".")[0].replace(/\D/g,"");
+  if(!sd||!integer)return "";
+  return sd.slice(-1)+integer.slice(-1);
+}
+function updateToday2D(){
+  $("today2D").value=calc2DFromSetValue($("todaySet").value,$("todayValue").value)||"";
+}
+async function publishTodayRound(){
+  const round=$("todayRound").value;
+  const setValue=$("todaySet").value.trim();
+  const valueValue=$("todayValue").value.trim();
+  const result2d=calc2DFromSetValue(setValue,valueValue);
+  if(!setValue||!valueValue||!/^\d{2}$/.test(result2d)){
+    $("todayMsg").textContent="SET / VALUE ကို မှန်ကန်စွာထည့်ပါ။";
+    return;
+  }
+  try{
+    $("todayMsg").textContent=`Publishing ${round}...`;
+    const r=await fetch("/api/admin/result",{
+      method:"POST",
+      headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
+      body:JSON.stringify({
+        result_date:$("resultDate").value,
+        round_time:round,
+        result_2d:result2d,
+        set_value:setValue,
+        value_value:valueValue,
+        publish_mode:"now",
+        auto_publish:true
+      })
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Publish failed");
+    $("today2D").value=result2d;
+    $("todayMsg").textContent=`${round} → SET ${setValue} / VALUE ${valueValue} / 2D ${result2d} published.`;
+    await loadDate();
+  }catch(e){$("todayMsg").textContent=e.message}
+}
+$("todaySet").addEventListener("input",updateToday2D);
+$("todayValue").addEventListener("input",updateToday2D);
+$("publishToday").onclick=publishTodayRound;
+
 $("resultDate").value=today();
 draw([]);
 $("loginBtn").onclick=login;

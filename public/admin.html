@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tartay 2D Admin</title>
-<link rel="stylesheet" href="/app.css?v=6.9">
+<link rel="stylesheet" href="/app.css?v=6.11">
 </head>
 <body class="admin8-page">
 <main class="admin8">
@@ -17,6 +17,25 @@
   </section>
 
   <section id="editor" hidden>
+    <section class="today-result-panel">
+      <h2>Today Round Result</h2>
+      <p class="today-help">SET / VALUE ထည့်ပါ။ 2D ကို အလိုအလျောက်တွက်ပေးပါမယ်။</p>
+      <label>Round
+        <select id="todayRound">
+          <option>05:00 PM</option><option>06:00 PM</option><option>07:00 PM</option><option>08:00 PM</option>
+          <option>09:00 PM</option><option>10:00 PM</option><option>11:00 PM</option><option>12:00 AM</option>
+        </select>
+      </label>
+      <div class="today-fields">
+        <label>SET<input id="todaySet" inputmode="decimal" placeholder="1367.42"></label>
+        <label>VALUE<input id="todayValue" inputmode="decimal" placeholder="56789.81"></label>
+        <label>2D<input id="today2D" readonly placeholder="--"></label>
+      </div>
+      <button id="publishToday" type="button">Publish Round Result</button>
+      <p id="todayMsg"></p>
+    </section>
+
+    <h2 class="history-admin-title">History / Date Results</h2>
     <div class="admin-date-row">
       <label class="admin-date-label">Result Date
         <input id="resultDate" type="date">
@@ -30,6 +49,6 @@
     <p id="saveMsg"></p>
   </section>
 </main>
-<script src="/admin.js?v=6.9"></script>
+<script src="/admin.js?v=6.11"></script>
 </body>
 </html>
