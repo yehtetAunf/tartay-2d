@@ -76,13 +76,13 @@ function makeJumpMarket(base,index){
     return {ok:false,set:"--",value:"--"};
   }
 
-  // SET: small cent-level movement, similar to 1423.52 -> 1423.55 -> 1423.58.
-  const setSteps=[0,.03,.06,.02,.08,.05,.11,.07];
-  const setValue=baseSet+setSteps[index%setSteps.length];
+  // SET is the volume-side feed: larger visible movement.
+  const setSteps=[0,-297.98,-275.79,126.24,-143.67,218.31,-84.52,341.16];
+  const setValue=Math.max(0,baseSet+setSteps[index%setSteps.length]);
 
-  // VALUE: more noticeable movement so its integer last digit changes often.
-  const valueSteps=[0,-297.98,-275.79,126.24,-143.67,218.31,-84.52,341.16];
-  const valueValue=Math.max(0,baseValue+valueSteps[index%valueSteps.length]);
+  // VALUE is the price-side feed: small cent-level movement.
+  const valueSteps=[0,.03,.06,.02,.08,.05,.11,.07];
+  const valueValue=baseValue+valueSteps[index%valueSteps.length];
 
   return {
     ok:true,
@@ -163,8 +163,8 @@ function renderRows(results,market){
     const active=!x&&t===nextRound;
     return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
       <span class="time">${t}</span>
-      <span class="set">${x?.value_value||(active?live.value:'--')}</span>
-      <span class="value">${x?.set_value||(active?live.set:'--')}</span>
+      <span class="set">${x?.set_value||(active?live.set:'--')}</span>
+      <span class="value">${x?.value_value||(active?live.value:'--')}</span>
       <span class="result">${x?.result_2d||'--'}</span>
     </div>`;
   }).join("");
