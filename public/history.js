@@ -8,7 +8,7 @@ function myToday(){
 }
 function label(s){const [y,m,d]=s.split("-").map(Number);return new Intl.DateTimeFormat("en-US",{weekday:"short",year:"numeric",month:"long",day:"numeric"}).format(new Date(y,m-1,d))}
 async function getDay(date){
- try{const r=await fetch(`/api/today?date=${date}&t=${Date.now()}`,{cache:"no-store"});const d=await r.json();return Array.isArray(d.results)?d.results:[]}catch{return []}
+ try{const r=await fetch(`/api/results/today?date=${date}&t=${Date.now()}`,{cache:"no-store"});const d=await r.json();return Array.isArray(d.results)?d.results:[]}catch{return []}
 }
 function section(date,results){
  const map=new Map(results.map(x=>[x.round_time,x]));
