@@ -1,12 +1,35 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Tartay 2D Admin</title><link rel="stylesheet" href="/app.css?v=6.8"></head>
-<body class="admin-page"><main class="admin-panel">
-<header class="admin-head"><h1>Tartay <span>2D</span> Admin</h1><a href="/" class="admin-home">← Home</a></header>
-<section id="loginBox" class="admin-box"><label>Admin Password<input id="password" type="password" autocomplete="current-password" placeholder="Enter admin password"></label><button id="loginBtn">Login</button><p id="loginMsg" class="admin-msg"></p></section>
-<section id="editor" hidden>
-<div class="admin-box date-box"><label>Result Date<input id="resultDate" type="date"></label><button id="loadDate">Load Date</button></div>
-<p class="admin-help">ရက်စွဲရွေးပြီး Round 8 ခုကို တစ်ခုချင်းစီ ထည့်/ပြင်နိုင်ပါတယ်။ Result မရှိသေးတဲ့ Round က -- ပြပါမယ်။</p>
-<div id="adminRounds" class="admin-editor-rounds"></div>
-<p id="saveMsg" class="admin-msg"></p>
-</section></main><script src="/admin.js?v=6.8"></script></body></html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tartay 2D Admin</title>
+<link rel="stylesheet" href="/app.css?v=6.9">
+</head>
+<body class="admin8-page">
+<main class="admin8">
+  <h1>Tartay <span>2D</span> Admin</h1>
+
+  <section id="loginBox">
+    <input id="password" type="password" placeholder="Admin password">
+    <button id="loginBtn">Login</button>
+    <p id="loginMsg"></p>
+  </section>
+
+  <section id="editor" hidden>
+    <div class="admin-date-row">
+      <label class="admin-date-label">Result Date
+        <input id="resultDate" type="date">
+      </label>
+      <button id="loadDate">Load Date</button>
+    </div>
+
+    <div id="adminRounds" class="admin-rounds"></div>
+
+    <button id="saveAll" class="save-all">Save 8 Rounds</button>
+    <p id="saveMsg"></p>
+  </section>
+</main>
+<script src="/admin.js?v=6.9"></script>
+</body>
+</html>

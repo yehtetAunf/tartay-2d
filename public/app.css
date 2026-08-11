@@ -486,5 +486,29 @@ header{
 #loginBox,.admin-date-label{display:grid;gap:10px}.admin8 input,.admin8 button{min-height:50px;border-radius:12px;border:1px solid #315f8f;padding:8px 14px;font:inherit}.admin8 button{background:#102844;color:#ffc928;font-weight:800}
 .admin-date-label{margin-bottom:10px}.admin-rounds{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.admin-round{display:grid;grid-template-columns:1fr 72px;align-items:center;gap:10px;background:#0d2745;border:1px solid #234d78;border-radius:14px;padding:12px}.admin-round input{text-align:center;width:100%;background:#fff;color:#111;font-size:22px;font-weight:800}.save-all{width:100%}
 
-/* v6.7 restored integrated Admin editor */
-.admin-page{margin:0;min-height:100vh;background:#06111e;color:#fff;font-family:system-ui,-apple-system,sans-serif}.admin-panel{width:min(94%,760px);margin:auto;padding:28px 0 60px}.admin-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px}.admin-head h1{margin:0;font-size:clamp(30px,7vw,48px);font-weight:500}.admin-head h1 span{color:#ffc928}.admin-home{text-decoration:none;color:#fff;background:#102844;border:1px solid #315f8f;border-radius:16px;padding:12px 18px;font-weight:700}.admin-box{display:grid;gap:14px;margin-bottom:22px}.admin-box label,.admin-fields label{display:grid;gap:7px;font-weight:650}.admin-page input,.admin-page button{box-sizing:border-box;min-height:52px;border-radius:14px;border:1px solid #315f8f;padding:10px 14px;font:inherit}.admin-page input{width:100%;background:#f7f8fb;color:#111}.admin-page button{background:#102844;color:#ffc928;font-weight:800;cursor:pointer}.date-box{grid-template-columns:1fr auto;align-items:end}.date-box button{padding-inline:24px}.admin-help{color:#b8c8dc;line-height:1.5}.admin-editor-rounds{display:grid;grid-template-columns:1fr 1fr;gap:14px}.admin-result-card{background:#0d2745;border:1px solid #234d78;border-radius:18px;padding:16px}.admin-round-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:22px}.round-status{font-size:28px;color:#ffc928;font-weight:900}.admin-fields{display:grid;grid-template-columns:74px 1fr 1fr;gap:9px}.admin-fields input{min-width:0}.admin-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.admin-actions .secondary{grid-column:1/-1;color:#fff}.admin-msg{min-height:24px;color:#ffc928;font-weight:700}@media(max-width:620px){.admin-panel{width:92%;padding-top:22px}.admin-head h1{font-size:36px}.admin-editor-rounds{grid-template-columns:1fr}.admin-fields{grid-template-columns:72px 1fr 1fr}.date-box{grid-template-columns:1fr}.date-box button{width:100%}}
+/* v6.9 compact Admin 8-round editor */
+.admin8-page{background:#061522;color:#fff;min-height:100vh}
+.admin8{max-width:760px;margin:0 auto;padding:28px}
+.admin8 h1{font-size:42px;font-weight:500;margin:0 0 36px}
+.admin8 h1 span{color:#ffc928}
+.admin8 #loginBox{display:grid;gap:16px}
+.admin8 #loginBox[hidden],.admin8 #editor[hidden]{display:none!important}
+.admin8 #loginBox input,.admin8 .admin-date-label input{width:100%;box-sizing:border-box;border:1px solid #47729d;border-radius:18px;background:#f5f5f5;color:#111;padding:18px;font-size:22px}
+.admin8 button{border:1px solid #35618e;border-radius:18px;background:#102e4d;color:#ffc928;padding:17px 20px;font-size:20px;font-weight:700}
+.admin-date-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:end;margin-bottom:24px}
+.admin-date-label{font-size:18px;display:grid;gap:8px}
+.admin-rounds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.admin-round{min-height:92px;border:1px solid #315c87;border-radius:20px;background:#102e4d;display:flex;align-items:center;justify-content:space-between;padding:16px 18px;box-sizing:border-box}
+.admin-round b{font-size:23px}
+.admin-round input{width:72px;height:58px;box-sizing:border-box;border:1px solid #4d779f;border-radius:16px;background:#f5f5f5;color:#111;text-align:center;font-size:24px;font-weight:700}
+.save-all{width:100%;margin-top:22px}
+#saveMsg,#loginMsg{min-height:24px}
+@media(max-width:520px){
+ .admin8{padding:22px 18px}
+ .admin8 h1{font-size:34px;margin-bottom:28px}
+ .admin-date-row{grid-template-columns:1fr}
+ .admin-rounds{gap:12px}
+ .admin-round{min-height:82px;padding:12px}
+ .admin-round b{font-size:18px}
+ .admin-round input{width:62px;height:54px;font-size:22px}
+}

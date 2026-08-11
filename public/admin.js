@@ -3,139 +3,75 @@ const ROUNDS=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM",
 let token=localStorage.getItem("tartayAdminToken")||"";
 const $=id=>document.getElementById(id);
 
-function mmToday(){
+function today(){
   const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());
   const g=t=>p.find(x=>x.type===t)?.value||"";
   return `${g("year")}-${g("month")}-${g("day")}`;
 }
-function auth(){return {"authorization":`Bearer ${token}`}}
-function esc(v=""){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-
-function cardHtml(t,r={}){
-  return `<article class="admin-result-card" data-round="${t}">
-    <div class="admin-round-title">
-      <strong>${t}</strong>
-      <span class="round-status">${r.result_2d?esc(r.result_2d):"--"}</span>
-    </div>
-    <div class="admin-fields">
-      <label>2D<input class="f2d" inputmode="numeric" maxlength="2" value="${esc(r.result_2d||"")}" placeholder="--"></label>
-      <label>SET<input class="fset" inputmode="decimal" value="${esc(r.set_value||"")}" placeholder="Auto / optional"></label>
-      <label>VALUE<input class="fvalue" inputmode="decimal" value="${esc(r.value_value||"")}" placeholder="Auto / optional"></label>
-    </div>
-    <div class="admin-actions">
-      <button class="save-round">Save / Schedule</button>
-      <button class="publish-round">Publish Now</button>
-      <button class="unpublish-round secondary" ${r.result_2d?"":"hidden"}>Hide</button>
-    </div>
-  </article>`;
-}
-
-function wireCards(){
-  document.querySelectorAll('.save-round').forEach(b=>b.onclick=()=>saveCard(b.closest('.admin-result-card'),'schedule'));
-  document.querySelectorAll('.publish-round').forEach(b=>b.onclick=()=>saveCard(b.closest('.admin-result-card'),'now'));
-  document.querySelectorAll('.unpublish-round').forEach(b=>b.onclick=()=>unpublish(b.closest('.admin-result-card')));
-}
-
 function draw(results=[]){
-  const m=new Map(results.map(x=>[x.round_time,x]));
-  $("adminRounds").innerHTML=ROUNDS.map(t=>cardHtml(t,m.get(t)||{})).join("");
-  wireCards();
+  const m=new Map((results||[]).map(x=>[x.round_time,x]));
+  $("adminRounds").innerHTML=ROUNDS.map(t=>{
+    const v=m.get(t)?.result_2d||"";
+    return `<div class="admin-round">
+      <b>${t}</b>
+      <input inputmode="numeric" maxlength="2" data-time="${t}" value="${v}" placeholder="--">
+    </div>`;
+  }).join("");
 }
-
-function ensureEightCards(){
-  if($("adminRounds").children.length!==8) draw([]);
-}
-
-function updateCard(card,data){
-  if(data?.result_2d!==undefined) card.querySelector(".f2d").value=data.result_2d||"";
-  if(data?.set_value!==undefined && data.set_value!==null) card.querySelector(".fset").value=data.set_value||"";
-  if(data?.value_value!==undefined && data.value_value!==null) card.querySelector(".fvalue").value=data.value_value||"";
-  const v=card.querySelector(".f2d").value.trim();
-  card.querySelector(".round-status").textContent=v||"--";
-  card.querySelector(".unpublish-round").hidden=!v;
-}
-
-async function apiJson(url,opts={}){
-  const r=await fetch(url,{cache:"no-store",...opts});
-  let d={}; try{d=await r.json()}catch{}
-  if(r.status===401){
-    localStorage.removeItem("tartayAdminToken"); token="";
-    $("loginBox").hidden=false; $("editor").hidden=true;
-    throw new Error("Login expired. Please login again.");
-  }
-  if(!r.ok) throw new Error(d.error||`HTTP ${r.status}`);
-  return d;
-}
-
 async function login(){
   try{
     $("loginMsg").textContent="Logging in...";
-    const d=await apiJson("/api/admin/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:$("password").value})});
-    token=d.token; localStorage.setItem("tartayAdminToken",token);
-    $("loginBox").hidden=true; $("editor").hidden=false; $("loginMsg").textContent="";
-    draw([]); await loadDate();
+    const r=await fetch("/api/admin/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:$("password").value})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||"Login failed");
+    token=d.token;
+    localStorage.setItem("tartayAdminToken",token);
+    $("loginBox").hidden=true;
+    $("editor").hidden=false;
+    $("loginMsg").textContent="";
+    await loadDate();
   }catch(e){$("loginMsg").textContent=e.message}
 }
-
 async function loadDate(){
-  ensureEightCards();
+  draw([]); // eight rounds are always visible
   try{
-    $("saveMsg").textContent="Loading...";
-    const d=await apiJson(`/api/admin/state?date=${encodeURIComponent($("resultDate").value)}&t=${Date.now()}`,{headers:auth()});
+    const date=$("resultDate").value;
+    const r=await fetch(`/api/today?date=${encodeURIComponent(date)}&t=${Date.now()}`,{cache:"no-store"});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||"Load failed");
     draw(Array.isArray(d.results)?d.results:[]);
     $("saveMsg").textContent="";
   }catch(e){
-    // Keep all 8 rounds visible even if loading fails.
-    ensureEightCards();
     $("saveMsg").textContent=e.message;
   }
 }
-
-async function saveCard(card,mode){
-  const v=card.querySelector('.f2d').value.trim();
-  if(!/^\d{2}$/.test(v)){alert('2D ကို ဂဏန်း 2 လုံး အတိအကျထည့်ပါ။');return}
-  const body={
-    result_date:$("resultDate").value,
-    round_time:card.dataset.round,
-    result_2d:v,
-    set_value:card.querySelector('.fset').value.trim()||null,
-    value_value:card.querySelector('.fvalue').value.trim()||null,
-    publish_mode:mode,
-    auto_publish:true
-  };
+async function saveAll(){
+  $("saveMsg").textContent="Saving...";
+  const date=$("resultDate").value;
+  const inputs=[...document.querySelectorAll(".admin-round input")];
   try{
-    $("saveMsg").textContent=`Saving ${card.dataset.round}...`;
-    const d=await apiJson('/api/admin/result',{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify(body)});
-    updateCard(card,d.result||body);
-    $("saveMsg").textContent=`${card.dataset.round} saved.`;
-    // Do NOT reload the whole editor here; all 8 round cards stay visible.
-  }catch(e){
-    ensureEightCards();
-    $("saveMsg").textContent=e.message;
-  }
+    for(const el of inputs){
+      const v=el.value.trim();
+      if(!v) continue;
+      if(!/^\d{2}$/.test(v)) throw new Error(`${el.dataset.time}: enter exactly 2 digits`);
+      const r=await fetch("/api/admin/save",{
+        method:"POST",
+        headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
+        body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v})
+      });
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.error||`Save failed: ${el.dataset.time}`);
+    }
+    $("saveMsg").textContent="Saved.";
+    await loadDate();
+  }catch(e){$("saveMsg").textContent=e.message}
 }
-
-async function unpublish(card){
-  try{
-    $("saveMsg").textContent=`Hiding ${card.dataset.round}...`;
-    await apiJson('/api/admin/unpublish',{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify({
-      result_date:$("resultDate").value,
-      round_time:card.dataset.round
-    })});
-    card.querySelector(".unpublish-round").hidden=true;
-    $("saveMsg").textContent=`${card.dataset.round} hidden from user app.`;
-  }catch(e){
-    ensureEightCards();
-    $("saveMsg").textContent=e.message;
-  }
-}
-
-$("resultDate").value=mmToday();
+$("resultDate").value=today();
 draw([]);
 $("loginBtn").onclick=login;
 $("loadDate").onclick=loadDate;
-$("password").addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-
+$("saveAll").onclick=saveAll;
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
 if(token){
   $("loginBox").hidden=true;
   $("editor").hidden=false;
