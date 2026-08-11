@@ -98,14 +98,14 @@ async function publishTodayRound(){
         result_2d:result2d,
         set_value:setValue,
         value_value:valueValue,
-        publish_mode:"now",
+        publish_mode:"schedule",
         auto_publish:true
       })
     });
     const d=await r.json();
     if(!r.ok)throw new Error(d.error||"Publish failed");
     $("today2D").value=result2d;
-    $("todayMsg").textContent=`${round} → SET ${setValue} / VALUE ${valueValue} / 2D ${result2d} published.`;
+    $("todayMsg").textContent=`${round} → SET ${setValue} / VALUE ${valueValue} / 2D ${result2d} scheduled. User ဘက်မှာ Round အချိန်ရောက်မှ ပေါ်ပါမယ်။`;
     await loadDate();
   }catch(e){$("todayMsg").textContent=e.message}
 }
