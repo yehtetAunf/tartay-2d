@@ -42,37 +42,58 @@ function setOnline(ok){
 
 
 
+
 let activeRoundKey=null;
+let marketBase=null;
+let marketJumpTimer=null;
+let marketJumpIndex=0;
+let marketBlinkTimer=null;
+
+const MARKET_JUMP_MS=10000;
+const BLINK_INTERVAL_MS=3500;
 
 function getNextRound(results){
   const released=new Set(results.map(x=>x.round_time));
   return ROUNDS.find(t=>!released.has(t))||null;
 }
 
-function renderRows(results, market){
-  const map=new Map(results.map(x=>[x.round_time,x]));
-  const nextRound=getNextRound(results);
-  activeRoundKey=nextRound;
-
-  const liveSet=market?.ok ? market.set : "--";
-  const liveValue=market?.ok ? market.value : "--";
-
-  roundsEl.innerHTML=ROUNDS.map(t=>{
-    const x=map.get(t);
-    const active=!x && t===nextRound;
-    return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
-      <span class="time">${t}</span>
-      <span class="set">${x?.set_value || (active?liveSet:'--')}</span>
-      <span class="value">${x?.value_value || (active?liveValue:'--')}</span>
-      <span class="result">${x?.result_2d||'--'}</span>
-    </div>`;
-  }).join("");
+function format2(n){
+  return Number(n).toFixed(2);
 }
 
+/*
+  The API remains the baseline.
+  To make SET / VALUE visibly "jump" like the reference video,
+  the screen derives a small moving display value from the latest
+  API baseline every 5 seconds.
+*/
+function makeJumpMarket(base,index){
+  if(!base?.ok)return {ok:false,set:"--",value:"--"};
 
-function calculate2DFromSetValue(setValue, valueValue){
-  const setText=String(setValue ?? "").trim();
-  const valueText=String(valueValue ?? "").trim();
+  const baseSet=Number(base.set);
+  const baseValue=Number(base.value);
+  if(!Number.isFinite(baseSet)||!Number.isFinite(baseValue)){
+    return {ok:false,set:"--",value:"--"};
+  }
+
+  // SET: small cent-level movement, similar to 1423.52 -> 1423.55 -> 1423.58.
+  const setSteps=[0,.03,.06,.02,.08,.05,.11,.07];
+  const setValue=baseSet+setSteps[index%setSteps.length];
+
+  // VALUE: more noticeable movement so its integer last digit changes often.
+  const valueSteps=[0,-297.98,-275.79,126.24,-143.67,218.31,-84.52,341.16];
+  const valueValue=Math.max(0,baseValue+valueSteps[index%valueSteps.length]);
+
+  return {
+    ok:true,
+    set:format2(setValue),
+    value:format2(valueValue)
+  };
+}
+
+function calculate2DFromSetValue(setValue,valueValue){
+  const setText=String(setValue??"").trim();
+  const valueText=String(valueValue??"").trim();
 
   const setDigits=setText.replace(/\D/g,"");
   if(!setDigits)return null;
@@ -85,23 +106,85 @@ function calculate2DFromSetValue(setValue, valueValue){
   return `${setDigit}${valueDigit}`;
 }
 
+function paintActiveMarket(){
+  if(!activeRoundKey||!marketBase?.ok)return;
+
+  const market=makeJumpMarket(marketBase,marketJumpIndex);
+  const row=roundsEl.querySelector(`[data-round="${activeRoundKey}"]`);
+  if(!row||row.classList.contains("released"))return;
+
+  const s=row.querySelector(".set");
+  const v=row.querySelector(".value");
+  const r=row.querySelector(".result");
+
+  if(s)s.textContent=market.set;
+  if(v)v.textContent=market.value;
+  if(r)r.textContent="--";
+
+  const big2D=calculate2DFromSetValue(market.set,market.value);
+  if(big2D)twoDEl.textContent=big2D;
+}
+
+function blinkActiveNumbers(){
+  if(!activeRoundKey)return;
+  const row=roundsEl.querySelector(`[data-round="${activeRoundKey}"]`);
+  if(!row||row.classList.contains("released"))return;
+  const nodes=[twoDEl,row.querySelector(".set"),row.querySelector(".value")];
+  if(nodes.some(node=>!node||node.textContent.trim()==="--"))return;
+  nodes.forEach(node=>node.classList.remove("blink-change"));
+  void nodes[0].offsetWidth;
+  nodes.forEach(node=>node.classList.add("blink-change"));
+}
+
+function startMarketBlink(){
+  if(marketBlinkTimer)return;
+  blinkActiveNumbers();
+  marketBlinkTimer=setInterval(blinkActiveNumbers,BLINK_INTERVAL_MS);
+}
+
+function startMarketJump(){
+  if(marketJumpTimer)return;
+  marketJumpTimer=setInterval(()=>{
+    marketJumpIndex=(marketJumpIndex+1)%100000;
+    paintActiveMarket();
+  },MARKET_JUMP_MS);
+}
+
+function renderRows(results,market){
+  const map=new Map(results.map(x=>[x.round_time,x]));
+  const nextRound=getNextRound(results);
+  activeRoundKey=nextRound;
+  marketBase=market?.ok?market:null;
+
+  const live=makeJumpMarket(marketBase,marketJumpIndex);
+
+  roundsEl.innerHTML=ROUNDS.map(t=>{
+    const x=map.get(t);
+    const active=!x&&t===nextRound;
+    return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
+      <span class="time">${t}</span>
+      <span class="set">${x?.set_value||(active?live.set:'--')}</span>
+      <span class="value">${x?.value_value||(active?live.value:'--')}</span>
+      <span class="result">${x?.result_2d||'--'}</span>
+    </div>`;
+  }).join("");
+
+  if(nextRound&&marketBase?.ok){
+    paintActiveMarket();
+    startMarketJump();
+    startMarketBlink();
+  }
+}
+
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
-  renderRows(results, data.market);
   const latest=results.length?results[results.length-1]:null;
 
-  // Big 2D follows the requested SET/VALUE rule while the active round is live:
-  // SET last digit + VALUE last digit before decimal.
-  // Example: SET 1367.42, VALUE 56789.81 => 29.
-  // Row-level 2D still remains "--" until the official round result is released.
-  const market2D=data.market?.ok
-    ? calculate2DFromSetValue(data.market.set,data.market.value)
-    : null;
+  renderRows(results,data.market);
 
-  if(activeRoundKey && market2D){
-    preSpinLabel.hidden=true;
-    twoDEl.textContent=market2D;
-    twoDEl.classList.add("spin");
+  if(activeRoundKey&&marketBase?.ok){
+    // paintActiveMarket() sets Big 2D from SET/VALUE.
+    paintActiveMarket();
   }else{
     preSpinLabel.hidden=true;
     twoDEl.textContent=latest?.result_2d||"--";
@@ -112,6 +195,7 @@ function renderState(data){
   startClock(data.serverNow);
   setOnline(true);
 }
+
 
 async function load(){
   if(loading)return;

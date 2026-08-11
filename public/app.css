@@ -356,3 +356,19 @@ header{
     min-height:58px!important;
   }
 }
+
+
+/* v6.3: copied timing/animation behavior from the supplied NZ sample */
+.blink-change{animation:resultBlink .82s ease-in-out 1}
+@keyframes resultBlink{
+  0%,100%{opacity:1;transform:scale(1)}
+  45%{opacity:.20;transform:scale(.96)}
+  65%{opacity:1;transform:scale(1.025)}
+}
+.round-row .set.blink-change,
+.round-row .value.blink-change{
+  animation:resultBlink .82s ease-in-out 1;
+}
+.big-result.blink-change{
+  animation:resultBlink .82s ease-in-out 1;
+}
