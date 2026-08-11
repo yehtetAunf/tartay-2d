@@ -372,3 +372,116 @@ header{
 .big-result.blink-change{
   animation:resultBlink .82s ease-in-out 1;
 }
+
+
+/* ===== v6.5 HISTORY: 2 columns × 4 rows, SET/VALUE removed ===== */
+.history-page{
+  margin:0;
+  min-height:100vh;
+  background:#020812;
+  color:#eef6ff;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+.history-app{
+  width:min(100%,720px);
+  margin:0 auto;
+  padding:26px 22px 40px;
+}
+.history-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:34px;
+}
+.history-top h1{
+  margin:0;
+  font-size:clamp(28px,6vw,44px);
+  font-weight:850;
+}
+.history-top h1 span{color:#ffc928}
+.history-home{
+  flex:none;
+  text-decoration:none;
+  color:#fff;
+  background:#102844;
+  border:1px solid #2d5f95;
+  border-radius:18px;
+  padding:13px 18px;
+  font-weight:750;
+}
+.history-picker{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  margin-bottom:26px;
+}
+.history-picker input,
+.history-picker button{
+  min-height:58px;
+  border-radius:16px;
+  border:1px solid #315f8f;
+  font:inherit;
+}
+.history-picker input{
+  padding:0 16px;
+  color:#fff;
+  background:#0d223c;
+}
+.history-picker button{
+  padding:0 22px;
+  color:#ffc928;
+  background:#102844;
+  font-weight:800;
+}
+#historyDateLabel{
+  margin:0 0 18px 4px;
+  font-size:clamp(20px,4.3vw,30px);
+}
+.history-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:14px;
+}
+.history-card{
+  min-height:118px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:22px 24px;
+  border:1px solid #234d78;
+  border-radius:22px;
+  background:#0d2745;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02);
+}
+.history-time{
+  font-size:clamp(18px,4vw,28px);
+  font-weight:750;
+  white-space:nowrap;
+}
+.history-result{
+  color:#78b7ff;
+  font-size:clamp(30px,6vw,46px);
+  line-height:1;
+}
+@media(max-width:520px){
+  .history-app{padding:20px 16px 32px}
+  .history-top{margin-bottom:26px}
+  .history-home{padding:11px 14px}
+  .history-grid{gap:12px}
+  .history-card{
+    min-height:104px;
+    padding:18px 16px;
+    border-radius:20px;
+  }
+  .history-time{font-size:17px}
+  .history-result{font-size:34px}
+}
+
+/* v6.6 History automatic date feed */
+.history-day{margin:0 0 30px}.history-day h2{margin:0 0 14px 4px;font-size:clamp(20px,4.3vw,30px)}
+/* v6.6 Admin 8-round date editor */
+.admin8-page{margin:0;background:#06111e;color:#fff;font-family:system-ui;min-height:100vh}.admin8{width:min(92%,680px);margin:auto;padding:28px 0}.admin8 h1 span{color:#ffc928}
+#loginBox,.admin-date-label{display:grid;gap:10px}.admin8 input,.admin8 button{min-height:50px;border-radius:12px;border:1px solid #315f8f;padding:8px 14px;font:inherit}.admin8 button{background:#102844;color:#ffc928;font-weight:800}
+.admin-date-label{margin-bottom:10px}.admin-rounds{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0}.admin-round{display:grid;grid-template-columns:1fr 72px;align-items:center;gap:10px;background:#0d2745;border:1px solid #234d78;border-radius:14px;padding:12px}.admin-round input{text-align:center;width:100%;background:#fff;color:#111;font-size:22px;font-weight:800}.save-all{width:100%}
