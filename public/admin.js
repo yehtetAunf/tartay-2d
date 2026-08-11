@@ -1,31 +1,18 @@
-
 const ROUNDS=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
 let token=localStorage.getItem("tartayAdminToken")||"";
 const $=id=>document.getElementById(id);
-function today(){const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t)?.value||"";return `${g("year")}-${g("month")}-${g("day")}`}
-function draw(results=[]){const m=new Map(results.map(x=>[x.round_time,x]));$("adminRounds").innerHTML=ROUNDS.map((t,i)=>`<div class="admin-round"><b>${t}</b><input inputmode="numeric" maxlength="2" data-time="${t}" value="${m.get(t)?.result_2d||""}" placeholder="--"></div>`).join("")}
-async function login(){
- const r=await fetch("/api/admin/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:$("password").value})});
- const d=await r.json(); if(!r.ok){$("loginMsg").textContent=d.error||"Login failed";return}
- token=d.token;localStorage.setItem("tartayAdminToken",token);$("loginBox").hidden=true;$("editor").hidden=false;await loadDate();
+function mmToday(){const p=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Yangon",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t)?.value||"";return `${g("year")}-${g("month")}-${g("day")}`}
+function auth(){return {"authorization":`Bearer ${token}`}}
+function esc(v=""){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function draw(results=[]){const m=new Map(results.map(x=>[x.round_time,x]));$("adminRounds").innerHTML=ROUNDS.map((t,i)=>{const r=m.get(t)||{};return `<article class="admin-result-card" data-round="${t}"><div class="admin-round-title"><strong>${t}</strong><span class="round-status">${r.result_2d?esc(r.result_2d):"--"}</span></div><div class="admin-fields"><label>2D<input class="f2d" inputmode="numeric" maxlength="2" value="${esc(r.result_2d||"")}" placeholder="--"></label><label>SET<input class="fset" inputmode="decimal" value="${esc(r.set_value||"")}" placeholder="Auto / optional"></label><label>VALUE<input class="fvalue" inputmode="decimal" value="${esc(r.value_value||"")}" placeholder="Auto / optional"></label></div><div class="admin-actions"><button class="save-round">Save / Schedule</button><button class="publish-round">Publish Now</button>${r.result_2d?'<button class="unpublish-round secondary">Hide</button>':''}</div></article>`}).join("");
+ document.querySelectorAll('.save-round').forEach(b=>b.onclick=()=>saveCard(b.closest('.admin-result-card'),'schedule'));
+ document.querySelectorAll('.publish-round').forEach(b=>b.onclick=()=>saveCard(b.closest('.admin-result-card'),'now'));
+ document.querySelectorAll('.unpublish-round').forEach(b=>b.onclick=()=>unpublish(b.closest('.admin-result-card')));
 }
-async function loadDate(){
- const date=$("resultDate").value; const r=await fetch(`/api/today?date=${date}&t=${Date.now()}`,{cache:"no-store"});const d=await r.json();draw(Array.isArray(d.results)?d.results:[]);
-}
-async function saveAll(){
- $("saveMsg").textContent="Saving...";
- const date=$("resultDate").value, inputs=[...document.querySelectorAll(".admin-round input")];
- try{
-  for(const el of inputs){
-   const v=el.value.trim(); if(!v)continue;
-   if(!/^\d{2}$/.test(v))throw new Error(`${el.dataset.time}: enter exactly 2 digits`);
-   const r=await fetch("/api/admin/save",{method:"POST",headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
-    body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v})});
-   const d=await r.json();if(!r.ok)throw new Error(d.error||`Save failed: ${el.dataset.time}`);
-  }
-  $("saveMsg").textContent="Saved."; await loadDate();
- }catch(e){$("saveMsg").textContent=e.message}
-}
-$("resultDate").value=today();draw();
-$("loginBtn").onclick=login;$("loadDate").onclick=loadDate;$("saveAll").onclick=saveAll;
+async function apiJson(url,opts={}){const r=await fetch(url,{cache:"no-store",...opts});let d={};try{d=await r.json()}catch{}if(r.status===401){localStorage.removeItem("tartayAdminToken");token="";$("loginBox").hidden=false;$("editor").hidden=true;throw new Error("Login expired. Please login again.")}if(!r.ok)throw new Error(d.error||`HTTP ${r.status}`);return d}
+async function login(){try{$("loginMsg").textContent="Logging in...";const d=await apiJson("/api/admin/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:$("password").value})});token=d.token;localStorage.setItem("tartayAdminToken",token);$("loginBox").hidden=true;$("editor").hidden=false;$("loginMsg").textContent="";await loadDate()}catch(e){$("loginMsg").textContent=e.message}}
+async function loadDate(){try{$("saveMsg").textContent="Loading...";const d=await apiJson(`/api/admin/state?date=${encodeURIComponent($("resultDate").value)}&t=${Date.now()}`,{headers:auth()});draw(d.results||[]);$("saveMsg").textContent=""}catch(e){$("saveMsg").textContent=e.message}}
+async function saveCard(card,mode){const v=card.querySelector('.f2d').value.trim();if(!/^\d{2}$/.test(v)){alert('2D ကို ဂဏန်း 2 လုံး အတိအကျထည့်ပါ။');return}const body={result_date:$("resultDate").value,round_time:card.dataset.round,result_2d:v,set_value:card.querySelector('.fset').value.trim()||null,value_value:card.querySelector('.fvalue').value.trim()||null,publish_mode:mode,auto_publish:true};try{$("saveMsg").textContent=`Saving ${card.dataset.round}...`;await apiJson('/api/admin/result',{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify(body)});$("saveMsg").textContent=`${card.dataset.round} saved.`;await loadDate()}catch(e){$("saveMsg").textContent=e.message}}
+async function unpublish(card){try{$("saveMsg").textContent=`Hiding ${card.dataset.round}...`;await apiJson('/api/admin/unpublish',{method:'POST',headers:{...auth(),'content-type':'application/json'},body:JSON.stringify({result_date:$("resultDate").value,round_time:card.dataset.round})});$("saveMsg").textContent=`${card.dataset.round} hidden from user app.`;await loadDate()}catch(e){$("saveMsg").textContent=e.message}}
+$("resultDate").value=mmToday();$("loginBtn").onclick=login;$("loadDate").onclick=loadDate;$("password").addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 if(token){$("loginBox").hidden=true;$("editor").hidden=false;loadDate()}
