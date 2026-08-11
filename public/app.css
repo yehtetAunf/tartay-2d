@@ -522,3 +522,11 @@ header{
 #today2D{text-align:center;font-weight:900;font-size:26px;color:#0b5fc6}
 #publishToday{width:100%}.history-admin-title{margin:30px 0 18px}
 @media(max-width:520px){.today-fields{grid-template-columns:1fr 1fr}.today-fields label:last-child{grid-column:1/-1}}
+
+.auto-publish-row{display:flex!important;grid-template-columns:none!important;align-items:center;gap:10px;margin:14px 0;font-size:20px}
+.auto-publish-row input{width:24px!important;min-height:24px!important}
+.publish-controls{display:grid;gap:10px}
+.publish-controls button{width:100%;min-height:58px;font-weight:800}
+.schedule-btn{background:#1267ad!important;color:#fff!important}
+.publish-btn{background:#2f8f57!important;color:#fff!important}
+.undo-btn{background:#cc2929!important;color:#fff!important}

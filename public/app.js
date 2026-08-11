@@ -163,8 +163,8 @@ function renderRows(results,market){
     const active=!x&&t===nextRound;
     return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
       <span class="time">${t}</span>
-      <span class="set">${x?.set_value||(active?live.set:'--')}</span>
-      <span class="value">${x?.value_value||(active?live.value:'--')}</span>
+      <span class="set">${x?.value_value||(active?live.value:'--')}</span>
+      <span class="value">${x?.set_value||(active?live.set:'--')}</span>
       <span class="result">${x?.result_2d||'--'}</span>
     </div>`;
   }).join("");
@@ -176,22 +176,36 @@ function renderRows(results,market){
   }
 }
 
+function stopLiveMotion(){
+  if(marketJumpTimer){clearInterval(marketJumpTimer);marketJumpTimer=null;}
+  if(marketBlinkTimer){clearInterval(marketBlinkTimer);marketBlinkTimer=null;}
+  twoDEl.classList.remove("blink-change","spin");
+}
+
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   const latest=results.length?results[results.length-1]:null;
 
+  // Set hold state BEFORE clock rendering, so ✓ appears immediately.
+  holdActive=Boolean(data.resultHold?.active);
   renderRows(results,data.market);
 
-  if(activeRoundKey&&marketBase?.ok){
-    // paintActiveMarket() sets Big 2D from SET/VALUE.
+  if(holdActive){
+    // For the exact 2-minute result window: freeze the large 2D on the released result.
+    stopLiveMotion();
+    preSpinLabel.hidden=true;
+    twoDEl.textContent=data.resultHold?.result_2d||latest?.result_2d||"--";
+  }else if(activeRoundKey&&marketBase?.ok){
+    // After the 2-minute hold, resume live SET/VALUE + large 2D movement.
     paintActiveMarket();
+    startMarketJump();
+    startMarketBlink();
   }else{
     preSpinLabel.hidden=true;
     twoDEl.textContent=latest?.result_2d||"--";
     twoDEl.classList.remove("spin");
   }
 
-  holdActive=Boolean(data.resultHold?.active);
   startClock(data.serverNow);
   setOnline(true);
 }

@@ -78,7 +78,7 @@ function calc2DFromSetValue(setValue,valueValue){
 function updateToday2D(){
   $("today2D").value=calc2DFromSetValue($("todaySet").value,$("todayValue").value)||"";
 }
-async function publishTodayRound(){
+async function saveTodayRound(mode){
   const round=$("todayRound").value;
   const setValue=$("todaySet").value.trim();
   const valueValue=$("todayValue").value.trim();
@@ -87,8 +87,9 @@ async function publishTodayRound(){
     $("todayMsg").textContent="SET / VALUE ကို မှန်ကန်စွာထည့်ပါ။";
     return;
   }
+  const autoPublish=$("autoPublish").checked;
   try{
-    $("todayMsg").textContent=`Publishing ${round}...`;
+    $("todayMsg").textContent=mode==="now"?`Publishing ${round}...`:`Saving ${round} schedule...`;
     const r=await fetch("/api/admin/result",{
       method:"POST",
       headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
@@ -98,20 +99,40 @@ async function publishTodayRound(){
         result_2d:result2d,
         set_value:setValue,
         value_value:valueValue,
-        publish_mode:"schedule",
-        auto_publish:true
+        publish_mode:mode,
+        auto_publish:autoPublish
       })
     });
     const d=await r.json();
-    if(!r.ok)throw new Error(d.error||"Publish failed");
+    if(!r.ok)throw new Error(d.error||"Save failed");
     $("today2D").value=result2d;
-    $("todayMsg").textContent=`${round} → SET ${setValue} / VALUE ${valueValue} / 2D ${result2d} scheduled. User ဘက်မှာ Round အချိန်ရောက်မှ ပေါ်ပါမယ်။`;
+    $("todayMsg").textContent=mode==="now"
+      ?`${round} published now.`
+      :`${round} schedule saved.${autoPublish?" Round အချိန်ရောက်မှ Auto Publish လုပ်မယ်။":" User ဘက်မှာ ဖျောက်ထားမယ်။"}`;
+    await loadDate();
+  }catch(e){$("todayMsg").textContent=e.message}
+}
+async function undoTodayRound(){
+  const round=$("todayRound").value;
+  try{
+    $("todayMsg").textContent=`Hiding ${round}...`;
+    const r=await fetch("/api/admin/unpublish",{
+      method:"POST",
+      headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
+      body:JSON.stringify({result_date:$("resultDate").value,round_time:round})
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Undo publish failed");
+    $("autoPublish").checked=false;
+    $("todayMsg").textContent=`${round} hidden. User ဘက်မှာ SET / VALUE / 2D ကို -- ပြမယ်။`;
     await loadDate();
   }catch(e){$("todayMsg").textContent=e.message}
 }
 $("todaySet").addEventListener("input",updateToday2D);
 $("todayValue").addEventListener("input",updateToday2D);
-$("publishToday").onclick=publishTodayRound;
+$("saveSchedule").onclick=()=>saveTodayRound("schedule");
+$("publishToday").onclick=()=>saveTodayRound("now");
+$("undoPublish").onclick=undoTodayRound;
 
 $("resultDate").value=today();
 draw([]);
