@@ -59,7 +59,15 @@ function getMyanmarNow() {
 function getOperationalDate() {
   const now = getMyanmarNow();
   const date = new Date(Date.UTC(now.year, now.month - 1, now.day));
-  if (now.hour < 17) date.setUTCDate(date.getUTCDate() - 1);
+
+  // Daily screen reset rule (Myanmar time):
+  // 12:00 AM is the 8th/final round of the previous result day.
+  // Keep that previous day visible only through 12:14:59 AM.
+  // At 12:15 AM, switch to the new calendar/result day so all 8
+  // rounds start fresh as -- until their new results are released.
+  if (now.hour === 0 && now.minute < 15) {
+    date.setUTCDate(date.getUTCDate() - 1);
+  }
   return formatDateUTC(date);
 }
 
@@ -442,7 +450,7 @@ async function handleState(env) {
   return json({
     success: true,
     app: "Tartay 2D",
-    version: "5.2.0",
+    version: "6.4.0",
     operational_date: date,
     serverNow: Date.now(),
     myanmarNow: getMyanmarNow(),
@@ -554,7 +562,7 @@ export default {
   async fetch(request, env) {
     try {
       const url = new URL(request.url);
-      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"3.3.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
+      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"6.4.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
       if (request.method === "GET" && (url.pathname === "/api/state" || url.pathname === "/api/results/state")) return handleState(env);
       if (request.method === "GET" && url.pathname === "/api/market") return json({success:true, market:await fetchLiveMarket(), serverNow:Date.now()});
       if (request.method === "GET" && url.pathname === "/api/results/today") return handleToday(url,env);
