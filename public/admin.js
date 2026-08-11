@@ -38,7 +38,16 @@ async function loadDate(){
     const date=$("resultDate").value;
     const r=await fetch(`/api/admin/state?date=${encodeURIComponent(date)}&t=${Date.now()}`,{cache:"no-store",headers:{"authorization":`Bearer ${token}`}});
     const d=await r.json();
-    if(!r.ok) throw new Error(d.error||"Load failed");
+    if(!r.ok){
+      if(r.status===401){
+        token="";
+        localStorage.removeItem("tartayAdminToken");
+        $("editor").hidden=true;
+        $("loginBox").hidden=false;
+        $("loginMsg").textContent="Password ဖြင့် ပြန် Login ဝင်ပါ။";
+      }
+      throw new Error(d.error||"Load failed");
+    }
     draw(Array.isArray(d.results)?d.results:[]);
     $("saveMsg").textContent="";
   }catch(e){
