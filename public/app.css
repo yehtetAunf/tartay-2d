@@ -530,3 +530,28 @@ header{
 .schedule-btn{background:#1267ad!important;color:#fff!important}
 .publish-btn{background:#2f8f57!important;color:#fff!important}
 .undo-btn{background:#cc2929!important;color:#fff!important}
+
+/* v6.18 requested-only change: move large 2D slightly upward and enlarge it */
+#twoD{
+  position:relative !important;
+  top:-10px !important;
+  font-size:clamp(92px,24vw,150px) !important;
+  line-height:.88 !important;
+}
+@media(max-width:520px){
+  #twoD{
+    top:-12px !important;
+    font-size:clamp(100px,29vw,142px) !important;
+  }
+}
+
+/* v6.18 requested-only Admin Log UI */
+.admin-log-panel{margin-top:28px;border:1px solid #315f8f;border-radius:20px;background:#0d2745;padding:18px}
+.admin-log-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-log-head h2{margin:0}
+.admin-log-head button{padding:10px 14px;font-size:15px}
+.admin-log-list{display:grid;gap:8px;max-height:360px;overflow:auto}
+.admin-log-item{display:grid;grid-template-columns:minmax(100px,.8fr) 1.5fr auto;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.12);font-size:14px}
+.admin-log-item small{opacity:.65;white-space:nowrap}
+.admin-log-empty{opacity:.7;padding:10px}
+@media(max-width:520px){.admin-log-item{grid-template-columns:1fr}.admin-log-item small{white-space:normal}}

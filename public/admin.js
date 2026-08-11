@@ -134,6 +134,31 @@ $("saveSchedule").onclick=()=>saveTodayRound("schedule");
 $("publishToday").onclick=()=>saveTodayRound("now");
 $("undoPublish").onclick=undoTodayRound;
 
+
+async function loadAdminLogs(){
+  const box=$("adminLogs");
+  if(!box)return;
+  box.textContent="Loading...";
+  try{
+    const r=await fetch(`/api/admin/logs?type=admin&t=${Date.now()}`,{
+      cache:"no-store",
+      headers:{"authorization":`Bearer ${token}`}
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Log load failed");
+    const logs=Array.isArray(d.logs)?d.logs:[];
+    box.innerHTML=logs.length?logs.map(x=>{
+      let details=x.details||"";
+      try{
+        const q=JSON.parse(details);
+        details=[q.result_date,q.round_time,q.result_2d?`2D ${q.result_2d}`:""].filter(Boolean).join(" • ");
+      }catch(_){}
+      return `<div class="admin-log-item"><b>${x.action||"admin"}</b><span>${details}</span><small>${x.created_at||""}</small></div>`;
+    }).join(""):`<div class="admin-log-empty">No admin logs yet.</div>`;
+  }catch(e){box.textContent=e.message}
+}
+$("refreshLogs").onclick=loadAdminLogs;
+
 $("resultDate").value=today();
 draw([]);
 $("loginBtn").onclick=login;
