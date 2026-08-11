@@ -562,7 +562,7 @@ export default {
   async fetch(request, env) {
     try {
       const url = new URL(request.url);
-      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"6.7.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
+      if (request.method === "GET" && url.pathname === "/api/status") return json({app:"Tartay 2D",status:"Online",version:"6.4.0",database:"connected",operational_date:getOperationalDate(),serverNow:Date.now()});
       if (request.method === "GET" && (url.pathname === "/api/state" || url.pathname === "/api/results/state")) return handleState(env);
       if (request.method === "GET" && url.pathname === "/api/market") return json({success:true, market:await fetchLiveMarket(), serverNow:Date.now()});
       if (request.method === "GET" && url.pathname === "/api/results/today") return handleToday(url,env);
