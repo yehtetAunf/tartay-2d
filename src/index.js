@@ -363,8 +363,8 @@ async function fetchLiveMarket() {
     const volume = Number(data.volume);
     return {
       ok: Number.isFinite(price) && Number.isFinite(volume),
-      set: Number.isFinite(price) ? price.toFixed(2) : "--",
-      value: Number.isFinite(volume) ? volume.toFixed(2) : "--",
+      set: Number.isFinite(volume) ? volume.toFixed(2) : "--",
+      value: Number.isFinite(price) ? price.toFixed(2) : "--",
       source: "Coinbase BTC-USD",
       fetched_at: new Date().toISOString()
     };
@@ -399,7 +399,7 @@ async function handleState(env) {
   const date = getOperationalDate();
   const market = await fetchLiveMarket();
 
-  // As soon as a round is released, freeze the current Coinbase SET/VALUE
+  // As soon as a round is released, freeze the current Coinbase SET/VALUE (SET=volume, VALUE=price)
   // into that round so refreshes/history never change it afterward.
   await lockReleasedMarketValues(env, date, market);
   const results = await queryResultsForDate(env, date, false);
