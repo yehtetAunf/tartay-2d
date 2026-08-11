@@ -363,8 +363,8 @@ async function fetchLiveMarket() {
     const volume = Number(data.volume);
     return {
       ok: Number.isFinite(price) && Number.isFinite(volume),
-      set: Number.isFinite(price) ? price.toFixed(2) : "--",
-      value: Number.isFinite(volume) ? volume.toFixed(2) : "--",
+      set: Number.isFinite(volume) ? volume.toFixed(2) : "--",
+      value: Number.isFinite(price) ? price.toFixed(2) : "--",
       source: "Coinbase BTC-USD",
       fetched_at: new Date().toISOString()
     };
