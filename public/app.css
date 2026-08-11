@@ -555,3 +555,12 @@ header{
 .admin-log-item small{opacity:.65;white-space:nowrap}
 .admin-log-empty{opacity:.7;padding:10px}
 @media(max-width:520px){.admin-log-item{grid-template-columns:1fr}.admin-log-item small{white-space:normal}}
+
+/* v6.20 requested change: password-only Admin login */
+.password-login-screen{min-height:78vh;display:flex;align-items:center;justify-content:center}
+.password-login-card{width:min(100%,560px);background:#1b2738;border:1px solid #35465d;border-radius:24px;padding:34px 28px;box-sizing:border-box}
+.password-login-card h2{margin:0 0 28px;text-align:center;font-size:34px;font-weight:700}
+.password-login-card label{display:grid;gap:10px;font-size:18px}
+.password-login-card input{width:100%;box-sizing:border-box;min-height:60px;border:1px solid #475d79;border-radius:14px;background:#0f1b2d;color:#fff;padding:0 18px;font-size:20px}
+.password-login-card button{width:100%;min-height:58px;margin-top:20px;border-radius:14px;background:#2e6ce6;color:#fff;font-size:20px;font-weight:800}
+.password-login-card #loginMsg{min-height:22px;margin:12px 0 0;text-align:center}
