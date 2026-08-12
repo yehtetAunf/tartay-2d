@@ -42,7 +42,7 @@ jobs:
           cd android-app
 
           yes "" | bubblewrap init \
-            --manifest="https://tartay-2d.yehtetaung7655.workers.dev/manifest.json"
+            --manifest="https://tartay-2d.yehtetaung7655.workers.dev/manifest.webmanifest"
 
       - name: Build Android app
         working-directory: android-app
