@@ -1,0 +1,1 @@
+v6.28 PWA install readiness only: added valid 192/512 app icons, completed manifest metadata, icon links, and updated service-worker cache. Existing app logic/UI remains unchanged. Deploy over HTTPS, open in Chrome on Android, then choose Install app/Add to Home screen.
