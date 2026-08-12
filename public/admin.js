@@ -1,6 +1,7 @@
 
 const ROUNDS=["05:00 PM","06:00 PM","07:00 PM","08:00 PM","09:00 PM","10:00 PM","11:00 PM","12:00 AM"];
-let token=localStorage.getItem("tartayAdminToken")||"";
+let token="";
+localStorage.removeItem("tartayAdminToken");
 const $=id=>document.getElementById(id);
 
 function today(){
@@ -13,7 +14,7 @@ function draw(results=[]){
   $("adminRounds").innerHTML=ROUNDS.map(t=>{
     const v=m.get(t)?.result_2d||"";
     return `<div class="admin-round">
-      <b>${t}</b>
+      <div class="admin-round-info"><b>${t}</b><small class="preset-2d">သတ်မှတ်ထားသော 2D: <strong>${v||"--"}</strong></small></div>
       <input inputmode="numeric" maxlength="2" data-time="${t}" value="${v}" placeholder="--">
     </div>`;
   }).join("");
@@ -25,7 +26,6 @@ async function login(){
     const d=await r.json();
     if(!r.ok) throw new Error(d.error||"Login failed");
     token=d.token;
-    localStorage.setItem("tartayAdminToken",token);
     $("loginBox").hidden=true;
     $("editor").hidden=false;
     $("loginMsg").textContent="";
@@ -63,13 +63,18 @@ async function saveAll(){
       const v=el.value.trim();
       if(!v) continue;
       if(!/^\d{2}$/.test(v)) throw new Error(`${el.dataset.time}: enter exactly 2 digits`);
-      const r=await fetch("/api/admin/result",{
-        method:"POST",
-        headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
-        body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v,publish_mode:"schedule",auto_publish:true})
-      });
-      const d=await r.json();
-      if(!r.ok) throw new Error(d.error||`Save failed: ${el.dataset.time}`);
+      let r,d;
+      for(let attempt=0;attempt<3;attempt++){
+        r=await fetch("/api/admin/result",{
+          method:"POST",
+          headers:{"content-type":"application/json","authorization":`Bearer ${token}`},
+          body:JSON.stringify({result_date:date,round_time:el.dataset.time,result_2d:v,publish_mode:"schedule",auto_publish:true})
+        });
+        d=await r.json();
+        if(r.ok)break;
+        if(r.status!==409||attempt===2)throw new Error(d.error||`Save failed: ${el.dataset.time}`);
+        await new Promise(resolve=>setTimeout(resolve,250));
+      }
     }
     $("saveMsg").textContent="Saved.";
     await loadDate();
@@ -150,8 +155,5 @@ $("loginBtn").onclick=login;
 $("loadDate").onclick=loadDate;
 $("saveAll").onclick=saveAll;
 $("password").addEventListener("keydown",e=>{if(e.key==="Enter")login()});
-if(token){
-  $("loginBox").hidden=true;
-  $("editor").hidden=false;
-  loadDate();
-}
+$("loginBox").hidden=false;
+$("editor").hidden=true;

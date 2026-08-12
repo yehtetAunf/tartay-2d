@@ -17,6 +17,8 @@ let holdActive=false;
 let spinTimer=null;
 let spinning=false;
 let lastSpinResult="";
+let live2DChangeTimer=null;
+let pendingLive2D="";
 
 function estimatedServerNow(){return serverBase+(performance.now()-perfBase)}
 
@@ -106,6 +108,22 @@ function calculate2DFromSetValue(setValue,valueValue){
   return `${setDigit}${valueDigit}`;
 }
 
+function showLive2DWithRing(nextValue){
+  if(!nextValue||nextValue==="--")return;
+  if(twoDEl.textContent.trim()===nextValue && !twoDEl.classList.contains("result-loading"))return;
+  pendingLive2D=nextValue;
+  if(live2DChangeTimer)clearTimeout(live2DChangeTimer);
+  // Reference-video behavior: number disappears, circular ring keeps spinning,
+  // then the complete new 2D number appears.
+  twoDEl.classList.add("result-loading");
+  twoDEl.textContent="";
+  live2DChangeTimer=setTimeout(()=>{
+    twoDEl.textContent=pendingLive2D;
+    twoDEl.classList.remove("result-loading");
+    live2DChangeTimer=null;
+  },PRE_SPIN_CHANGE_ANIMATION_MS);
+}
+
 function paintActiveMarket(){
   if(!activeRoundKey||!marketBase?.ok)return;
 
@@ -122,14 +140,14 @@ function paintActiveMarket(){
   if(r)r.textContent="--";
 
   const big2D=calculate2DFromSetValue(market.set,market.value);
-  if(big2D)twoDEl.textContent=big2D;
+  if(big2D)showLive2DWithRing(big2D);
 }
 
 function blinkActiveNumbers(){
   if(!activeRoundKey)return;
   const row=roundsEl.querySelector(`[data-round="${activeRoundKey}"]`);
   if(!row||row.classList.contains("released"))return;
-  const nodes=[twoDEl,row.querySelector(".set"),row.querySelector(".value")];
+  const nodes=[row.querySelector(".set"),row.querySelector(".value")];
   if(nodes.some(node=>!node||node.textContent.trim()==="--"))return;
   nodes.forEach(node=>node.classList.remove("blink-change"));
   void nodes[0].offsetWidth;
@@ -179,7 +197,8 @@ function renderRows(results,market){
 function stopLiveMotion(){
   if(marketJumpTimer){clearInterval(marketJumpTimer);marketJumpTimer=null;}
   if(marketBlinkTimer){clearInterval(marketBlinkTimer);marketBlinkTimer=null;}
-  twoDEl.classList.remove("blink-change","spin");
+  if(live2DChangeTimer){clearTimeout(live2DChangeTimer);live2DChangeTimer=null;}
+  twoDEl.classList.remove("blink-change","spin","result-loading");
 }
 
 function renderState(data){
