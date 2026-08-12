@@ -1,1 +1,30 @@
-{"name":"Tartay 2D","short_name":"Tartay 2D","start_url":"/","display":"standalone","background_color":"#071426","theme_color":"#071426","icons":[]}
+{
+  "id": "/",
+  "name": "တာတေ 2D",
+  "short_name": "တာတေ 2D",
+  "description": "တာတေ 2D Live Results",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#020812",
+  "theme_color": "#020812",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
