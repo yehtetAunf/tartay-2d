@@ -1,0 +1,1 @@
+v6.23: History prior-date loading fixed via /api/results/history. Password-only Admin login now restores login screen when saved token expires. Other behavior unchanged.
