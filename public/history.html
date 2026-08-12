@@ -1,8 +1,38 @@
 <!doctype html>
-<html lang="my">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Tartay 2D History</title><link rel="stylesheet" href="/app.css?v=6.23"></head>
-<body class="history-page"><main class="history-app">
-<header class="history-top"><h1>Tartay <span>2D</span> History</h1><a href="/" class="history-home">← Home</a></header>
-<div id="historySections"></div>
-</main><script src="/history.js?v=6.23"></script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2D History</title>
+<link rel="stylesheet" href="/app.css?v=6.25">
+<style>
+body.history-new{background:radial-gradient(circle at 50% 18%,#082354 0,#031633 42%,#001021 100%);min-height:100vh;color:#fff}
+.hwrap{max-width:980px;margin:auto;padding:26px 28px 48px}
+.htop{display:grid;grid-template-columns:92px 1fr 92px;align-items:center}
+.htitle{text-align:center;font-size:48px;font-weight:800}
+.hicon{width:76px;height:76px;border:2px solid #174c9c;border-radius:50%;background:#061a3a;color:#fff;font-size:42px}
+.hicon.cal{border-color:#11c8ff;box-shadow:0 0 18px #00aef0}
+.datebar{margin:34px 0 36px;padding:22px 34px;border-radius:28px;background:linear-gradient(135deg,#0756c8,#053b9d);font-size:42px;font-weight:800;display:flex;gap:22px;align-items:center}
+.datebar span:first-child{font-size:40px}
+.hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:46px 38px}
+.round{text-align:center}.rtime{font-size:28px;font-weight:800;line-height:1.15;min-height:66px;display:flex;align-items:center;justify-content:center;white-space:pre-line}
+.rbox{margin-top:16px;aspect-ratio:1/1;border-radius:25px;border:2px solid #1689ff;background:linear-gradient(145deg,#1173df,#07327e);box-shadow:inset 0 0 20px rgba(22,204,255,.3),0 0 12px rgba(0,133,255,.25);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800}
+.hnote{margin-top:54px;border-radius:38px;background:rgba(7,49,105,.72);padding:20px;text-align:center;font-size:23px}
+@media(max-width:700px){.hwrap{padding:20px 16px 36px}.htop{grid-template-columns:64px 1fr 64px}.htitle{font-size:34px}.hicon{width:56px;height:56px;font-size:30px}.datebar{font-size:28px;padding:18px 22px;border-radius:20px}.hgrid{gap:28px 16px}.rtime{font-size:19px;min-height:48px}.rbox{font-size:34px;border-radius:18px}.hnote{font-size:16px;margin-top:38px}}
+</style>
+</head>
+<body class="history-new">
+<main class="hwrap">
+  <div class="htop">
+    <button class="hicon" onclick="location.href='/'">‹</button>
+    <div class="htitle">2D History</div>
+    <button class="hicon cal" id="calBtn">▣</button>
+  </div>
+  <input id="datePick" type="date" hidden>
+  <div class="datebar"><span>▣</span><span id="dateText">----</span></div>
+  <div id="historyGrid" class="hgrid"></div>
+  <div class="hnote">🛡️ &nbsp; Results are final and will be held for 2 minutes.</div>
+</main>
+<script src="/history.js?v=6.25"></script>
+</body>
+</html>
