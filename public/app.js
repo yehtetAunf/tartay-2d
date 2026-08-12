@@ -17,9 +17,6 @@ let holdActive=false;
 let spinTimer=null;
 let spinning=false;
 let lastSpinResult="";
-let live2DChangeTimer=null;
-let pendingLive2D="";
-let live2DJumpCount=0;
 
 function estimatedServerNow(){return serverBase+(performance.now()-perfBase)}
 
@@ -109,31 +106,6 @@ function calculate2DFromSetValue(setValue,valueValue){
   return `${setDigit}${valueDigit}`;
 }
 
-function showLive2DJump(nextValue){
-  if(!nextValue||nextValue==="--")return;
-  const current=twoDEl.textContent.trim();
-  pendingLive2D=nextValue;
-  live2DJumpCount++;
-
-  // Keep the normal live number jumps. After every 3rd jump, hide the
-  // complete two-digit number briefly, then show the new number again.
-  // No ring / spinner is used.
-  if(live2DJumpCount % 3 !== 0){
-    twoDEl.textContent=nextValue;
-    twoDEl.classList.remove("result-hide");
-    return;
-  }
-
-  if(live2DChangeTimer)clearTimeout(live2DChangeTimer);
-  twoDEl.classList.add("result-hide");
-  twoDEl.textContent="";
-  live2DChangeTimer=setTimeout(()=>{
-    twoDEl.textContent=pendingLive2D;
-    twoDEl.classList.remove("result-hide");
-    live2DChangeTimer=null;
-  },PRE_SPIN_CHANGE_ANIMATION_MS);
-}
-
 function paintActiveMarket(){
   if(!activeRoundKey||!marketBase?.ok)return;
 
@@ -150,14 +122,14 @@ function paintActiveMarket(){
   if(r)r.textContent="--";
 
   const big2D=calculate2DFromSetValue(market.set,market.value);
-  if(big2D)showLive2DJump(big2D);
+  if(big2D)twoDEl.textContent=big2D;
 }
 
 function blinkActiveNumbers(){
   if(!activeRoundKey)return;
   const row=roundsEl.querySelector(`[data-round="${activeRoundKey}"]`);
   if(!row||row.classList.contains("released"))return;
-  const nodes=[row.querySelector(".set"),row.querySelector(".value")];
+  const nodes=[twoDEl,row.querySelector(".set"),row.querySelector(".value")];
   if(nodes.some(node=>!node||node.textContent.trim()==="--"))return;
   nodes.forEach(node=>node.classList.remove("blink-change"));
   void nodes[0].offsetWidth;
@@ -207,8 +179,7 @@ function renderRows(results,market){
 function stopLiveMotion(){
   if(marketJumpTimer){clearInterval(marketJumpTimer);marketJumpTimer=null;}
   if(marketBlinkTimer){clearInterval(marketBlinkTimer);marketBlinkTimer=null;}
-  if(live2DChangeTimer){clearTimeout(live2DChangeTimer);live2DChangeTimer=null;}
-  twoDEl.classList.remove("blink-change","spin","result-loading","result-hide");
+  twoDEl.classList.remove("blink-change","spin");
 }
 
 function renderState(data){

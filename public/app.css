@@ -571,12 +571,3 @@ header{
   user-select: none !important;
   -webkit-touch-callout: none !important;
 }
-
-
-/* v6.33 Live 2D: every third live jump briefly hides the full number; no ring */
-#twoD.result-hide{color:transparent!important;text-shadow:none!important}
-
-/* v6.32 Admin preset-result label */
-.admin-round-info{display:flex;flex-direction:column;gap:7px;min-width:0}
-.preset-2d{font-size:13px;opacity:.78;white-space:nowrap}
-.preset-2d strong{color:#ffd43b;font-size:17px}
