@@ -573,26 +573,8 @@ header{
 }
 
 
-/* v6.32 requested: reference-video large Live 2D transition only */
-.hero{position:relative}
-#twoD{z-index:2}
-#twoD.result-loading{color:transparent!important;text-shadow:none!important}
-#twoD.result-loading::after{
-  content:"";
-  position:absolute;
-  left:50%;top:50%;
-  width:118px;height:118px;
-  margin:-59px 0 0 -59px;
-  border-radius:50%;
-  border:7px solid rgba(54,129,255,.24);
-  border-top-color:#3d7dff;
-  border-right-color:#8b52ff;
-  box-shadow:0 0 20px rgba(80,85,255,.55), inset 0 0 15px rgba(78,145,255,.25);
-  animation:tartayResultRing .58s linear infinite;
-  box-sizing:border-box;
-}
-@keyframes tartayResultRing{to{transform:rotate(360deg)}}
-@media(max-width:520px){#twoD.result-loading::after{width:104px;height:104px;margin:-52px 0 0 -52px;border-width:6px}}
+/* v6.33 Live 2D: every third live jump briefly hides the full number; no ring */
+#twoD.result-hide{color:transparent!important;text-shadow:none!important}
 
 /* v6.32 Admin preset-result label */
 .admin-round-info{display:flex;flex-direction:column;gap:7px;min-width:0}
