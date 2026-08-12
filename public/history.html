@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>2D History</title>
-<link rel="stylesheet" href="/app.css?v=6.25">
+<link rel="stylesheet" href="/app.css?v=6.26">
 <style>
 body.history-new{background:radial-gradient(circle at 50% 18%,#082354 0,#031633 42%,#001021 100%);min-height:100vh;color:#fff}
 .hwrap{max-width:980px;margin:auto;padding:26px 28px 48px}
@@ -17,7 +17,7 @@ body.history-new{background:radial-gradient(circle at 50% 18%,#082354 0,#031633 
 .hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:46px 38px}
 .round{text-align:center}.rtime{font-size:28px;font-weight:800;line-height:1.15;min-height:66px;display:flex;align-items:center;justify-content:center;white-space:pre-line}
 .rbox{margin-top:16px;aspect-ratio:1/1;border-radius:25px;border:2px solid #1689ff;background:linear-gradient(145deg,#1173df,#07327e);box-shadow:inset 0 0 20px rgba(22,204,255,.3),0 0 12px rgba(0,133,255,.25);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800}
-.hnote{margin-top:54px;border-radius:38px;background:rgba(7,49,105,.72);padding:20px;text-align:center;font-size:23px}
+.history-section{margin-bottom:52px}.history-section .datebar{margin-bottom:36px}.hnote{margin-top:20px;border-radius:38px;background:rgba(7,49,105,.72);padding:20px;text-align:center;font-size:23px}
 @media(max-width:700px){.hwrap{padding:20px 16px 36px}.htop{grid-template-columns:64px 1fr 64px}.htitle{font-size:34px}.hicon{width:56px;height:56px;font-size:30px}.datebar{font-size:28px;padding:18px 22px;border-radius:20px}.hgrid{gap:28px 16px}.rtime{font-size:19px;min-height:48px}.rbox{font-size:34px;border-radius:18px}.hnote{font-size:16px;margin-top:38px}}
 </style>
 </head>
@@ -29,10 +29,9 @@ body.history-new{background:radial-gradient(circle at 50% 18%,#082354 0,#031633 
     <button class="hicon cal" id="calBtn">▣</button>
   </div>
   <input id="datePick" type="date" hidden>
-  <div class="datebar"><span>▣</span><span id="dateText">----</span></div>
-  <div id="historyGrid" class="hgrid"></div>
+  <div id="historySections"></div>
   <div class="hnote">🛡️ &nbsp; Results are final and will be held for 2 minutes.</div>
 </main>
-<script src="/history.js?v=6.25"></script>
+<script src="/history.js?v=6.26"></script>
 </body>
 </html>
