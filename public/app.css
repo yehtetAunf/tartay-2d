@@ -564,3 +564,10 @@ header{
 .password-login-card input{width:100%;box-sizing:border-box;min-height:60px;border:1px solid #475d79;border-radius:14px;background:#0f1b2d;color:#fff;padding:0 18px;font-size:20px}
 .password-login-card button{width:100%;min-height:58px;margin-top:20px;border-radius:14px;background:#2e6ce6;color:#fff;font-size:20px;font-weight:800}
 .password-login-card #loginMsg{min-height:22px;margin:12px 0 0;text-align:center}
+
+/* v6.31 User App copy protection */
+.public-app, .public-app * {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
