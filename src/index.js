@@ -312,7 +312,9 @@ async function handleSaveResult(request, env) {
       result_date,round_time,result_2d,set_value,value_value,publish_mode,auto_publish,published_at,created_at,updated_at
     ) VALUES(?,?,?,?,?,?,?,?,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
     ON CONFLICT(result_date,round_time) DO UPDATE SET
-      result_2d=excluded.result_2d,set_value=excluded.set_value,value_value=excluded.value_value,
+      result_2d=excluded.result_2d,
+      set_value=COALESCE(NULLIF(excluded.set_value,''),app_results.set_value),
+      value_value=COALESCE(NULLIF(excluded.value_value,''),app_results.value_value),
       publish_mode=excluded.publish_mode,auto_publish=excluded.auto_publish,published_at=excluded.published_at,
       updated_at=CURRENT_TIMESTAMP`).bind(resultDate,roundTime,result2d,setValue,valueValue,publishMode,autoPublish,publishedAt).run();
     await logAdmin(env, publishMode === "now" ? "publish_now" : "save_schedule", {result_date:resultDate,round_time:roundTime,result_2d:result2d,auto_publish:autoPublish});
@@ -380,7 +382,7 @@ async function lockReleasedMarketValues(env, date, market) {
   try {
     const rows = await queryResultsForDate(env, date, true);
     for (const item of rows) {
-      if (!isRoundReleased(item)) continue;
+      if (!isRoundReleased(item.result_date, item.round_time)) continue;
       if (item.set_value && item.value_value) continue;
       await env.DB.prepare(`
         UPDATE app_results
