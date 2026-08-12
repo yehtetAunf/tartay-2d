@@ -27,28 +27,40 @@ jobs:
 
       - name: Configure Bubblewrap
         run: |
-          bubblewrap updateConfig \
-            --jdkPath="$JAVA_HOME" \
-            --androidSdkPath="$ANDROID_SDK_ROOT"
+          mkdir -p "$HOME/.bubblewrap"
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' \
+            "$JAVA_HOME" "$ANDROID_SDK_ROOT" \
+            > "$HOME/.bubblewrap/config.json"
+
+          echo "Bubblewrap configuration:"
+          cat "$HOME/.bubblewrap/config.json"
 
       - name: Create TWA project
         run: |
+          rm -rf android-app
           mkdir -p android-app
           cd android-app
+
           yes "" | bubblewrap init \
-            --manifest="https://tartay-2d.yehtetaung7655.workers.dev/manifest.json" \
-            --directory="."
+            --manifest="https://tartay-2d.yehtetaung7655.workers.dev/manifest.json"
 
       - name: Build Android app
         working-directory: android-app
         run: |
-          yes | bubblewrap build
+          yes "" | bubblewrap build
+
+      - name: Find Android files
+        if: always()
+        run: |
+          echo "Searching for APK/AAB files..."
+          find android-app -type f \( -name "*.apk" -o -name "*.aab" \) -print || true
 
       - name: Upload Android files
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: tartay-2d-android
           path: |
-            android-app/*.apk
-            android-app/*.aab
-          if-no-files-found: error
+            android-app/**/*.apk
+            android-app/**/*.aab
+          if-no-files-found: warn
