@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "dev.workers.yehtetaung7655.tartay_2d.twa",
+      "sha256_cert_fingerprints": [
+        "A2:2C:61:7A:C0:09:58:09:1B:A0:07:DD:53:07:69:AA:94:7E:D8:D7:87:40:7B:CE:1B:3E:5F:0E:19:6F:D4:F5"
+      ]
+    }
+  }
+]
