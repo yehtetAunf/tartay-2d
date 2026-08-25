@@ -1,1 +1,0 @@
-v6.26: History only — keeps v6.25 design, but loads available history dates and stacks them vertically for scrolling. Calendar scrolls to a loaded date. All other v6.25 behavior unchanged.
