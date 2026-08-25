@@ -1,1 +1,0 @@
-v4.2 uses a static crop from the user supplied haunted reference image. No video animation and no SVG cartoon background. App/API logic unchanged.
