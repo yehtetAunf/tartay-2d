@@ -17,7 +17,7 @@ body{display:flex;justify-content:center}
   overflow:hidden;
   background:
     linear-gradient(rgba(8,0,0,.20),rgba(0,0,0,.38)),
-    url('/haunted-clear.png?v=4.7') center top / cover no-repeat fixed;
+    url('/haunted-clear.png?v=6.33') center top / cover no-repeat fixed;
 }
 
 /* Make background clear and visible */
