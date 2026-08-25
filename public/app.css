@@ -571,3 +571,20 @@ header{
   user-select: none !important;
   -webkit-touch-callout: none !important;
 }
+
+/* v6.34: mobile full-page visibility fix */
+html,body{
+  overflow-x:hidden;
+  overflow-y:auto;
+}
+.app{
+  height:auto;
+  overflow:visible;
+  padding-bottom:calc(96px + env(safe-area-inset-bottom));
+}
+@media(max-width:520px){
+  .app{
+    min-height:100svh;
+    padding-bottom:calc(110px + env(safe-area-inset-bottom));
+  }
+}
