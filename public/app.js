@@ -8,6 +8,8 @@ const updatedEl=document.getElementById("updatedText");
 const onlineEl=document.querySelector(".online");
 const preSpinLabel=document.getElementById("preSpinLabel");
 const preSpinNumber=document.getElementById("preSpinNumber");
+const heroSetEl=document.getElementById("heroSet");
+const heroValueEl=document.getElementById("heroValue");
 
 let loading=false;
 let timer=null;
@@ -120,6 +122,8 @@ function paintActiveMarket(){
   if(s)s.textContent=market.set;
   if(v)v.textContent=market.value;
   if(r)r.textContent="--";
+  if(heroSetEl)heroSetEl.textContent=market.set;
+  if(heroValueEl)heroValueEl.textContent=market.value;
 
   const big2D=calculate2DFromSetValue(market.set,market.value);
   if(big2D)twoDEl.textContent=big2D;
@@ -161,7 +165,7 @@ function renderRows(results,market){
   roundsEl.innerHTML=ROUNDS.map(t=>{
     const x=map.get(t);
     const active=!x&&t===nextRound;
-    return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}">
+    return `<div class="round-row ${x?'released':''} ${active?'active-spin':''}" data-round="${t}" data-index="${ROUNDS.indexOf(t)+1}">
       <span class="time">${t}</span>
       <span class="set">${x?.set_value||(active?live.set:'--')}</span>
       <span class="value">${x?.value_value||(active?live.value:'--')}</span>
@@ -185,6 +189,8 @@ function stopLiveMotion(){
 function renderState(data){
   const results=Array.isArray(data.results)?data.results:[];
   const latest=results.length?results[results.length-1]:null;
+  if(heroSetEl)heroSetEl.textContent=(data.market?.ok?data.market.set:(latest?.set_value||"--"));
+  if(heroValueEl)heroValueEl.textContent=(data.market?.ok?data.market.value:(latest?.value_value||"--"));
 
   // Set hold state BEFORE clock rendering, so ✓ appears immediately.
   holdActive=Boolean(data.resultHold?.active);
