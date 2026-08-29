@@ -10,6 +10,7 @@ const preSpinLabel=document.getElementById("preSpinLabel");
 const preSpinNumber=document.getElementById("preSpinNumber");
 const heroSetEl=document.getElementById("heroSet");
 const heroValueEl=document.getElementById("heroValue");
+const mondayNotice=document.getElementById("mondayNotice");
 
 let loading=false;
 let timer=null;
@@ -186,7 +187,31 @@ function stopLiveMotion(){
   twoDEl.classList.remove("blink-change","spin");
 }
 
+
+function isYangonMonday(ms){
+  const weekday=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",weekday:"short"}).format(new Date(Number(ms)||Date.now()));
+  return weekday==="Mon";
+}
+
+function renderMondayClosed(ms){
+  stopLiveMotion();
+  holdActive=false;
+  activeRoundKey=null; marketBase=null;
+  twoDEl.textContent="CLOSED";
+  twoDEl.classList.add("closed-result");
+  if(heroSetEl)heroSetEl.textContent="--";
+  if(heroValueEl)heroValueEl.textContent="--";
+  if(preSpinLabel)preSpinLabel.hidden=true;
+  if(mondayNotice)mondayNotice.hidden=false;
+  roundsEl.innerHTML=ROUNDS.map(t=>`<div class="round-row monday-closed" data-round="${t}"><span class="time">${t}</span><span class="set">--</span><span class="value">--</span><span class="closed-mark">▣</span><span class="closed-text">CLOSED</span></div>`).join("");
+  startClock(ms);
+  setOnline(true);
+}
+
 function renderState(data){
+  if(isYangonMonday(data.serverNow)){renderMondayClosed(data.serverNow);return;}
+  twoDEl.classList.remove("closed-result");
+  if(mondayNotice)mondayNotice.hidden=true;
   const results=Array.isArray(data.results)?data.results:[];
   const latest=results.length?results[results.length-1]:null;
   if(heroSetEl)heroSetEl.textContent=(data.market?.ok?data.market.set:(latest?.set_value||"--"));
