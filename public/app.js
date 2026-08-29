@@ -169,7 +169,7 @@ function renderRows(results,market){
       <span class="time">${t}</span>
       <span class="set">${x?.set_value||(active?live.set:'--')}</span>
       <span class="value">${x?.value_value||(active?live.value:'--')}</span>
-      <span class="result">${x?.result_2d||'--'}</span>
+      ${x ? `<span class="result">${x.result_2d||'--'}</span>` : `<span class="round-cover" aria-label="Result pending"></span>`}
     </div>`;
   }).join("");
 
