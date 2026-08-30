@@ -26,7 +26,7 @@ function estimatedServerNow(){return serverBase+(performance.now()-perfBase)}
 function fmtUpdated(ms){
   const p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",day:"numeric",month:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",second:"2-digit",hour12:true}).formatToParts(new Date(ms));
   const g=t=>p.find(x=>x.type===t)?.value||"";
-  return `${holdActive?"✓ ":""}Updated ${g("day")}/${g("month")}/${g("year")}, ${g("hour")}:${g("minute")}:${g("second")} ${(g("dayPeriod")||"").toUpperCase()}`;
+  return `${holdActive?"✅ ":""}Updated ${g("day")}/${g("month")}/${g("year")}, ${g("hour")}:${g("minute")}:${g("second")} ${(g("dayPeriod")||"").toUpperCase()}`;
 }
 
 function updateClock(){if(updatedEl)updatedEl.textContent=fmtUpdated(estimatedServerNow())}

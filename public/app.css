@@ -115,3 +115,7 @@
 .round-row.monday-closed .closed-text{font-size:13px;color:#d8dce2;margin-top:2px}
 @media(max-width:520px){.monday-notice{min-height:50px;margin-bottom:8px;border-radius:13px;font-size:13px;padding:7px 9px}.big-result.closed-result{font-size:43px!important}.round-row.monday-closed .closed-mark{font-size:20px;margin-top:4px}.round-row.monday-closed .closed-text{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.app,.app:before{animation:none!important}}
+
+/* v8.2 visual-only tweaks: clearer Updated line + slightly larger main 2D result */
+.updated-text{color:#fff!important;font-weight:800!important;text-shadow:0 2px 5px #000,0 0 2px #000!important;opacity:1!important;}
+@media(max-width:520px){.updated-text{font-size:12.5px!important;margin-top:7px!important}.big-result:not(.closed-result){font-size:74px!important}}
