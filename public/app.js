@@ -110,6 +110,8 @@ function calculate2DFromSetValue(setValue,valueValue){
 }
 
 function paintActiveMarket(){
+  // Never let the live market repaint the hero while an Admin result is in its 2-minute hold.
+  if(holdActive)return;
   if(!activeRoundKey||!marketBase?.ok)return;
 
   const market=makeJumpMarket(marketBase,marketJumpIndex);
