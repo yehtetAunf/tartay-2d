@@ -191,8 +191,15 @@ function stopLiveMotion(){
 
 
 function isYangonMonday(ms){
-  const weekday=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",weekday:"short"}).format(new Date(Number(ms)||Date.now()));
-  return weekday==="Mon";
+  const now=new Date(Number(ms)||Date.now());
+  const weekday=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",weekday:"short"}).format(now);
+  if(weekday!=="Mon")return false;
+
+  // Midnight belongs to the previous result day until 12:30 AM.
+  // This keeps the 12:00 AM result visible before Monday CLOSED begins.
+  const parts=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).formatToParts(now);
+  const get=t=>Number(parts.find(x=>x.type===t)?.value||0);
+  return get("hour")>0 || (get("hour")===0 && get("minute")>=30);
 }
 
 function renderMondayClosed(ms){
