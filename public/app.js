@@ -214,18 +214,28 @@ function renderState(data){
   if(mondayNotice)mondayNotice.hidden=true;
   const results=Array.isArray(data.results)?data.results:[];
   const latest=results.length?results[results.length-1]:null;
-  if(heroSetEl)heroSetEl.textContent=(data.market?.ok?data.market.set:(latest?.set_value||"--"));
-  if(heroValueEl)heroValueEl.textContent=(data.market?.ok?data.market.value:(latest?.value_value||"--"));
-
-  // Set hold state BEFORE clock rendering, so ✓ appears immediately.
+  // Set hold state BEFORE painting the hero values. During the 2-minute
+  // published-result hold, SET / VALUE / 2D must all come from the exact
+  // Admin-saved round, not from the live market feed.
   holdActive=Boolean(data.resultHold?.active);
+  const heldRound=holdActive
+    ? results.find(x=>x.round_time===data.resultHold?.round_time)
+    : null;
+
+  if(heroSetEl)heroSetEl.textContent=holdActive
+    ? (heldRound?.set_value||"--")
+    : (data.market?.ok?data.market.set:(latest?.set_value||"--"));
+  if(heroValueEl)heroValueEl.textContent=holdActive
+    ? (heldRound?.value_value||"--")
+    : (data.market?.ok?data.market.value:(latest?.value_value||"--"));
+
   renderRows(results,data.market);
 
   if(holdActive){
-    // For the exact 2-minute result window: freeze the large 2D on the released result.
+    // Freeze the complete Admin-published result for the exact 2-minute window.
     stopLiveMotion();
     preSpinLabel.hidden=true;
-    twoDEl.textContent=data.resultHold?.result_2d||latest?.result_2d||"--";
+    twoDEl.textContent=data.resultHold?.result_2d||heldRound?.result_2d||latest?.result_2d||"--";
   }else if(activeRoundKey&&marketBase?.ok){
     // After the 2-minute hold, resume live SET/VALUE + large 2D movement.
     paintActiveMarket();
