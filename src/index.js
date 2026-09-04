@@ -1702,6 +1702,19 @@ export default {
         new URL(request.url);
 
       // =========================================
+      // APK Download
+      // =========================================
+      if (
+        request.method === "GET" &&
+        url.pathname === "/download"
+      ) {
+        return Response.redirect(
+          "https://github.com/yehtetAunf/Tartay2D-APK/releases/download/v1.3/app-debug.apk",
+          302
+        );
+      }
+
+      // =========================================
       // Android Trusted Web Activity
       // Digital Asset Links verification
       // =========================================
