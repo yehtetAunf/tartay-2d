@@ -57,6 +57,38 @@
 
     <button id="saveAll" class="save-all">Save 8 Rounds</button>
     <p id="saveMsg"></p>
+
+    <section class="gift-admin-panel">
+      <h2>🎁 လက်ဆောင်ဂဏန်း</h2>
+      <p class="today-help">တစ်ရက်စာ / တစ်ပတ်စာကို သီးသန့်သိမ်းနိုင်ပါတယ်။ ဒီအပိုင်းက 2D History data ကို မပြောင်းပါ။</p>
+      <div class="gift-admin-tabs">
+        <button id="giftDailyTab" type="button" class="gift-admin-tab active">🎁 တစ်ရက်စာ</button>
+        <button id="giftWeeklyTab" type="button" class="gift-admin-tab">📅 တစ်ပတ်စာ</button>
+      </div>
+      <div id="giftDailyEditor">
+        <div class="gift-admin-fields">
+          <label>စတင်ရက်<input id="giftDateFrom" type="date"></label>
+          <label>အဆုံးရက်<input id="giftDateTo" type="date"></label>
+          <label>အဓိကဂဏန်း<input id="giftMainNumber" inputmode="numeric" maxlength="2" placeholder="7"></label>
+        </div>
+        <label>ဂဏန်းတွဲများ (တစ်ကြောင်းစီ)<textarea id="giftPairs" rows="3" placeholder="72.79&#10;76.71"></textarea></label>
+        <label>ခေါင်းစဉ်<input id="giftDailyTitle" placeholder="တစ်ရက်စာ လက်ဆောင်ဂဏန်း"></label>
+        <label>မှတ်ချက်<input id="giftDailyNote" placeholder=""></label>
+      </div>
+      <div id="giftWeeklyEditor" hidden>
+        <div class="gift-admin-fields"><label>အပတ်ရက်<input id="giftWeekDate" type="date"></label></div>
+        <label>ခေါင်းစဉ်<input id="giftWeeklyLabel" placeholder="နေ့တစ်ပတ်စာ လက်ဆောင်ဂဏန်း"></label>
+        <div class="gift-week-inputs">
+          <div><input id="giftW1n" maxlength="2" placeholder="2"><textarea id="giftW1p" rows="2" placeholder="21&#10;24.29"></textarea></div>
+          <div><input id="giftW2n" maxlength="2" placeholder="8"><textarea id="giftW2p" rows="2" placeholder="81&#10;84.89"></textarea></div>
+          <div><input id="giftW3n" maxlength="2" placeholder="3"><textarea id="giftW3p" rows="2" placeholder="31&#10;34.39"></textarea></div>
+          <div><input id="giftW4n" maxlength="2" placeholder="6"><textarea id="giftW4p" rows="2" placeholder="61&#10;64.69"></textarea></div>
+        </div>
+        <label>မှတ်ချက်<input id="giftWeeklyNote" placeholder=""></label>
+      </div>
+      <div class="gift-admin-actions"><button id="giftLoad" type="button">Load Gift</button><button id="giftSave" type="button" class="publish-btn">Save Gift</button></div>
+      <p id="giftMsg"></p>
+    </section>
   </section>
 </main>
 <script src="/admin.js?v=6.25"></script>
