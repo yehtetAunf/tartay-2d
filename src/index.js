@@ -279,6 +279,19 @@ async function ensureSchema(env) {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
+
+  // Gift-number content is isolated in its own table so existing 2D results are untouched.
+  await env.DB.prepare(`
+    CREATE TABLE IF NOT EXISTS app_gifts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      kind TEXT NOT NULL,
+      period_key TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(kind, period_key)
+    )
+  `).run();
 }
 
 async function logAdmin(env, action, details = {}) {
@@ -1201,6 +1214,91 @@ async function handleState(env) {
   });
 }
 
+async function handlePublicGift(url, env) {
+  const kind = String(url.searchParams.get("kind") || "daily").toLowerCase();
+  const date = String(url.searchParams.get("date") || getOperationalDate());
+  if (!["daily", "weekly"].includes(kind) || !parseDateUTC(date)) {
+    return json({ success:false, error:"Invalid gift request." }, 400);
+  }
+  await ensureSchema(env);
+  let res = await env.DB.prepare(`
+    SELECT payload FROM app_gifts
+    WHERE kind = ? AND period_key = ?
+    LIMIT 1
+  `).bind(kind, date).all();
+  let row = (res.results || [])[0];
+  if (!row && kind === "weekly") {
+    res = await env.DB.prepare(`
+      SELECT payload FROM app_gifts
+      WHERE kind = ? AND period_key <= ?
+      ORDER BY period_key DESC
+      LIMIT 1
+    `).bind(kind, date).all();
+    row = (res.results || [])[0];
+  }
+  if (!row && kind === "weekly") {
+    const endDate = shiftDateText(date, 6);
+    res = await env.DB.prepare(`
+      SELECT payload FROM app_gifts
+      WHERE kind = ? AND period_key > ? AND period_key <= ?
+      ORDER BY period_key ASC
+      LIMIT 1
+    `).bind(kind, date, endDate).all();
+    row = (res.results || [])[0];
+  }
+  let gift = null;
+  if (row) {
+    try { gift = JSON.parse(row.payload); } catch (_) { gift = null; }
+  }
+  return json({ success:true, kind, date, gift });
+}
+
+async function handleAdminGift(request, env) {
+  if (!(await requireAdmin(request, env))) {
+    return json({ success:false, error:"Unauthorized." }, 401);
+  }
+  await ensureSchema(env);
+  if (request.method === "GET") {
+    const url = new URL(request.url);
+    const kind = String(url.searchParams.get("kind") || "daily").toLowerCase();
+    const date = String(url.searchParams.get("date") || getOperationalDate());
+    if (!["daily", "weekly"].includes(kind) || !parseDateUTC(date)) {
+      return json({ success:false, error:"Invalid gift request." }, 400);
+    }
+    const res = await env.DB.prepare(`SELECT payload FROM app_gifts WHERE kind = ? AND period_key = ? LIMIT 1`).bind(kind, date).all();
+    const row = (res.results || [])[0];
+    let gift = null;
+    if (row) { try { gift = JSON.parse(row.payload); } catch (_) { gift = null; } }
+    return json({ success:true, kind, date, gift });
+  }
+
+  const body = await readJson(request);
+  const kind = String(body?.kind || "").toLowerCase();
+  const periodKey = String(body?.period_key || "").trim();
+  const data = body?.data;
+  if (!["daily", "weekly"].includes(kind) || !parseDateUTC(periodKey) || !data || typeof data !== "object") {
+    return json({ success:false, error:"Invalid gift data." }, 400);
+  }
+  if (kind === "daily") {
+    if (!parseDateUTC(String(data.date_from || periodKey)) || !parseDateUTC(String(data.date_to || data.date_from || periodKey))) {
+      return json({ success:false, error:"Invalid daily gift date." }, 400);
+    }
+  } else if (!parseDateUTC(String(data.week_date || periodKey))) {
+    return json({ success:false, error:"Invalid weekly gift date." }, 400);
+  }
+
+  await env.DB.prepare(`
+    INSERT INTO app_gifts(kind, period_key, payload, created_at, updated_at)
+    VALUES(?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    ON CONFLICT(kind, period_key) DO UPDATE SET
+      payload = excluded.payload,
+      updated_at = CURRENT_TIMESTAMP
+  `).bind(kind, periodKey, JSON.stringify(data)).run();
+
+  await logAdmin(env, "save_gift", { kind, period_key: periodKey });
+  return json({ success:true, kind, period_key: periodKey, gift:data });
+}
+
 async function handleHistory(url, env) {
   let limit =
     Math.min(
@@ -1828,6 +1926,26 @@ export default {
           url,
           env
         );
+      }
+
+      // =========================================
+      // Public gift numbers
+      // =========================================
+      if (
+        request.method === "GET" &&
+        url.pathname === "/api/gifts"
+      ) {
+        return handlePublicGift(url, env);
+      }
+
+      // =========================================
+      // Admin gift numbers
+      // =========================================
+      if (
+        (request.method === "GET" || request.method === "POST") &&
+        url.pathname === "/api/admin/gift"
+      ) {
+        return handleAdminGift(request, env);
       }
 
       // =========================================
