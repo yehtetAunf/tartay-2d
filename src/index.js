@@ -99,6 +99,26 @@ function getOperationalDate() {
   return formatDateUTC(date);
 }
 
+function getMyanmarCalendarDate() {
+  const now = getMyanmarNow();
+  return formatDateUTC(
+    new Date(Date.UTC(now.year, now.month - 1, now.day))
+  );
+}
+
+// Around midnight, the app historically uses the previous operational date
+// for the late-night 12:00 AM round.  Admin, however, can save/publish the
+// 12:00 AM round under the current calendar date.  Public state therefore
+// checks both dates and lets the current-date published round win for the
+// same round_time.
+function getPublicStateDates() {
+  const operationalDate = getOperationalDate();
+  const calendarDate = getMyanmarCalendarDate();
+  return operationalDate === calendarDate
+    ? [operationalDate]
+    : [operationalDate, calendarDate];
+}
+
 function myanmarPseudoEpoch(parts = getMyanmarNow()) {
   return Date.UTC(
     parts.year,
@@ -895,6 +915,24 @@ async function queryResultsForDate(
         .map(publicResult);
 }
 
+async function queryPublicResultsForDates(env, dates) {
+  const byRound = new Map();
+
+  for (const date of dates) {
+    const rows = await queryResultsForDate(env, date, false);
+    for (const row of rows) {
+      // Later dates are checked after the operational date so a currently
+      // published 12:00 AM result saved for the calendar date replaces the
+      // older 12:00 AM row from the previous operational date.
+      byRound.set(row.round_time, row);
+    }
+  }
+
+  return ROUNDS
+    .map(round => byRound.get(round))
+    .filter(Boolean);
+}
+
 async function handleToday(url, env) {
   const date =
     url.searchParams.get("date") ||
@@ -1092,20 +1130,26 @@ async function handleState(env) {
   const date =
     getOperationalDate();
 
+  const publicDates =
+    getPublicStateDates();
+
   const market =
     await fetchLiveMarket();
 
+  // Keep released market values locked for the normal operational date.
   await lockReleasedMarketValues(
     env,
     date,
     market
   );
 
+  // At midnight the admin may publish the current calendar day's 12:00 AM
+  // result while the operational date is still the previous date.  Include
+  // both dates so Publish Now becomes visible immediately.
   const results =
-    await queryResultsForDate(
+    await queryPublicResultsForDates(
       env,
-      date,
-      false
+      publicDates
     );
 
   const nowMs =
@@ -1113,58 +1157,83 @@ async function handleState(env) {
 
   let resultHold = null;
 
-  for (
-    let i = ROUNDS.length - 1;
-    i >= 0;
-    i--
-  ) {
-    const roundTime =
-      ROUNDS[i];
+  // A manually published result must also get the normal result-hold window
+  // immediately, even if its calendar date is one day ahead of the current
+  // operational date (the common 12:00 AM midnight case).
+  const nowWallMs = Date.now();
+  let newestPublishedAt = -Infinity;
+  let newestPublishedRow = null;
 
-    const releaseMs =
-      roundReleasePseudoEpoch(
-        date,
-        roundTime
-      );
+  for (const row of results) {
+    const publishedMs = Date.parse(row.published_at || "");
+    if (Number.isFinite(publishedMs) && publishedMs <= nowWallMs && publishedMs > newestPublishedAt) {
+      newestPublishedAt = publishedMs;
+      newestPublishedRow = row;
+    }
+  }
 
-    const elapsedSeconds =
-      Math.floor(
-        (nowMs - releaseMs) / 1000
-      );
+  if (newestPublishedRow && nowWallMs - newestPublishedAt < RESULT_HOLD_SECONDS * 1000) {
+    const elapsedSeconds = Math.max(
+      0,
+      Math.floor((nowWallMs - newestPublishedAt) / 1000)
+    );
 
-    if (
-      elapsedSeconds >= 0 &&
-      elapsedSeconds <
-        RESULT_HOLD_SECONDS
+    resultHold = {
+      active: true,
+      round_time: newestPublishedRow.round_time,
+      result_2d: newestPublishedRow.result_2d,
+      elapsed_seconds: elapsedSeconds,
+      seconds_remaining: RESULT_HOLD_SECONDS - elapsedSeconds,
+      hold_until_ms: newestPublishedAt + RESULT_HOLD_SECONDS * 1000
+    };
+  }
+
+  if (!resultHold) {
+    for (
+      let i = ROUNDS.length - 1;
+      i >= 0;
+      i--
     ) {
-      const row =
-        results.find(
-          item =>
-            item.round_time ===
-            roundTime
-        );
+      const roundTime =
+        ROUNDS[i];
 
-      if (row) {
-        resultHold = {
-          active: true,
-          round_time: roundTime,
-          result_2d:
-            row.result_2d,
-          elapsed_seconds:
-            elapsedSeconds,
-          seconds_remaining:
-            RESULT_HOLD_SECONDS -
-            elapsedSeconds,
-          hold_until_ms:
-            releaseMs +
-            (
-              RESULT_HOLD_SECONDS *
-              1000
-            )
-        };
+      for (const releaseDate of publicDates) {
+        const releaseMs =
+          roundReleasePseudoEpoch(
+            releaseDate,
+            roundTime
+          );
+
+        const elapsedSeconds =
+          Math.floor(
+            (nowMs - releaseMs) / 1000
+          );
+
+        if (
+          elapsedSeconds >= 0 &&
+          elapsedSeconds < RESULT_HOLD_SECONDS
+        ) {
+          const row =
+            results.find(
+              item =>
+                item.round_time === roundTime
+            );
+
+          if (row) {
+            resultHold = {
+              active: true,
+              round_time: roundTime,
+              result_2d: row.result_2d,
+              elapsed_seconds: elapsedSeconds,
+              seconds_remaining: RESULT_HOLD_SECONDS - elapsedSeconds,
+              hold_until_ms: releaseMs + RESULT_HOLD_SECONDS * 1000
+            };
+          }
+          break;
+        }
       }
 
-      break;
+      if (resultHold) break;
     }
   }
 
@@ -1201,7 +1270,7 @@ async function handleState(env) {
   return json({
     success: true,
     app: "Tartay 2D",
-    version: "6.4.0",
+    version: "6.4.1",
     operational_date: date,
     serverNow: Date.now(),
     myanmarNow: getMyanmarNow(),
@@ -1735,14 +1804,34 @@ async function cronAutoPublish(env) {
   const date =
     getOperationalDate();
 
-  const rows =
-    await queryResultsForDate(
-      env,
-      date,
-      true
-    );
+  const dates =
+    getPublicStateDates();
 
-  for (const row of rows) {
+  const rowsById = new Map();
+  for (const scanDate of dates) {
+    const rows =
+      await queryResultsForDate(
+        env,
+        scanDate,
+        true
+      );
+    for (const row of rows) rowsById.set(row.id, row);
+  }
+
+  const calendarDate =
+    getMyanmarCalendarDate();
+
+  for (const row of rowsById.values()) {
+    const midnightCalendarRelease =
+      row.round_time === "12:00 AM" &&
+      row.result_date === calendarDate;
+
+    const released =
+      isRoundReleased(
+        row.result_date,
+        row.round_time
+      ) || midnightCalendarRelease;
+
     if (
       normaliseMode(
         row.publish_mode
@@ -1751,10 +1840,7 @@ async function cronAutoPublish(env) {
         row.auto_publish ?? 1
       ) === 1 &&
       !row.published_at &&
-      isRoundReleased(
-        row.result_date,
-        row.round_time
-      )
+      released
     ) {
       await env.DB.prepare(`
         UPDATE app_results
@@ -1863,7 +1949,7 @@ export default {
         return json({
           app: "Tartay 2D",
           status: "Online",
-          version: "6.4.0",
+          version: "6.4.1",
           database: "connected",
           operational_date:
             getOperationalDate(),
