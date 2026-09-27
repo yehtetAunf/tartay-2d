@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Tartay 2D Admin</title>
-<link rel="stylesheet" href="/app.css?v=6.25">
+<link rel="stylesheet" href="/app.css?v=7.0">
 </head>
 <body class="admin8-page">
 <main class="admin8">
@@ -58,6 +58,40 @@
     <button id="saveAll" class="save-all">Save 8 Rounds</button>
     <p id="saveMsg"></p>
 
+
+    <section class="admin-tools-grid">
+      <div class="admin-tool-card">
+        <h2>🟢 System Status</h2>
+        <div id="systemStatus" class="status-line">Checking...</div>
+        <div id="systemStatusDetail" class="status-detail">Database / server status</div>
+        <button id="refreshStatus" type="button">Refresh Status</button>
+      </div>
+
+      <div class="admin-tool-card">
+        <h2>📝 Edit Result Log</h2>
+        <div id="adminLogList" class="admin-log-list">Loading...</div>
+        <button id="refreshLogs" type="button">Refresh Log</button>
+      </div>
+
+      <div class="admin-tool-card">
+        <h2>💾 Backup / Restore</h2>
+        <p class="today-help">လက်ရှိ Result data ကို JSON backup အဖြစ်သိမ်းပြီး လိုအပ်ရင် ပြန်ယူနိုင်ပါတယ်။ Restore မလုပ်ခင် safety backup အလိုအလျောက်လုပ်ပါမယ်။</p>
+        <div class="backup-actions">
+          <button id="downloadBackup" type="button">Download Backup</button>
+          <label class="file-button">Restore JSON
+            <input id="restoreFile" type="file" accept="application/json,.json" hidden>
+          </label>
+        </div>
+        <div id="backupMsg" class="status-detail"></div>
+      </div>
+
+      <div class="admin-tool-card">
+        <h2>🕐 Next Round Countdown</h2>
+        <div id="adminCountdown" class="admin-countdown">--:--:--</div>
+        <div id="adminNextRound" class="status-detail">Next round: --</div>
+      </div>
+    </section>
+
     <section class="gift-admin-panel">
       <h2>🎁 လက်ဆောင်ဂဏန်း</h2>
       <p class="today-help">တစ်ရက်စာ / တစ်ပတ်စာကို သီးသန့်သိမ်းနိုင်ပါတယ်။ ဒီအပိုင်းက 2D History data ကို မပြောင်းပါ။</p>
@@ -91,6 +125,6 @@
     </section>
   </section>
 </main>
-<script src="/admin.js?v=6.25"></script>
+<script src="/admin.js?v=7.0"></script>
 </body>
 </html>

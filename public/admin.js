@@ -157,6 +157,92 @@ if(token){
 }
 
 
+
+// v7 Admin tools: system status, audit log, backup/restore, and countdown.
+async function loadSystemStatus(){
+  if(!token) return;
+  try{
+    const r=await fetch(`/api/admin/status?t=${Date.now()}`,{cache:"no-store",headers:{authorization:`Bearer ${token}`}});
+    const d=await r.json();
+    if(!r.ok) throw Error(d.error||"Status load failed");
+    $("systemStatus").textContent = d.status==="online" ? "● ONLINE" : "● OFFLINE";
+    $("systemStatus").className = "status-line "+(d.status==="online"?"ok":"bad");
+    const now=d.myanmarNow||{};
+    $("systemStatusDetail").textContent =
+      `DB: ${d.database} · Date: ${d.calendar_date||"--"} · Results: ${d.result_count||0} · Time: ${String(now.hour??"--").padStart(2,"0")}:${String(now.minute??"--").padStart(2,"0")}:${String(now.second??"--").padStart(2,"0")}`;
+  }catch(e){
+    $("systemStatus").textContent="● ERROR";
+    $("systemStatus").className="status-line bad";
+    $("systemStatusDetail").textContent=e.message;
+  }
+}
+async function loadAdminLogs(){
+  if(!token) return;
+  try{
+    const r=await fetch(`/api/admin/logs?type=admin&t=${Date.now()}`,{cache:"no-store",headers:{authorization:`Bearer ${token}`}});
+    const d=await r.json(); if(!r.ok) throw Error(d.error||"Log load failed");
+    const rows=(d.logs||[]).slice(0,8);
+    $("adminLogList").innerHTML=rows.length ? rows.map(x=>{
+      let details="";
+      try{details=JSON.stringify(JSON.parse(x.details||"{}"))}catch(_){details=x.details||""}
+      return `<div class="admin-log-row"><b>${x.action}</b><span>${x.created_at||""}</span><small>${details}</small></div>`;
+    }).join("") : "<div class='status-detail'>No log yet.</div>";
+  }catch(e){$("adminLogList").textContent=e.message}
+}
+async function downloadBackup(){
+  if(!token)return;
+  $("backupMsg").textContent="Preparing backup...";
+  try{
+    const r=await fetch(`/api/admin/backup?t=${Date.now()}`,{cache:"no-store",headers:{authorization:`Bearer ${token}`}});
+    if(!r.ok){const d=await r.json().catch(()=>({}));throw Error(d.error||"Backup failed")}
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=url; a.download=`tartay-2d-backup-${today()}.json`; a.click(); URL.revokeObjectURL(url);
+    $("backupMsg").textContent="Backup downloaded.";
+    loadAdminLogs();
+  }catch(e){$("backupMsg").textContent=e.message}
+}
+async function restoreBackup(file){
+  if(!file||!token)return;
+  $("backupMsg").textContent="Restoring...";
+  try{
+    const backup=JSON.parse(await file.text());
+    const r=await fetch("/api/admin/restore",{
+      method:"POST",
+      headers:{"content-type":"application/json",authorization:`Bearer ${token}`},
+      body:JSON.stringify({backup,mode:"merge"})
+    });
+    const d=await r.json(); if(!r.ok)throw Error(d.error||"Restore failed");
+    $("backupMsg").textContent=`Restored ${d.rows||0} rows (merge).`;
+    await loadDate(); loadAdminLogs(); loadSystemStatus();
+  }catch(e){$("backupMsg").textContent=e.message}
+}
+function updateAdminCountdown(){
+  const now=new Date();
+  const p=new Intl.DateTimeFormat("en-US",{timeZone:"Asia/Yangon",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(now);
+  const n=t=>Number(p.find(x=>x.type===t)?.value||0);
+  const mins=n("hour")*60+n("minute")+n("second")/60;
+  const roundMinutes=[17*60,18*60,19*60,20*60,21*60,22*60,23*60,24*60];
+  let diff=null, next=null;
+  for(let i=0;i<roundMinutes.length;i++){
+    let d=roundMinutes[i]-mins;
+    if(d>=0){diff=d*60;next=ROUNDS[i];break}
+  }
+  if(diff===null){diff=(24*60-mins+17*60)*60;next=ROUNDS[0]}
+  const total=Math.max(0,Math.floor(diff));
+  const hh=String(Math.floor(total/3600)).padStart(2,"0");
+  const mm=String(Math.floor((total%3600)/60)).padStart(2,"0");
+  const ss=String(total%60).padStart(2,"0");
+  $("adminCountdown").textContent=`${hh}:${mm}:${ss}`;
+  $("adminNextRound").textContent=`Next round: ${next}`;
+}
+$("refreshStatus").onclick=loadSystemStatus;
+$("refreshLogs").onclick=loadAdminLogs;
+$("downloadBackup").onclick=downloadBackup;
+$("restoreFile").onchange=e=>restoreBackup(e.target.files?.[0]);
+updateAdminCountdown(); setInterval(updateAdminCountdown,1000);
+setInterval(()=>{loadSystemStatus();loadAdminLogs()},30000);
+
 // v8.4 Gift-number editor (isolated from the existing 2D result editor)
 let giftKind="daily";
 function giftSetTab(kind){giftKind=kind;$("giftDailyTab").classList.toggle("active",kind==="daily");$("giftWeeklyTab").classList.toggle("active",kind==="weekly");$("giftDailyEditor").hidden=kind!=="daily";$("giftWeeklyEditor").hidden=kind!=="weekly";$("giftMsg").textContent="";loadGift();}
