@@ -1549,6 +1549,47 @@ async function storeSafetyBackup(env) {
   return backup;
 }
 
+
+async function handleAdminStatus(request, env) {
+  if (!(await requireAdmin(request, env))) {
+    return json({ success: false, error: "Unauthorized." }, 401);
+  }
+
+  await ensureSchema(env);
+
+  const [adminLogs, errorLogs, resultCount] = await Promise.all([
+    env.DB.prepare(`
+      SELECT action, details, created_at
+      FROM app_admin_logs
+      ORDER BY id DESC
+      LIMIT 1
+    `).all(),
+    env.DB.prepare(`
+      SELECT message, created_at
+      FROM app_error_logs
+      ORDER BY id DESC
+      LIMIT 1
+    `).all(),
+    env.DB.prepare(`SELECT COUNT(*) AS count FROM app_results`).first()
+  ]);
+
+  const lastAdmin = adminLogs.results?.[0] || null;
+  const lastError = errorLogs.results?.[0] || null;
+
+  return json({
+    success: true,
+    status: "online",
+    database: "connected",
+    operational_date: getOperationalDate(),
+    calendar_date: getMyanmarCalendarDate(),
+    myanmarNow: getMyanmarNow(),
+    serverNow: Date.now(),
+    result_count: Number(resultCount?.count || 0),
+    last_admin_action: lastAdmin,
+    last_error: lastError
+  });
+}
+
 async function handleBackup(
   request,
   env
@@ -2088,6 +2129,16 @@ export default {
           request,
           env
         );
+      }
+
+      // =========================================
+      // Admin system status
+      // =========================================
+      if (
+        request.method === "GET" &&
+        url.pathname === "/api/admin/status"
+      ) {
+        return handleAdminStatus(request, env);
       }
 
       // =========================================
